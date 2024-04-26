@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import torch
 import torch.nn.functional as F
 from activations.utils.find_init_weights import find_weights
@@ -42,57 +43,82 @@ def _save_inputs_auto_stop(self, input, output):
         self.training_mode()
 
 
-class Metaclass(type):
-    def __setattr__(self, key, value):
-        if not hasattr(self, key):
-            key_str = colored(key, "red")
-            self_name_str = colored(self, "red")
-            msg = colored(f"Setting new Class attribute {key_str}", "yellow") + \
-                  colored(f" of {self_name_str}", "yellow")
-            print(msg)
-        type.__setattr__(self, key, value)
+@dataclass
+class _InputMode:
+    use_kde: bool
+    use_neurons: bool
+
+    def get_mode(self):
+        return f"{'kde' if self.use_kde else 'bar'}_{'neurons' if self.use_neurons else 'all'}":
 
 
-class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
-    # histograms_colors = plt.get_cmap('Pastel1').colors
-    instances = {}
+class ActivationModule:
+    _registered_modules = {}  # {module-name: torch.nn.module}
+    _groups = {}  # {group_name: list of module-names}
+    _input_handles = {}  # {module-name: handle}
+    _grad_handles = {}
+    _distributions = {}  # {module-name: list of snapshots}
+    _input_retrieval_modes = {}  # {module-name: _InputMode}
+    _time_stats = {
+        "forward": {},  # {module-name: list of time-snapshots}
+        "backward": {}
+    }
     histograms_colors = ["red", "green", "black"]
     distribution_display_mode = "kde"
+    logger = ActivationLogger(f"ActivationModule")
 
-    def __init__(self, function, device=None):
-        if isinstance(function, str):
-            self.type = function
-            function = None
-        super().__init__()
-        self.logger = ActivationLogger(f"ActivationLogger: {function}")
-        if self.classname not in self.instances:
-            self.instances[self.classname] = []
-        self.instances[self.classname].append(self)
-        if function is not None:
-            self.activation_function = function
-            if "__forward__" in dir(function):
-                self.forward = self.activation_function.__forward__
-            else:
-                self.forward = self.activation_function
-        self._handle_inputs = None
-        self._handle_grads = None
-        self._saving_input = False
-        self.distributions = []
-        if device is None:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        else:
-            self.device = device
-        self.use_kde = True
+    @classmethod
+    def register(cls, module, name, mode="kde_neurons", group=None):
+        """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
+        
+        Args:
+            module (torch.nn.Module):
+            name (str): If name already exists an incrementing integer will be appended.
+            mode (str, optional): The mode in which input will be retrieved/plotted. For example
+                ``'bar_neurons'`` will create a bar plot for each neuron in layer.
+            group (any hashable type, optional): Group to assign ``module`` to.
+            
+        Returns:
+            name (str): Name under which module is registered.
+        """
+        if name in cls._registered_modules:
+            name = cls._increment_name(f"{name}_0")
 
-    @property
-    def classname(self):
-        clsn = str(self.__class__)
-        if "activations.torch" in clsn:
-            return clsn.split("'")[1].split(".")[-1]
-        else:
-            return "Unknown"  # TODO, implement
+        cls._registered_modules[name] = module
+        cls._input_handles[name] = None
+        cls._grad_handles[name] = None
+        cls._distributions[name] = []
+        cls._time_stats["forward"][name] = []
+        cls._time_stats["backward"][name] = []
+        cls._input_retrieval_modes[name] = _InputMode("kde" in mode, "neurons" in mode)
 
-    def save_inputs(self, saving=True, auto_stop=False, max_saves=1000,
+        if group not in cls._groups:
+            cls._groups[group] = []
+        cls._groups[group].append(name)
+
+        return name
+
+    @classmethod
+    def _increment_name(cls, name):
+        """Helper method for appending incrementing integer at string.
+        
+        Args:
+            name (str): Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
+                are registered under (incremented) name.
+                
+        Returns:
+            new_name (str): Name for which no other module is registered.
+        """
+        name_ = name.split("_")
+        name_[-1] = f"{int(name_[-1]+1)}"
+        while "_".join(name_) in cls._registered_modules:
+            name_[-1] = f"{int(name_[-1]+1)}"
+
+        return "_".join(name_)
+
+
+    @classmethod
+    def save_inputs(cls, saving=True, auto_stop=False, max_saves=1000,
                     bin_width=0.1, mode="all", category_name=None):
         """
         Will retrieve the distribution of the input in self.distribution. \n
@@ -163,7 +189,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         else:
             self._handle_inputs = self.register_forward_hook(_save_inputs)
 
-    def save_gradients(self, saving=True, auto_stop=False, max_saves=1000,
+    @classmethod
+    def save_gradients(cls, saving=True, auto_stop=False, max_saves=1000,
                        bin_width="auto", mode="all"):
         """
         Will retrieve the distribution of the input in self.distribution. \n
@@ -217,14 +244,6 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         else:
             self._handle_grads = self.register_full_backward_hook(_save_gradients)
 
-    # def training_mode(self):
-    #     """
-    #     Stops retrieving the distribution of the input in `self.distribution`.
-    #     """
-    #     print("Training mode, no longer retrieving the input.")
-    #     self._handle_inputs.remove()
-    #     self._handle_inputs = None
-
     @classmethod
     def save_all_inputs(cls, *args, **kwargs):
         """
@@ -243,17 +262,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         for instance in instances_list:
             instance.save_gradients(*args, **kwargs)
 
-    def __repr__(self):
-        return f"{self.classname}"
-        # if "type" in dir(self):
-        #     # return  f"{self.type} ActivationModule at {hex(id(self))}"
-        #     return  f"{self.type} ActivationModule"
-        # if "__name__" in dir(self.activation_function):
-        #     # return f"{self.activation_function.__name__} ActivationModule at {hex(id(self))}"
-        #     return f"{self.activation_function.__name__} ActivationModule"
-        # return f"{self.activation_function} ActivationModule"
-
-    def show_gradients(self, display=True, tolerance=0.001, title=None,
+    @classmethod
+    def show_gradients(cls, display=True, tolerance=0.001, title=None,
                        axis=None, writer=None, step=None, label=None, colors=None):
         try:
             import scipy.stats as sts
@@ -397,7 +407,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
         else:
             return fig
 
-    def show(self, x=None, fitted_function=True, other_func=None, display=True,
+    @classmethod
+    def show(cls, x=None, fitted_function=True, other_func=None, display=True,
              tolerance=0.001, title=None, axis=None, writer=None, step=None, label=None,
              color=None):
         #Construct x axis
@@ -442,37 +453,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
             if axis is None:
                 return fig
 
-    @property
-    def current_inp_category(self):
-        return self._selected_distribution_name
-
-    @current_inp_category.setter
-    def current_inp_category(self, value):
-        if value == self._selected_distribution_name:
-            return
-        if "cuda" in self.device:
-            if "neurons" in self._irm.lower():
-                from activations.torch.utils.histograms_cupy import NeuronsHistogram as Histogram
-            else:
-                from activations.torch.utils.histograms_cupy import Histogram
-        else:
-            if "neurons" in self._irm.lower():
-                from activations.torch.utils.histograms_numpy import NeuronsHistogram as Histogram
-            else:
-                from activations.torch.utils.histograms_numpy import Histogram
-        #if the histogram is empty, it means that is was created at the same phase
-        #that the current category is created, which means that no input was perceived
-        #during this time -> redundant category
-        for i in range(len(self.distributions)):
-            if self.distributions[i].is_empty:
-                del self.distributions[i]
-                del self.categories[i]
-        self._selected_distribution = Histogram(self._inp_bin_width)
-        self.distributions.append(self._selected_distribution)
-        self.categories.append(value)
-        self._selected_distribution_name = value
-
-    def plot_distributions(self, ax, colors=None, bin_size=None):
+    @classmethod
+    def plot_distributions(cls, ax, colors=None, bin_size=None):
         """
         Plot the distribution and returns the corresponding x
         """
@@ -559,7 +541,8 @@ class ActivationModule(torch.nn.Module):#, metaclass=Metaclass):
 
         return torch.arange(x_min, x_max, size)
 
-    def plot_layer_distributions(self, ax):
+    @classmethod
+    def plot_layer_distributions(cls, ax):
         """
         Plot the layer distributions and returns the corresponding x
         """
