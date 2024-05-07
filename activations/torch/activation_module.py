@@ -12,6 +12,8 @@ import numpy as np
 from termcolor import colored
 from random import randint
 
+from activations.torch.utils.histograms_numpy import Histogram, NeuronsHistogram
+
 
 _LINED = dict()
 
@@ -26,45 +28,27 @@ def create_colors(n):
     return colors
 
 
-def _input_hook(registered_module, snapshot, max_saves):
+def _input_hook(registered_module, histogram, max_saves):
     # by using a list instead of integer the hook can modify ``n_saves``
     # and not just a copy of it. This way it can remove itself when desired.
     n_saves = [0]
     def hook(module, input, output):
-        snapshot.add_input_data(input[0])
+        histogram.fill_n(input[0])
         n_saves[0] += 1
         if max_saves > 0 and n_saves[0] >= max_saves:
             registered_module.save_inputs(saving=False)
     return hook
 
 
-class Snapshot:
-    """Collection of all statistics accessable by ``ActivationModule`` API."""
-
-    def __init__(self, name):
-        self.name = name
-
-        self.input_label = None
-        self.grad_label = None
-        self.input_distribution = None
-        self.gradient_distribution = None
-        self.func_snapshot = None
-        self.timeings = None
-
-    def add_input_statistics(self, bin_width, input_label, mode):
-        if mode == "neurons":
-            from activations.torch.utils.histograms_numpy import NeuronsHistogram as Histogram
-        elif mode == "normal":
-            from activations.torch.utils.histograms_numpy import Histogram
-        else:
-            raise ValueError(f"Unsupported input mode '{mode}'")
-        
-        self.input_label = input_label
-        self.input_distribution = Histogram(bin_width)
-
-    def add_input_data(self, data):
-        """Adds the data to ``self.input_distribution``."""
-        pass # TODO
+def _gradient_hook(registered_module, histogram_input, histogram_output, max_saves):
+    n_saves = [0]
+    def hook(module, in_grad, out_grad):
+        histogram_input.fill_n(in_grad[0])
+        histogram_output.fill_n(out_grad[0])
+        n_saves[0] += 1
+        if max_saves > 0 and n_saves[0] >= max_saves:
+            registered_module.save_gradients(saving=False)
+    return hook
 
 
 class RegisteredModule:
@@ -74,15 +58,17 @@ class RegisteredModule:
         self.module = module
         self.logger = logger
 
-        self.snapshots = []
-        self._current_snapshot_name = None
-        self._current_snapshot = None
-        self._verbose = True
-
         self.input_retrieval_mode = mode["irm"]
-        self.gradient_retrieval_mode = mode["irm"]
-        self._input_handle = None
+        self.input_distributions = []
+        self.input_labels = []
+
+        self.input_gradient_distributions = []
+        self.output_gradient_distributions = []
+        self.input_gradient_labels = []
+        self.output_gradient_labels = []
+
         self._grad_handle = None
+        self._input_handle = None
 
     @property
     def groups(self):
@@ -98,18 +84,10 @@ class RegisteredModule:
             return -3, 3, 0.01
         return x_min, x_max, size
     
-    def _new_snapshot(self):
-        """Creates a new, empty snapshot which will be used from this moment on."""
-        if len(self.snapshots) == 0:
-            snapshot_name = "snapshot_0"
-        else:
-            snapshot_name = _increment_name(self.snapshots[-1].name)
-        self._current_snapshot = Snapshot(snapshot_name)
-    
     def save_inputs(self, saving=True, max_saves=-1,
-                    bin_width=0.1, mode=None, input_label=None):
+                    bin_width=0.1, mode=None, label=None):
         if not saving:
-            self.logger.warn("Not retrieving input anymore")
+            self.logger.info("Not retrieving input anymore")
             self._input_handle.remove()
             self._input_handle = None
             return
@@ -122,66 +100,44 @@ class RegisteredModule:
         else:
             self.input_retrieval_mode = mode
 
-        if self._current_snapshot is None:  # may be set by other func (e.g. save_gradients)
-            self._new_snapshot()
-        self._current_snapshot.add_input_statistics(bin_width, input_label, mode)
+        if mode == "neurons":
+            self.input_distributions.append(NeuronsHistogram(bin_width))
+        else:
+            self.input_distributions.append(Histogram(bin_width))
+        self.input_labels.append(label)
 
         self._input_handle = self.module.register_forward_hook(
             _input_hook(
-                self, self._current_snapshot, max_saves,
+                self, self.input_distributions[-1], max_saves,
             )
         )
+        
 
-    def save_gradients(self, saving=True, auto_stop=False, max_saves=1000,
-                       bin_width="auto", mode="all"):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
-
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``False``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``1000``
-                bin_width (float):
-                    Default bin width for the histogram.\n
-                    Default ``0.1``
-                mode (str):
-                    The mode for the input retrieve.\n
-                    Have to be one of ``all``, ``categories``, ...
-                    Default ``all``
-                category_name (str):
-                    The mode for the input retrieve.\n
-                    Have to be one of ``all``, ``categories``, ...
-                    Default ``0``
-        """
+    def save_gradients(self, saving=True, max_saves=-1,
+                       bin_width="auto", label_in=None, label_out=None):
         if not saving:
             self.logger.warn("Not retrieving gradients anymore")
-            self._handle_grads.remove()
-            self._handle_grads = None
+            self._grad_handle.remove()
+            self._grad_handle = None
             return
+        
         if self._handle_grads is not None:
-            # print("Already in retrieve mode")
             return
-        from .utils.histograms_numpy import Histogram
+        
+        self.input_gradient_distributions.append(Histogram(bin_width))
+        self.output_gradient_distributions.append(Histogram(bin_width))
 
-        self._grm = mode  # gradient retrieval mode
-        self._in_grad_dist = Histogram(bin_width)
-        self._out_grad_dist = Histogram(bin_width)
-        self._grad_bin_width = bin_width
-        if auto_stop:  # TODO
-            self.inputs_saved = 0
-            raise NotImplementedError
-            # self._handle_grads = self.register_full_backward_hook(_save_gradients_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_grads = self.register_full_backward_hook(_save_gradients)
+        self.input_gradient_labels.append(label_in)
+        self.output_gradient_labels.append(label_out)
+
+        self._grad_handle = self.register_full_backward_hook(
+            _gradient_hook(
+                self,
+                self.input_gradient_distributions[-1],
+                self.output_gradient_distributions[-1],
+                max_saves,
+            )
+        )
 
     def show(self, x=None, fitted_function=True, other_func=None,
              title=None, axis=None, label=None, color=None):
