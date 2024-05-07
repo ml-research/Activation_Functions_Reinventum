@@ -16,6 +16,9 @@ from random import randint
 _LINED = dict()
 
 
+def _increment_name(name):
+    pass  # TODO copy from ActivationModule
+
 def create_colors(n):
     colors = []
     for i in range(n):
@@ -23,174 +26,113 @@ def create_colors(n):
     return colors
 
 
-def _save_inputs(self, input, output):
-    if self._selected_distribution is None:
-        raise ValueError("Selected distribution is none")
-    self._selected_distribution.fill_n(input[0])
+def _input_hook(registered_module, snapshot, max_saves):
+    # by using a list instead of integer the hook can modify ``n_saves``
+    # and not just a copy of it. This way it can remove itself when desired.
+    n_saves = [0]
+    def hook(module, input, output):
+        snapshot.add_input_data(input[0])
+        n_saves[0] += 1
+        if max_saves > 0 and n_saves[0] >= max_saves:
+            registered_module.save_inputs(saving=False)
+    return hook
 
 
-def _save_gradients(self, in_grad, out_grad):
-    self._in_grad_dist.fill_n(in_grad[0])
-    self._out_grad_dist.fill_n(out_grad[0])
+class Snapshot:
+    """Collection of all statistics accessable by ``ActivationModule`` API."""
 
+    def __init__(self, name):
+        self.name = name
 
-def _save_inputs_auto_stop(self, input, output):
-    self.inputs_saved += 1
-    if self._selected_distribution is None:
-        raise ValueError("Selected distribution is none")
-    self._selected_distribution.fill_n(input[0])
-    if self.inputs_saved > self._max_saves:
-        self.training_mode()
+        self.input_label = None
+        self.grad_label = None
+        self.input_distribution = None
+        self.gradient_distribution = None
+        self.func_snapshot = None
+        self.timeings = None
 
-
-@dataclass
-class _InputMode:
-    use_kde: bool
-    use_neurons: bool
-
-    def get_mode(self):
-        return f"{'kde' if self.use_kde else 'bar'}_{'neurons' if self.use_neurons else 'all'}":
-
-
-class ActivationModule:
-    _registered_modules = {}  # {module-name: torch.nn.module}
-    _groups = {}  # {group_name: list of module-names}
-    _input_handles = {}  # {module-name: handle}
-    _grad_handles = {}
-    _distributions = {}  # {module-name: list of snapshots}
-    _input_retrieval_modes = {}  # {module-name: _InputMode}
-    _time_stats = {
-        "forward": {},  # {module-name: list of time-snapshots}
-        "backward": {}
-    }
-    histograms_colors = ["red", "green", "black"]
-    distribution_display_mode = "kde"
-    logger = ActivationLogger(f"ActivationModule")
-
-    @classmethod
-    def register(cls, module, name, mode="kde_neurons", group=None):
-        """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
+    def add_input_statistics(self, bin_width, input_label, mode):
+        if mode == "neurons":
+            from activations.torch.utils.histograms_numpy import NeuronsHistogram as Histogram
+        elif mode == "normal":
+            from activations.torch.utils.histograms_numpy import Histogram
+        else:
+            raise ValueError(f"Unsupported input mode '{mode}'")
         
-        Args:
-            module (torch.nn.Module):
-            name (str): If name already exists an incrementing integer will be appended.
-            mode (str, optional): The mode in which input will be retrieved/plotted. For example
-                ``'bar_neurons'`` will create a bar plot for each neuron in layer.
-            group (any hashable type, optional): Group to assign ``module`` to.
-            
-        Returns:
-            name (str): Name under which module is registered.
-        """
-        if name in cls._registered_modules:
-            name = cls._increment_name(f"{name}_0")
+        self.input_label = input_label
+        self.input_distribution = Histogram(bin_width)
 
-        cls._registered_modules[name] = module
-        cls._input_handles[name] = None
-        cls._grad_handles[name] = None
-        cls._distributions[name] = []
-        cls._time_stats["forward"][name] = []
-        cls._time_stats["backward"][name] = []
-        cls._input_retrieval_modes[name] = _InputMode("kde" in mode, "neurons" in mode)
-
-        if group not in cls._groups:
-            cls._groups[group] = []
-        cls._groups[group].append(name)
-
-        return name
-
-    @classmethod
-    def _increment_name(cls, name):
-        """Helper method for appending incrementing integer at string.
-        
-        Args:
-            name (str): Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
-                are registered under (incremented) name.
-                
-        Returns:
-            new_name (str): Name for which no other module is registered.
-        """
-        name_ = name.split("_")
-        name_[-1] = f"{int(name_[-1]+1)}"
-        while "_".join(name_) in cls._registered_modules:
-            name_[-1] = f"{int(name_[-1]+1)}"
-
-        return "_".join(name_)
+    def add_input_data(self, data):
+        """Adds the data to ``self.input_distribution``."""
+        pass # TODO
 
 
-    @classmethod
-    def save_inputs(cls, saving=True, auto_stop=False, max_saves=1000,
-                    bin_width=0.1, mode="all", category_name=None):
-        """
-        Will retrieve the distribution of the input in self.distribution. \n
-        This will slow down the function, as it has to retrieve the input \
-        dist.\n
+class RegisteredModule:
+    def __init__(self, name, module, groups, mode, logger):
+        self.name = name
+        self._groups = groups
+        self.module = module
+        self.logger = logger
 
-        Arguments:
-                auto_stop (bool):
-                    If True, the retrieving will stop after `max_saves` \
-                    calls to forward.\n
-                    Else, use :meth:`torch.Rational.training_mode`.\n
-                    Default ``False``
-                max_saves (int):
-                    The range on which the curves of the functions are fitted \
-                    together.\n
-                    Default ``1000``
-                bin_width (float):
-                    Default bin width for the histogram.\n
-                    Default ``0.1``
-                mode (str):
-                    The mode for the input retrieve.\n
-                    Have to be one of ``all``, ``categories``, ...
-                    Default ``all``
-                category_name (str):
-                    The name of the category
-                    Default ``0``
-        """
+        self.snapshots = []
+        self._current_snapshot_name = None
+        self._current_snapshot = None
+        self._verbose = True
+
+        self.input_retrieval_mode = mode["irm"]
+        self.gradient_retrieval_mode = mode["irm"]
+        self._input_handle = None
+        self._grad_handle = None
+
+    @property
+    def groups(self):
+        return self._groups
+
+    def get_distributions_range(self):
+        x_min, x_max = np.inf, -np.inf
+        for dist in self.distributions:
+            if not dist.is_empty:
+                x_min, x_max = min(x_min, dist.range[0]), max(x_max, dist.range[-1])
+                size = dist.range[1] - dist.range[0]
+        if x_min == np.inf or x_max == np.inf:
+            return -3, 3, 0.01
+        return x_min, x_max, size
+    
+    def _new_snapshot(self):
+        """Creates a new, empty snapshot which will be used from this moment on."""
+        if len(self.snapshots) == 0:
+            snapshot_name = "snapshot_0"
+        else:
+            snapshot_name = _increment_name(self.snapshots[-1].name)
+        self._current_snapshot = Snapshot(snapshot_name)
+    
+    def save_inputs(self, saving=True, max_saves=-1,
+                    bin_width=0.1, mode=None, input_label=None):
         if not saving:
             self.logger.warn("Not retrieving input anymore")
-            self._handle_inputs.remove()
-            self._handle_inputs = None
+            self._input_handle.remove()
+            self._input_handle = None
             return
-        if self._handle_inputs is not None:
-            # print("Already in retrieve mode")
+        
+        if self._input_handle is not None:  # already retrieving inputs
             return
-        if "cuda" in self.device:
-            if "neurons" in mode.lower():
-                from activations.torch.utils.histograms_cupy import NeuronsHistogram as Histogram
-            else:
-                from activations.torch.utils.histograms_cupy import Histogram
+        
+        if mode is None:
+            mode = self.input_retrieval_mode
         else:
-            if "neurons" in mode.lower():
-                from activations.torch.utils.histograms_numpy import NeuronsHistogram as Histogram
-            else:
-                from activations.torch.utils.histograms_numpy import Histogram
-        if "categor" in mode.lower():
-            if category_name is None:
-                self._selected_distribution_name = None
-                self.categories = []
-                self._selected_distribution = None
-                self.distributions = []
-            else:
-                self._selected_distribution_name = category_name
-                self.categories = [category_name]
-                self._selected_distribution = Histogram(bin_width)
-                self.distributions = [self._selected_distribution]
-        else:
-            self._selected_distribution_name = "distribution"
-            self.categories = ["distribution"]
-            self._selected_distribution = Histogram(bin_width)
-            self.distributions = [self._selected_distribution]
-        self._irm = mode  # input retrieval mode
-        self._inp_bin_width = bin_width
-        if auto_stop:
-            self.inputs_saved = 0
-            self._handle_inputs = self.register_forward_hook(_save_inputs_auto_stop)
-            self._max_saves = max_saves
-        else:
-            self._handle_inputs = self.register_forward_hook(_save_inputs)
+            self.input_retrieval_mode = mode
 
-    @classmethod
-    def save_gradients(cls, saving=True, auto_stop=False, max_saves=1000,
+        if self._current_snapshot is None:  # may be set by other func (e.g. save_gradients)
+            self._new_snapshot()
+        self._current_snapshot.add_input_statistics(bin_width, input_label, mode)
+
+        self._input_handle = self.module.register_forward_hook(
+            _input_hook(
+                self, self._current_snapshot, max_saves,
+            )
+        )
+
+    def save_gradients(self, saving=True, auto_stop=False, max_saves=1000,
                        bin_width="auto", mode="all"):
         """
         Will retrieve the distribution of the input in self.distribution. \n
@@ -227,16 +169,13 @@ class ActivationModule:
         if self._handle_grads is not None:
             # print("Already in retrieve mode")
             return
-        if "cuda" in self.device:
-            from .utils.histograms_cupy import Histogram
-        else:
-            from .utils.histograms_numpy import Histogram
+        from .utils.histograms_numpy import Histogram
 
         self._grm = mode  # gradient retrieval mode
         self._in_grad_dist = Histogram(bin_width)
         self._out_grad_dist = Histogram(bin_width)
         self._grad_bin_width = bin_width
-        if auto_stop:
+        if auto_stop:  # TODO
             self.inputs_saved = 0
             raise NotImplementedError
             # self._handle_grads = self.register_full_backward_hook(_save_gradients_auto_stop)
@@ -244,173 +183,8 @@ class ActivationModule:
         else:
             self._handle_grads = self.register_full_backward_hook(_save_gradients)
 
-    @classmethod
-    def save_all_inputs(cls, *args, **kwargs):
-        """
-        Saves inputs for all instantiates objects of the called class.
-        """
-        instances_list = cls._get_instances()
-        for instance in instances_list:
-            instance.save_inputs(*args, **kwargs)
-
-    @classmethod
-    def save_all_gradients(cls, *args, **kwargs):
-        """
-        Saves gradients for all instantiates objects of the called class.
-        """
-        instances_list = cls._get_instances()
-        for instance in instances_list:
-            instance.save_gradients(*args, **kwargs)
-
-    @classmethod
-    def show_gradients(cls, display=True, tolerance=0.001, title=None,
-                       axis=None, writer=None, step=None, label=None, colors=None):
-        try:
-            import scipy.stats as sts
-            scipy_imported = True
-        except ImportError:
-            RationalImportScipyWarning.warn()
-            scipy_imported = False
-        if axis is None:
-            with sns.axes_style("whitegrid"):
-                # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
-                fig, axis = plt.subplots(1, 1, figsize=(20, 12))
-        if colors is None or len(colors) != 2:
-            colors = ["orange", "blue"]
-        dists = [self._in_grad_dist, self._out_grad_dist]
-        if label is None:
-            labels = ['input grads', 'output grads']
-        else:
-            labels = [f'{label} (inp)', f'{label} (outp)']
-        for distribution, col, label in zip(dists, colors, labels):
-            weights, x = distribution.weights, distribution.bins
-            if self.use_kde and scipy_imported:
-                if len(x) > 5:
-                    refined_bins = np.linspace(float(x[0]), float(x[-1]), 200)
-                    kde_curv = distribution.kde()(refined_bins)
-                    # ax.plot(refined_bins, kde_curv, lw=0.1)
-                    axis.fill_between(refined_bins, kde_curv, alpha=0.4,
-                                      color=col, label=label)
-                else:
-                    self.logger.warn("The bin size is too big, bins contain too few "
-                                     f"elements.\nbins: {x}")
-                    axis.bar([], []) # in case of remove needed
-            else:
-                axis.bar(x, weights/weights.max(), width=x[1] - x[0],
-                         linewidth=0, alpha=0.4, color=col, label=label)
-            distribution.empty()
-        if writer is not None:
-            try:
-                writer.add_figure(title, fig, step)
-            except AttributeError:
-                self.logger.error("Could not use the given SummaryWriter to add the Rational figure")
-        elif display:
-            plt.legend()
-            plt.show()
-        else:
-            if axis is None:
-                return fig
-
-    @classmethod
-    def show_all_gradients(cls, display=True, tolerance=0.001, title=None,
-                           axes=None, layout="auto", writer=None, step=None,
-                           colors=None):
-        """
-        Shows a graph of the all instanciated activation functions (or returns \
-        it if ``returns=True``).
-
-        Arguments:
-                x (range):
-                    The range to print the function on.\n
-                    Default ``None``
-                fitted_function (bool):
-                    If ``True``, displays the best fitted function if searched.
-                    Otherwise, returns it. \n
-                    Default ``True``
-                other_funcs (callable):
-                    another function to be plotted or a list of other callable
-                    functions or a dictionary with the function name as key
-                    and the callable as value.
-                display (bool):
-                    If ``True``, displays the plot.
-                    Otherwise, returns the figure. \n
-                    Default ``False``
-                tolerance (float):
-                    If the input histogram is used, it will be pruned. \n
-                    Every bin containg less than `tolerance` of the total \
-                    input is pruned out.
-                    (Reduces noise).
-                    Default ``0.001``
-                title (str):
-                    If not None, a title for the figure
-                    Default ``None``
-                axes (matplotlib.pyplot.axis):
-                    On ax or a list of axes to be plotted on. \n
-                    If None, creates them automatically (see `layout`). \n
-                    Default ``None``
-                layout (tuple or 'auto'):
-                    Grid layout of the figure. If "auto", one is generated.\n
-                    Default ``"auto"``
-                writer (tensorboardX.SummaryWriter):
-                    A tensorboardX writer to give the image to, in case of
-                    debugging.
-                    Default ``None``
-                step (int):
-                    A step/epoch for tensorboardX writer.
-                    If None, incrementing itself.
-                    Default ``None``
-        """
-        logger = ActivationLogger("f{cls.__name__}Logger")
-        instances_list = cls._get_instances()
-        if axes is None:
-            if layout == "auto":
-                total = len(instances_list)
-                layout = _get_auto_axis_layout(total)
-            if len(layout) != 2:
-                msg = 'layout should be either "auto" or a tuple of size 2'
-                raise TypeError(msg)
-            figs = tuple(np.flip(np.array(layout)* (2, 3)))
-            try:
-                import seaborn as sns
-                with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout, figsize=figs)
-            except ImportError:
-                logger.warn("Could not import seaborn")
-                #RationalImportSeabornWarning.warn()
-                fig, axes = plt.subplots(*layout, figsize=figs)
-            if isinstance(axes, plt.Axes):
-                axes = np.array([axes])
-            # if display:
-            for ax in axes.flatten()[len(instances_list):]:
-                ax.remove()
-            axes = axes[:len(instances_list)]
-        elif isinstance(axes, plt.Axes):
-            axes = np.array([axes for _ in range(len(instances_list))])
-            fig = plt.gcf()
-        if isinstance(colors, str) or colors is None:
-            colors = [colors]*len(axes.flatten())
-        for act, ax, color in zip(instances_list, axes.flatten(), colors):
-            act.show_gradients(False, tolerance, title, axis=ax,
-                               writer=None, step=step, colors=color)
-        if title is not None:
-            fig.suptitle(title, y=0.95)
-        fig = plt.gcf()
-        fig.tight_layout()
-        if writer is not None:
-            if step is None:
-                step = cls._step
-                cls._step += 1
-            writer.add_figure(title, fig, step)
-        elif display:
-            plt.legend()
-            plt.show()
-        else:
-            return fig
-
-    @classmethod
-    def show(cls, x=None, fitted_function=True, other_func=None, display=True,
-             tolerance=0.001, title=None, axis=None, writer=None, step=None, label=None,
-             color=None):
+    def show(self, x=None, fitted_function=True, other_func=None,
+             title=None, axis=None, label=None, color=None):
         #Construct x axis
         if x is None:
             x = torch.arange(-3., 3, 0.01)
@@ -425,7 +199,7 @@ class ActivationModule:
         if self.distributions:
             if self.distribution_display_mode in ["kde", "bar"]:
                 ax2 = axis.twinx()
-                if "neurons" in self._irm:
+                if "neurons" in self.input_retrieval_mode:
                     x = self.plot_layer_distributions(ax2)
                 else:
                     x = self.plot_distributions(ax2, color)
@@ -436,12 +210,8 @@ class ActivationModule:
                 axis.scatter(x_edges, y_edges, color=color)
         #TODO: this should enable showing without input data from before
         y = self.forward(x.to(self.device)).detach().cpu().numpy()
-        if label:
-            # axis.twinx().plot(x, y, label=label, color=color)
-            axis.plot(x, y, label=label, color=color)
-        else:
-            # axis.twinx().plot(x, y, label=label, color=color)
-            axis.plot(x, y, label=label, color=color)
+        axis.plot(x, y, label=label, color=color)
+        
         if writer is not None:
             try:
                 writer.add_figure(title, fig, step)
@@ -452,9 +222,8 @@ class ActivationModule:
         else:
             if axis is None:
                 return fig
-
-    @classmethod
-    def plot_distributions(cls, ax, colors=None, bin_size=None):
+            
+    def plot_distributions(self, ax, colors=None, bin_size=None):
         """
         Plot the distribution and returns the corresponding x
         """
@@ -541,8 +310,7 @@ class ActivationModule:
 
         return torch.arange(x_min, x_max, size)
 
-    @classmethod
-    def plot_layer_distributions(cls, ax):
+    def plot_layer_distributions(self, ax):
         """
         Plot the layer distributions and returns the corresponding x
         """
@@ -604,38 +372,330 @@ class ActivationModule:
                 fig.canvas.draw()
             fig.canvas.mpl_connect('pick_event', toggle_distribution)
         return torch.arange(*self.get_distributions_range())
+    
+    def show_gradients(self, display=True, tolerance=0.001, title=None,
+                       axis=None, writer=None, step=None, label=None, colors=None):
+        try:
+            import scipy.stats as sts
+            scipy_imported = True
+        except ImportError:
+            RationalImportScipyWarning.warn()
+            scipy_imported = False
+        if axis is None:
+            with sns.axes_style("whitegrid"):
+                # fig, axis = plt.subplots(1, 1, figsize=(8, 6))
+                fig, axis = plt.subplots(1, 1, figsize=(20, 12))
+        if colors is None or len(colors) != 2:
+            colors = ["orange", "blue"]
+        dists = [self._in_grad_dist, self._out_grad_dist]
+        if label is None:
+            labels = ['input grads', 'output grads']
+        else:
+            labels = [f'{label} (inp)', f'{label} (outp)']
+        for distribution, col, label in zip(dists, colors, labels):
+            weights, x = distribution.weights, distribution.bins
+            if self.use_kde and scipy_imported:
+                if len(x) > 5:
+                    refined_bins = np.linspace(float(x[0]), float(x[-1]), 200)
+                    kde_curv = distribution.kde()(refined_bins)
+                    # ax.plot(refined_bins, kde_curv, lw=0.1)
+                    axis.fill_between(refined_bins, kde_curv, alpha=0.4,
+                                      color=col, label=label)
+                else:
+                    self.logger.warn("The bin size is too big, bins contain too few "
+                                     f"elements.\nbins: {x}")
+                    axis.bar([], []) # in case of remove needed
+            else:
+                axis.bar(x, weights/weights.max(), width=x[1] - x[0],
+                         linewidth=0, alpha=0.4, color=col, label=label)
+            distribution.empty()
+        if writer is not None:
+            try:
+                writer.add_figure(title, fig, step)
+            except AttributeError:
+                self.logger.error("Could not use the given SummaryWriter to add the Rational figure")
+        elif display:
+            plt.legend()
+            plt.show()
+        else:
+            if axis is None:
+                return fig
+            
+    def capture(self, name="snapshot_0", x=None, fitted_function=True,
+                other_func=None, returns=False):
+        """
+        Captures a snapshot of the rational functions and related in the
+        snapshot_list variable (or returns it if ``returns=True``).
 
-    def get_distributions_range(self):
-        x_min, x_max = np.inf, -np.inf
-        for dist in self.distributions:
-            if not dist.is_empty:
-                x_min, x_max = min(x_min, dist.range[0]), max(x_max, dist.range[-1])
-                size = dist.range[1] - dist.range[0]
-        if x_min == np.inf or x_max == np.inf:
-            return -3, 3, 0.01
-        return x_min, x_max, size
+        Arguments:
+                name (str):
+                    Name of the snapshot.\n
+                    Default ``"snapshot_0"``
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                returns (bool):
+                    If ``True``, returns the snapshot.
+                    Otherwise, saves it in self.snapshot_list \n
+                    Default ``False``
+        """
+        while name in [snst.name for snst in self.snapshots] \
+              and not returns:
+            name = _increment_string(name)
+        snapshot = Snapshot(name, self, fitted_function, other_func)
+        if returns:
+            return snapshot
+        self.snapshots.append(snapshot)
+
+    def export_graph(self, path="rational_function.svg", snap_number=-1,
+                     other_func=None):
+        """
+        Saves one graph of the function based on the last snapshot \
+        (by default, and if available).
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rational_functions.svg"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``auto``
+                snap_number (int):
+                    The snap to take in snapshot_list for each function.\n
+                    Default ``-1 (last)``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                    Default ``None``
+        """
+        if not len(self.snapshots):
+            mes =("Cannot use the last snapshot as the snapshot_list "
+                  "is empty, making a capture with default params")
+            RationalWarning.warn(mes)
+            self.capture()
+        snap = self.snapshots[snap_number]
+        snap.save(path=path, other_func=other_func)
+
+    def export_evolution_graph(self, path="rational_evolution.gif",
+                               animated=True, other_func=None):
+        """
+        Creates and saves an animated graph of the function evolution based \
+        on the successive snapshots saved in `snapshot_list`.
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rational_evolution.gif"``
+                animated (bool):
+                    Complete path with name of the figure.\n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value. \n
+                    Default ``None``
+        """
+        if animated:
+            import io
+            from PIL import Image
+            if len(self.snapshots) < 2:
+                print("Cannot save a gif as you have taken less than 1 snapshot")
+                return
+            fig = plt.gcf()
+            x_min, x_max, y_min, y_max = _get_frontiers(self.snapshots,
+                                                        other_func)
+            input = np.arange(x_min, x_max, (x_max - x_min)/10000)
+            gif_images = []
+            for i, snap in enumerate(self.snapshots):
+                fig = snap.show(x=input, other_func=other_func, display=False,
+                                duplicate_axis=self.use_multiple_axis)
+                ax0 = fig.axes[0]
+                ax0.set_xlim([x_min, x_max])
+                ax0.set_ylim([y_min, y_max])
+                buf = io.BytesIO()
+                fig.set_tight_layout(True)
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+                gif_images.append(Image.open(buf))
+                fig.clf()
+            if path[-4:] != ".gif":
+                path += ".gif"
+            path = _repair_path(path)
+            gif_images[0].save(path, save_all=True, duration=800, loop=0,
+                               append_images=gif_images[1:], optimize=False)
+        else:
+            if path[-4:] == ".gif":
+                path = path[-4:] + ".svg"
+            path = _path_for_multiple(path, "evolution")
+            for i, snap in enumerate(self.snapshots):
+                pos = path.rfind(".")
+                if pos > 0:
+                    new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                else:
+                    new_path = f"{path}_{i}"
+                snap.save(path=new_path, other_func=other_func)
+
+class ActivationModule:
+    _registered_modules = {}  # {module-name: RegisteredModule}
+    count = 0
+    _step = 0
+    use_multiple_axis = False
+    distribution_display_mode = "kde"
+    histograms_colors = ["red", "green", "black"]
+    logger = ActivationLogger(f"ActivationModule")
 
     @classmethod
-    def _get_instances(cls):
+    def register(cls, module, name, mode="kde_neurons", group=None, logger=None):
+        """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
+        
+        Args:
+            module (torch.nn.Module):
+            name (str): If name already exists an incrementing integer will be appended.
+            mode (str, optional): The mode in which input will be retrieved/plotted. For example
+                ``'bar_neurons'`` will create a bar plot for each neuron in layer.
+            group (hashable or list of hashables, optional): Group(s) to assign ``module`` to. 
+            
+        Returns:
+            name (str): Name under which module is registered.
         """
-        if called from ActivationModule: returning all instanciated functions
-        if called from a child-class: returning the instances of this specific class
+        if not isinstance(group, list):
+            group = [group]
+
+        if name in cls._registered_modules:
+            name = cls._increment_name(f"{name}_0")
+
+        dist_display_mode = "kde"
+        if "bar" in mode:
+            dist_display_mode = "bar"
+        elif "points" in mode:
+            dist_display_mode = "points"
+
+        input_retrieval_mode = "neurons"
+        if "neurons" not in input_retrieval_mode:
+            input_retrieval_mode = "normal"
+        
+        cls._registered_modules[name] = RegisteredModule(
+            name=name,
+            module=module,
+            groups=group,
+            mode={
+                "dist_display": dist_display_mode,
+                "irm": input_retrieval_mode, 
+            },
+            logger=cls.logger if logger is None else logger,
+        )
+
+        cls.count += 1
+
+        return name
+
+    @classmethod
+    def _increment_name(cls, name):
+        """Helper method for appending incrementing integer at string.
+        
+        Args:
+            name (str): Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
+                are registered under (incremented) name.
+                
+        Returns:
+            new_name (str): Name for which no other module is registered.
         """
-        if "ActivationModule" in str(cls):
-            instances_list = []
-            [instances_list.extend(insts) for insts in cls.instances.values()]
+        name_ = name.split("_")
+        name_[-1] = f"{int(name_[-1]+1)}"
+        while "_".join(name_) in cls._registered_modules:
+            name_[-1] = f"{int(name_[-1]+1)}"
+
+        return "_".join(name_)
+
+    @classmethod
+    def get_groups(cls, group):
+        if not isinstance(group, list):
+            group = [group]
+
+        # find all modules that belong to given groups
+        if group is None:
+            names = tuple(cls._registered_modules.keys())
         else:
-            clsn = str(cls)
-            if "activations.torch" in clsn:
-                curr_classname = clsn.split("'")[1].split(".")[-1]
-                if curr_classname not in cls.instances:
-                    print(f"No instanciated function of {curr_classname} found")
-                    return []
-                instances_list = cls.instances[curr_classname]
-            else:
-                print(f"Unknown {cls} for show_all")  # shall never happen
-                return []
-        return instances_list
+            _groups = set(group)
+            names = tuple(filter(
+                lambda name: not set(cls._registered_modules[name].groups).isdisjoint(_groups),
+                cls._registered_modules.keys()
+            ))
+
+        return names
+    
+    @classmethod
+    def _get_modules(cls, names):
+        if names is None:
+            return list(cls._registered_modules.items())
+
+        if isinstance(names, str):
+            return [cls._registered_modules[names]]
+
+        return [cls._registered_modules[name_] for name_ in names]
+    
+    @classmethod
+    def create_snapshot(cls, inputs=False, gradients=False, function=False, timeings=False):
+        # create a snapshot including all specified statistics
+        pass  # TODO
+
+    @classmethod
+    def save_all_inputs(cls, *args, **kwargs):
+        """
+        Saves inputs for all instantiates objects of the called class.
+        """
+        instances_list = cls._get_instances()
+        for instance in instances_list:
+            instance.save_inputs(*args, **kwargs)
+
+    @classmethod
+    def save_all_gradients(cls, *args, **kwargs):
+        """
+        Saves gradients for all instantiates objects of the called class.
+        """
+        instances_list = cls._get_instances()
+        for instance in instances_list:
+            instance.save_gradients(*args, **kwargs)
+
+    @classmethod
+    def save_inputs(cls, saving=True, auto_stop=False, max_saves=1000, bin_width=0.1, mode=None,
+                      group=None, save_time=False):
+        for name in cls.get_groups(group):
+            module = cls._registered_modules[name]
+            module.save_input(
+                saving=saving,
+                max_saves=max_saves if auto_stop else -1,
+                bin_width=bin_width,
+                mode=mode,
+                save_time=save_time,
+            )
+
+    @classmethod
+    def save_gradients(cls, saving=True, auto_stop=False, max_saves=1000, bin_width="auto", mode=None,
+                       group=None, save_time=False):
+        for name in cls.get_groups(group):
+            module = cls._registered_modules[name]
+            module.save_gradient(
+                saving=saving,
+                max_saves=max_saves if auto_stop else -1,
+                bin_width=bin_width,
+                mode=mode,
+                save_time=save_time,
+            )
 
     @classmethod
     def show_all(cls, x=None, fitted_function=True, other_func=None,
@@ -740,25 +800,339 @@ class ActivationModule:
         else:
             return fig
 
-    # def __setattr__(self, key, value):
-    #     if not hasattr(self, key):
-    #         key_str = colored(key, "red")
-    #         self_name_str = colored(self.__class__, "red")
-    #         msg = colored(f"Setting new attribute {key_str}", "yellow") + \
-    #               colored(f" of instance of {self_name_str}", "yellow")
-    #         print(msg)
-    #     object.__setattr__(self, key, value)
+    @classmethod
+    def show_all_gradients(cls, display=True, tolerance=0.001, title=None,
+                           axes=None, layout="auto", writer=None, step=None,
+                           colors=None):
+        """
+        Shows a graph of the all instanciated activation functions (or returns \
+        it if ``returns=True``).
 
+        Arguments:
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                display (bool):
+                    If ``True``, displays the plot.
+                    Otherwise, returns the figure. \n
+                    Default ``False``
+                tolerance (float):
+                    If the input histogram is used, it will be pruned. \n
+                    Every bin containg less than `tolerance` of the total \
+                    input is pruned out.
+                    (Reduces noise).
+                    Default ``0.001``
+                title (str):
+                    If not None, a title for the figure
+                    Default ``None``
+                axes (matplotlib.pyplot.axis):
+                    On ax or a list of axes to be plotted on. \n
+                    If None, creates them automatically (see `layout`). \n
+                    Default ``None``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\n
+                    Default ``"auto"``
+                writer (tensorboardX.SummaryWriter):
+                    A tensorboardX writer to give the image to, in case of
+                    debugging.
+                    Default ``None``
+                step (int):
+                    A step/epoch for tensorboardX writer.
+                    If None, incrementing itself.
+                    Default ``None``
+        """
+        logger = ActivationLogger("f{cls.__name__}Logger")
+        instances_list = cls._get_instances()
+        if axes is None:
+            if layout == "auto":
+                total = len(instances_list)
+                layout = _get_auto_axis_layout(total)
+            if len(layout) != 2:
+                msg = 'layout should be either "auto" or a tuple of size 2'
+                raise TypeError(msg)
+            figs = tuple(np.flip(np.array(layout)* (2, 3)))
+            try:
+                import seaborn as sns
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout, figsize=figs)
+            except ImportError:
+                logger.warn("Could not import seaborn")
+                #RationalImportSeabornWarning.warn()
+                fig, axes = plt.subplots(*layout, figsize=figs)
+            if isinstance(axes, plt.Axes):
+                axes = np.array([axes])
+            # if display:
+            for ax in axes.flatten()[len(instances_list):]:
+                ax.remove()
+            axes = axes[:len(instances_list)]
+        elif isinstance(axes, plt.Axes):
+            axes = np.array([axes for _ in range(len(instances_list))])
+            fig = plt.gcf()
+        if isinstance(colors, str) or colors is None:
+            colors = [colors]*len(axes.flatten())
+        for act, ax, color in zip(instances_list, axes.flatten(), colors):
+            act.show_gradients(False, tolerance, title, axis=ax,
+                               writer=None, step=step, colors=color)
+        if title is not None:
+            fig.suptitle(title, y=0.95)
+        fig = plt.gcf()
+        fig.tight_layout()
+        if writer is not None:
+            if step is None:
+                step = cls._step
+                cls._step += 1
+            writer.add_figure(title, fig, step)
+        elif display:
+            plt.legend()
+            plt.show()
+        else:
+            return fig
+        
+    @classmethod
+    def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
+                    other_func=None, returns=False):
+        """
+        Captures a snapshot of every instanciated rational functions and \
+        related in the snapshot_list variable (or returns a list of them if \
+        ``returns=True``).
 
-    # def load_state_dict(self, state_dict):
-    #     if "distributions" in state_dict.keys():
-    #         _distributions = state_dict.pop("distributions")
-    #         if "cuda" in self.device and _cupy_installed():
-    #             msg = f"Loading input distributions on {self.device} using cupy"
-    #             RationalLoadWarning.warn(msg)
-    #             self.distributions = _distributions
-    #     super().load_state_dict(state_dict)
-    #
+        Arguments:
+                name (str):
+                    Name of the snapshot.\n
+                    Default ``"snapshot_0"``
+                x (range):
+                    The range to print the function on.\n
+                    Default ``None``
+                fitted_function (bool):
+                    If ``True``, displays the best fitted function if searched.
+                    Otherwise, returns it. \n
+                    Default ``True``
+                other_funcs (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                returns (bool):
+                    If ``True``, returns the snapshot.
+                    Otherwise, saves it in self.snapshot_list \n
+                    Default ``False``
+        """
+        if returns:
+            captures = []
+            for rat in cls.list:
+                captures.append(rat.capture(name, x, fitted_function,
+                                            other_func, returns))
+            return captures
+        else:
+            for rat in cls.list:
+                rat.capture(name, x, fitted_function, other_func, returns)
+
+    @classmethod
+    def export_graphs(cls, path="rational_functions.svg", together=True,
+                      layout="auto", snap_number=-1, other_func=None):
+        """
+        Saves one or more graph(s) of the function based on the last snapshot \
+        (by default, and if available) for each instanciated rational function.
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rational_functions.svg"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).
+                    Default ``"auto"``
+                snap_number (int):
+                    The snap to take in snapshot_list for each function.\n
+                    Default ``-1 (last)``
+                other_func (callable):
+                    another function to be plotted or a list of other callable
+                    functions or a dictionary with the function name as key
+                    and the callable as value.
+                    Default ``None``
+        """
+        if together:
+            for i, rat in enumerate(cls.list):
+                if not len(rat.snapshot_list) > 0:
+                    print(f"Cannot use the last snapshots as snapshot n {i} \
+                          is empty, capturing...")
+                    cls.capture_all()
+                    break
+            if layout == "auto":
+                total = len(cls.list)
+                layout = _get_auto_axis_layout(total)
+            if len(layout) != 2:
+                msg = 'layout should be either "auto" or a tuple of size 2'
+                raise TypeError(msg)
+            figs = tuple(np.flip(np.array(layout) * (2, 3)))
+            try:
+                import seaborn as sns
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout, figsize=figs)
+            except ImportError:
+                RationalImportSeabornWarning.warn()
+                fig, axes = plt.subplots(*layout, figsize=figs)
+            for rat, ax in zip(cls.list, axes.flatten()):
+                snap = rat.snapshot_list[snap_number]
+                snap.show(display=False, axis=ax, other_func=other_func,
+                          duplicate_axis=cls.use_multiple_axis)
+            for ax in axes.flatten()[len(cls.list):]:
+                ax.remove()
+            fig.savefig(_repair_path(path))
+            fig.clf()
+        else:
+            path = _path_for_multiple(path, "graphs")
+            for i, rat in enumerate(tqdm(cls.list, desc="Saving Rationals")):
+                pos = path.rfind(".")
+                new_path = f"{path[:pos]}_{i}{path[pos:]}"
+                rat.export_graph(new_path)
+
+    @classmethod
+    def export_evolution_graphs(cls, path="rationals_evolution.gif",
+                                together=True, layout="auto", animated=True,
+                                other_func=None):
+        """
+        Creates and saves an animated graph of the function evolution based \
+        on the successive snapshots saved in `snapshot_list` for each \
+        instanciated rational function.
+
+        Arguments:
+                path (str):
+                    Complete path with name of the figure.\n
+                    Default ``"rationals_evolution.gif"``
+                together (bool):
+                    If True, the graphs of every functions are stored in \
+                    different files.\n
+                    Default ``True``
+                layout (tuple or 'auto'):
+                    Grid layout of the figure. If "auto", one is generated.\
+                    (see `layout`).\n
+                    Default ``"auto"``
+                animated (bool):
+                    If True, creates an animated gif, else, different files \
+                    are created.\n
+                    Default ``True``
+                other_func (callable):
+                    another function to be plotted or a list of other \
+                    callable functions or a dictionary with the function \
+                    name as key and the callable as value.\n
+                    Default ``None``
+        """
+        if animated:
+            if together:
+                nb_sn = len(cls.list[0].snapshot_list)
+                if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
+                    msg = "Seems that not all rationals have the same " \
+                          "number of snapshots."
+                    RationalWarning.warn(msg)
+                import io
+                from PIL import Image
+                limits = []
+                for i, rat in enumerate(cls.list):
+                    if len(rat.snapshot_list) < 2:
+                        msg = "Cannot save a gif as you have taken less " \
+                              f"than 1 snapshot for rational n {i}"
+                        print(msg)
+                        return
+                    limits.append(_get_frontiers(rat.snapshot_list,
+                                                 other_func))
+                if layout == "auto":
+                    total = len(cls.list)
+                    layout = _get_auto_axis_layout(total)
+                if len(layout) != 2:
+                    msg = 'layout should be either "auto" or a tuple of size 2'
+                    raise TypeError(msg)
+                fig = plt.gcf()
+                gif_images = []
+                seaborn_installed = True
+                try:
+                    import seaborn as sns
+                except ImportError:
+                    seaborn_installed = False
+                    RationalImportSeabornWarning.warn()
+                if seaborn_installed:
+                    with sns.axes_style("whitegrid"):
+                        figs = tuple(np.flip(np.array(layout)* (2, 3)))
+                        fig, axes = plt.subplots(*layout, figsize=figs)
+                else:
+                    figs = tuple(np.flip(np.array(layout)* (2, 3)))
+                    fig, axes = plt.subplots(*layout, figsize=figs)
+                for ax in axes.flatten()[len(cls.list):]:
+                    ax.remove()  # removes empty axes
+                for i in range(nb_sn):
+                    for rat, ax, lim in zip(cls.list, axes.flatten(), limits):
+                        x_min, x_max, y_min, y_max = lim
+                        input = np.arange(x_min, x_max, (x_max - x_min)/10000)
+                        snap = rat.snapshot_list[i]
+                        snap.show(x=input, other_func=other_func,
+                                  display=False, axis=ax,
+                                  duplicate_axis=cls.use_multiple_axis)
+                        ax.set_xlim([x_min, x_max])
+                        ax.set_ylim([y_min, y_max])
+                    buf = io.BytesIO()
+                    fig.set_tight_layout(True)
+                    plt.savefig(buf, format='png')
+                    buf.seek(0)
+                    gif_images.append(Image.open(buf))
+                    for i, ax in enumerate(fig.axes):
+                        if i < len(cls.list):
+                            ax.cla()
+                        else:
+                            ax.remove()
+                if path[-4:] != ".gif":
+                    path += ".gif"
+                path = _repair_path(path)
+                gif_images[0].save(path, save_all=True, duration=800, loop=0,
+                                   append_images=gif_images[1:], optimize=False)
+            else:
+                path = _path_for_multiple(path, "graphs")
+                bar_title = "Saving Rationals' evolutions"
+                for i, rat in enumerate(tqdm(cls.list, desc=bar_title)):
+                    pos = path.rfind(".")
+                    if pos > 0:
+                        new_path = f"{path[:pos]}_{i}{path[pos:]}"
+                    else:
+                        new_path = f"{path}_{i}"
+                    rat.export_evolution_graph(new_path, True, other_func)
+        else:  # not animated
+            if path[-4:] == ".gif":
+                path = path[-4:] + ".svg"
+            path = _path_for_multiple(path, "evolution")
+            if together:
+                nb_sn = len(cls.list[0].snapshot_list)
+                if any([len(rat.snapshot_list) != nb_sn for rat in cls.list]):
+                    msg = "Seems that not all rationals have the " \
+                          "same number of snapshots."
+                    RationalWarning.warn(msg)
+                for snap_number in range(nb_sn):
+                    if "." in path:
+                        ext = path.split(".")[-1]
+                        main = ".".join(path.split(".")[:-1])
+                        new_path = f"{main}_{snap_number}.{ext}"
+                    else:
+                        new_path = f"{path}_{snap_number}"
+                    cls.export_graphs(new_path, together, layout, snap_number,
+                                      other_func)
+            else:
+                for i, rat in enumerate(cls.list):
+                    pos = path.rfind(".")
+                    if pos > 0:
+                        new_path = f"{path[pos:]}_{i}{path[:pos]}"
+                    else:
+                        new_path = f"{path}_{i}"
+                    rat.export_evolution_graph(new_path, False, other_func)
+
     def state_dict(self, destination=None, *args, **kwargs):
         _state_dict = super().state_dict(destination, *args, **kwargs)
         if self.distributions is not None:
