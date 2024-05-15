@@ -18,9 +18,6 @@ from activations.torch.utils.histograms_numpy import Histogram, NeuronsHistogram
 _LINED = dict()
 
 
-def _increment_name(name):
-    pass  # TODO copy from ActivationModule
-
 def create_colors(n):
     colors = []
     for i in range(n):
@@ -58,10 +55,17 @@ class RegisteredModule:
         self.module = module
         self.logger = logger
 
+        self.display_mode = mode["dist_display"]
+
+        # function snapshots
+        self.snapshots = OrderedDict()
+
+        # input distributions
         self.input_retrieval_mode = mode["irm"]
         self.input_distributions = []
         self.input_labels = []
 
+        # gradient distributions
         self.input_gradient_distributions = []
         self.output_gradient_distributions = []
         self.input_gradient_labels = []
@@ -73,7 +77,27 @@ class RegisteredModule:
     @property
     def groups(self):
         return self._groups
+    
+    @property
+    def use_kde(self):
+        return self.display_mode == "kde"
+    
+    def _increment_snapshot_name(self, name):
+        while name in self.snapshots:
+            name_ = name.split("_")
+            name_[-1] = f"{int(name_[-1]) + 1}"
+            name = "_".join(name)
 
+        return name
+    
+    # needed for compability with Snapshot class
+    def numpy(self, *args, **kwargs):
+        return self.module.numpy(*args, **kwargs)
+    
+    # needed for compability with Snapshot class
+    def __call__(self, *args, **kwargs):
+        return self.module(*args, **kwargs)
+    
     def get_distributions_range(self):
         x_min, x_max = np.inf, -np.inf
         for dist in self.distributions:
@@ -377,8 +401,7 @@ class RegisteredModule:
             if axis is None:
                 return fig
             
-    def capture(self, name="snapshot_0", x=None, fitted_function=True,
-                other_func=None, returns=False):
+    def capture(self, name="snapshot_0", other_func=None, returns=False):
         """
         Captures a snapshot of the rational functions and related in the
         snapshot_list variable (or returns it if ``returns=True``).
@@ -387,13 +410,6 @@ class RegisteredModule:
                 name (str):
                     Name of the snapshot.\n
                     Default ``"snapshot_0"``
-                x (range):
-                    The range to print the function on.\n
-                    Default ``None``
-                fitted_function (bool):
-                    If ``True``, displays the best fitted function if searched.
-                    Otherwise, returns it. \n
-                    Default ``True``
                 other_funcs (callable):
                     another function to be plotted or a list of other callable
                     functions or a dictionary with the function name as key
@@ -403,13 +419,14 @@ class RegisteredModule:
                     Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
-        while name in [snst.name for snst in self.snapshots] \
-              and not returns:
-            name = _increment_string(name)
-        snapshot = Snapshot(name, self, fitted_function, other_func)
+        name = self._increment_snapshot_name(name)
+
+        # self.module.distribution is always None therefore 3rd argument
+        # does not influence behaviour
+        snapshot = Snapshot(name, self, False, other_func)
         if returns:
             return snapshot
-        self.snapshots.append(snapshot)
+        self.snapshots[name] = snapshot
 
     def export_graph(self, path="rational_function.svg", snap_number=-1,
                      other_func=None):
@@ -561,7 +578,7 @@ class ActivationModule:
 
     @classmethod
     def _increment_name(cls, name):
-        """Helper method for appending incrementing integer at string.
+        """Helper method for numerating string.
         
         Args:
             name (str): Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
@@ -570,12 +587,12 @@ class ActivationModule:
         Returns:
             new_name (str): Name for which no other module is registered.
         """
-        name_ = name.split("_")
-        name_[-1] = f"{int(name_[-1]+1)}"
-        while "_".join(name_) in cls._registered_modules:
-            name_[-1] = f"{int(name_[-1]+1)}"
+        while name in cls._registered_modules:
+            name_ = name.split("_")
+            name_[-1] = f"{int(name_[-1])+1}"
+            name = "_".join(name_)
 
-        return "_".join(name_)
+        return name
 
     @classmethod
     def get_groups(cls, group):
@@ -595,43 +612,30 @@ class ActivationModule:
         return names
     
     @classmethod
-    def _get_modules(cls, names):
-        if names is None:
-            return list(cls._registered_modules.items())
+    def _get_modules(cls, name=None, group=None):
+        if name is not None and group is not None:
+            msg = "Name and group are exclusive"
+            raise ValueError(msg)
+        
+        if name is None:
+            module_names = cls.get_groups(group)
+        elif isinstance(name, list):
+            module_names = name
+        else:
+            module_names = [name]
 
-        if isinstance(names, str):
-            return [cls._registered_modules[names]]
-
-        return [cls._registered_modules[name_] for name_ in names]
-    
+        return [cls._registered_modules[name] for name in module_names]
+        
     @classmethod
     def create_snapshot(cls, inputs=False, gradients=False, function=False, timeings=False):
         # create a snapshot including all specified statistics
         pass  # TODO
 
     @classmethod
-    def save_all_inputs(cls, *args, **kwargs):
-        """
-        Saves inputs for all instantiates objects of the called class.
-        """
-        instances_list = cls._get_instances()
-        for instance in instances_list:
-            instance.save_inputs(*args, **kwargs)
-
-    @classmethod
-    def save_all_gradients(cls, *args, **kwargs):
-        """
-        Saves gradients for all instantiates objects of the called class.
-        """
-        instances_list = cls._get_instances()
-        for instance in instances_list:
-            instance.save_gradients(*args, **kwargs)
-
-    @classmethod
-    def save_inputs(cls, saving=True, auto_stop=False, max_saves=1000, bin_width=0.1, mode=None,
-                      group=None, save_time=False):
-        for name in cls.get_groups(group):
-            module = cls._registered_modules[name]
+    def save_inputs(cls, name=None, group=None, saving=True, auto_stop=False,
+                         max_saves=1000, bin_width=0.1, mode=None, save_time=False):
+        """Saves inputs of registered modules."""
+        for module in cls._get_modules(name=name, group=group):
             module.save_input(
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
@@ -641,10 +645,10 @@ class ActivationModule:
             )
 
     @classmethod
-    def save_gradients(cls, saving=True, auto_stop=False, max_saves=1000, bin_width="auto", mode=None,
-                       group=None, save_time=False):
-        for name in cls.get_groups(group):
-            module = cls._registered_modules[name]
+    def save_gradients(cls, name=None, group=None, saving=True, auto_stop=False,
+                           max_saves=1000, bin_width="auto", mode=None, save_time=False):
+        """Saves gradients of registered modules."""
+        for module in cls._get_modules(name=name, group=group):
             module.save_gradient(
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
@@ -853,8 +857,8 @@ class ActivationModule:
             return fig
         
     @classmethod
-    def capture_all(cls, name="snapshot_0", x=None, fitted_function=True,
-                    other_func=None, returns=False):
+    def capture(cls, name=None, group=None, snap_name="snapshot_0",
+                other_func=None, returns=False):
         """
         Captures a snapshot of every instanciated rational functions and \
         related in the snapshot_list variable (or returns a list of them if \
@@ -864,13 +868,6 @@ class ActivationModule:
                 name (str):
                     Name of the snapshot.\n
                     Default ``"snapshot_0"``
-                x (range):
-                    The range to print the function on.\n
-                    Default ``None``
-                fitted_function (bool):
-                    If ``True``, displays the best fitted function if searched.
-                    Otherwise, returns it. \n
-                    Default ``True``
                 other_funcs (callable):
                     another function to be plotted or a list of other callable
                     functions or a dictionary with the function name as key
@@ -880,15 +877,20 @@ class ActivationModule:
                     Otherwise, saves it in self.snapshot_list \n
                     Default ``False``
         """
+        modules = cls._get_modules(name=name, group=group)
+
         if returns:
-            captures = []
-            for rat in cls.list:
-                captures.append(rat.capture(name, x, fitted_function,
-                                            other_func, returns))
+            captures = {}
+            for module in modules:
+                captures[module.name] = module.capture(
+                    name=snap_name,
+                    other_func=other_func,
+                    returns=True
+                )
             return captures
-        else:
-            for rat in cls.list:
-                rat.capture(name, x, fitted_function, other_func, returns)
+
+        for module in modules:
+            module.capture(name=snap_name, other_func=other_func, returns=False)
 
     @classmethod
     def export_graphs(cls, path="rational_functions.svg", together=True,
