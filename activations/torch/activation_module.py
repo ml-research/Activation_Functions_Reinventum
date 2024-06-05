@@ -60,14 +60,14 @@ class RegisteredModule:
 
         # input distributions
         self.input_retrieval_mode = mode["irm"]
-        self.input_distributions = []
-        self.input_labels = []
+        self.input_distributions = OrderedDict()
+        self.input_labels = OrderedDict()
 
         # gradient distributions
-        self.input_gradient_distributions = []
-        self.output_gradient_distributions = []
-        self.input_gradient_labels = []
-        self.output_gradient_labels = []
+        self.input_gradient_distributions = OrderedDict()
+        self.output_gradient_distributions = OrderedDict()
+        self.input_gradient_labels = OrderedDict()
+        self.output_gradient_labels = OrderedDict()
 
         self._grad_handle = None
         self._input_handle = None
@@ -80,8 +80,9 @@ class RegisteredModule:
     def use_kde(self):
         return self.display_mode == "kde"
     
-    def _increment_snapshot_name(self, name):
-        while name in self.snapshots:
+    @staticmethod
+    def _increment_snapshot_name(name, snapshots):
+        while name in snapshots:
             name_ = name.split("_")
             name_[-1] = f"{int(name_[-1]) + 1}"
             name = "_".join(name)
@@ -96,17 +97,7 @@ class RegisteredModule:
     def __call__(self, *args, **kwargs):
         return self.module(*args, **kwargs)
     
-    def get_distributions_range(self):
-        x_min, x_max = np.inf, -np.inf
-        for dist in self.distributions:
-            if not dist.is_empty:
-                x_min, x_max = min(x_min, dist.range[0]), max(x_max, dist.range[-1])
-                size = dist.range[1] - dist.range[0]
-        if x_min == np.inf or x_max == np.inf:
-            return -3, 3, 0.01
-        return x_min, x_max, size
-    
-    def save_inputs(self, saving=True, max_saves=-1,
+    def save_inputs(self, name, saving=True, max_saves=-1,
                     bin_width=0.1, mode=None, label=None):
         if not saving:
             self.logger.info("Not retrieving input anymore")
@@ -123,19 +114,22 @@ class RegisteredModule:
             self.input_retrieval_mode = mode
 
         if mode == "neurons":
-            self.input_distributions.append(NeuronsHistogram(bin_width))
+            hist = NeuronsHistogram(bin_width)
         else:
-            self.input_distributions.append(Histogram(bin_width))
-        self.input_labels.append(label)
+            hist = Histogram(bin_width)
+
+        name = self._increment_snapshot_name(name, self.input_distributions)
+        self.input_distributions[name] = hist
+        self.input_labels[name] = label
 
         self._input_handle = self.module.register_forward_hook(
             _input_hook(
-                self, self.input_distributions[-1], max_saves,
+                self, self.input_distributions[name], max_saves,
             )
         )
         
 
-    def save_gradients(self, saving=True, max_saves=-1,
+    def save_gradients(self, name, saving=True, max_saves=-1,
                        bin_width="auto", label_in=None, label_out=None):
         if not saving:
             self.logger.warn("Not retrieving gradients anymore")
@@ -146,11 +140,12 @@ class RegisteredModule:
         if self._handle_grads is not None:
             return
         
-        self.input_gradient_distributions.append(Histogram(bin_width))
-        self.output_gradient_distributions.append(Histogram(bin_width))
+        name = self._increment_snapshot_name(name, self.input_gradient_distributions)
+        self.input_gradient_distributions[name] = Histogram(bin_width)
+        self.output_gradient_distributions[name] = Histogram(bin_width)
 
-        self.input_gradient_labels.append(label_in)
-        self.output_gradient_labels.append(label_out)
+        self.input_gradient_labels[name] = label_in
+        self.output_gradient_labels[name] = label_out
 
         self._grad_handle = self.register_full_backward_hook(
             _gradient_hook(
@@ -292,36 +287,34 @@ class ActivationModule:
             module_names = [name]
 
         return [cls._registered_modules[name] for name in module_names]
-        
-    @classmethod
-    def create_snapshot(cls, inputs=False, gradients=False, function=False, timeings=False):
-        # create a snapshot including all specified statistics
-        pass  # TODO
 
     @classmethod
-    def save_inputs(cls, name=None, group=None, saving=True, auto_stop=False,
-                         max_saves=1000, bin_width=0.1, mode=None, save_time=False):
+    def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
+                         max_saves=1000, bin_width=0.1, mode=None, input_label=None):
         """Saves inputs of registered modules."""
         for module in cls._get_modules(name=name, group=group):
-            module.save_input(
+            module.save_inputs(
+                snap_name=snap_name,
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
                 bin_width=bin_width,
                 mode=mode,
-                save_time=save_time,
+                label=input_label,
             )
 
     @classmethod
-    def save_gradients(cls, name=None, group=None, saving=True, auto_stop=False,
-                           max_saves=1000, bin_width="auto", mode=None, save_time=False):
+    def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
+                           max_saves=1000, bin_width="auto", mode=None, input_label=None, output_label=None):
         """Saves gradients of registered modules."""
         for module in cls._get_modules(name=name, group=group):
-            module.save_gradient(
+            module.save_gradients(
+                snap_name=snap_name,
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
                 bin_width=bin_width,
                 mode=mode,
-                save_time=save_time,
+                label_in=input_label,
+                label_out=output_label,
             )
         
     @classmethod
@@ -359,3 +352,10 @@ class ActivationModule:
 
         for module in modules:
             module.capture(name=snap_name, other_func=other_func, returns=False)
+
+    def show(cls, name=None, group=None, snap_name=None, function=False,
+                inputs=False, gradients=False, animated=False, other_func=None,
+                display=False, title=None, axes=None, layout="auto", writer=None,
+                step=None, colors="#1f77b4"):
+        pass  # TODO
+        
