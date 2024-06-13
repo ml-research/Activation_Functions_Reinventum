@@ -176,34 +176,17 @@ class RegisteredModule:
         name = self._increment_snapshot_name(name)
         self.snapshots[name] = snapshot
 
-    def show(self, x, other_func, axis, color,
-             name="snapshot_0", x_label=None, y_label=None):
-        if x is None:
-            x = torch.arange(-3, 3, 0.01, dtype=float)
-        elif isinstance(x, int):
-            x = torch.linspace(-3, 3, x, dtype=float)
-        elif isinstance(x, tuple):
-            if len(x) == 3:
-                x = torch.linspace(*x, dtype=float)
-            else:
-                x = torch.arange(*x, dtype=float)
-        elif isinstance(x, np.array):
-            x = torch.tensor(x, dtype=float)
-        elif not isinstance(x, torch.Tensor):
-            msg = f"Unsupported type for argument `x`, got {x}"
-            raise ValueError(msg)
+    def input_range(self, name):
+        pass # TODO
 
+    def show_function(self, x, axis, color,
+             name="snapshot_0"):
         current_state = None
         if name is not None:
             current_state = self.module.state_dict()
             state, other_func, label_in, label_out = self.snapshots[name]
             
             self.module.load_state_dict(state)
-
-            if x_label is None:
-                x_label = label_in
-            if y_label is None:
-                y_label = label_out
 
         y = self._call_nohook(x)
         axis.plot(x, y, color=color, color=self.name)
@@ -213,8 +196,10 @@ class RegisteredModule:
                 other_func[other_func_name](x),
                 label=other_func_name,
             )
-        axis.set_xlabel(x_label)
-        axis.set_ylabel(y_label)
+        if label_in is not None:
+            axis.set_xlabel(label_in)
+        if label_out is not None:
+            axis.set_ylabel(label_out)
 
         if current_state is not None:
             self.module.load_state_dict(current_state)
@@ -294,19 +279,17 @@ class ActivationModule:
 
     @classmethod
     def get_groups(cls, group):
+        if group is None:
+            return tuple(cls._registered_modules.keys())
+        
         if not isinstance(group, list):
             group = [group]
 
-        # find all modules that belong to given groups
-        if group is None:
-            names = tuple(cls._registered_modules.keys())
-        else:
-            _groups = set(group)
-            names = tuple(filter(
-                lambda name: not set(cls._registered_modules[name].groups).isdisjoint(_groups),
-                cls._registered_modules.keys()
-            ))
-
+        _groups = set(group)
+        names = tuple(filter(
+            lambda name: not set(cls._registered_modules[name].groups).isdisjoint(_groups),
+            cls._registered_modules.keys()
+        ))
         return names
     
     @classmethod
@@ -376,15 +359,43 @@ class ActivationModule:
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
-                      step=None, colors="#1f77b4", x_label=None, y_label=None):
+                      step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False,
+                      inputs=False, gradients=False, x_mode="expand"):
+        """Create figure of multiple modules for one snapshot.
+        
+        Creates a figure with one subplot for each module. Each module can only be plotted for a single snapshot,
+        but snapshots do not have to be equal for all modules.
+
+        Args:
+            name (str or list(str), optional):
+            group (str or list(str), optional):
+            snap_name (str or dict(str, str), optional):
+            x (int or tuple or array-like, optional):
+            other_func (dict(str, callable)):
+            display (bool):
+            title (str):
+            axes (list(plt.Axes)):
+            layout (str or tuple):
+            writer ():
+            step ():
+            colors (str or dict(str, str)):
+            x_label, y_label (str or dict(str, str)):
+            ax_title (bool):
+            x_mode (str): Determines how x axis range is expanded/clipped based
+                on given x range (see :param:``x``) and input range. One of ``"expand", "clip"``.
+                * ``"expand"``: Always expand to greatest range.
+                * ``"clip"``: Always clip to smallest range.
+                Defaults to ``"expand"``.
+        """
         returns = (axes is None) and not display and (writer is None)
         display = (axes is None) and display and (writer is None)
         tensorboard = (axes is None) and (writer is not None)
-        ax_title = isinstance(snap_name, dict)
         
         modules = cls._get_modules(name, group, as_dict=True)
         n_modules = len(modules)
 
+        if isinstance(snap_name, str):
+            snap_name = {name: snap_name for name in modules}
         if isinstance(colors, str):
             colors = {name: colors for name in modules}
         if not isinstance(x, dict):
@@ -393,10 +404,12 @@ class ActivationModule:
             x_label = {name: x_label for name in modules}
         if not isinstance(y_label, dict):
             y_label = {name: y_label for name in modules}
-        if not isinstance(snap_name, dict):
-            snap_name = {name: snap_name for name in modules}
 
-        if axes is None:
+        if axes is not None:
+            if len(axes) != n_modules:
+                msg = f"Expected one axis for each module, got {len(axes)} axes but {n_modules} modules"
+                raise ValueError(msg)
+        else:
             if layout == "auto":
                 layout = _get_auto_axis_layout(n_modules)
             elif len(layout) != 2:
@@ -422,17 +435,62 @@ class ActivationModule:
             axes = {name: axes[i] for i, name in enumerate(modules)}
 
         for name, mod in modules.items():
-            mod.show(
-                x=x[name],
+            x_ = x[name]
+
+            min_x1, max_x1 = None, None
+            if (x_ is None) and (not inputs):
+                x_ = torch.arange(-3, 3, 0.01, dtype=float)
+                min_x1, max_x1 = -3., 3., 600
+            if isinstance(x_, int):
+                x_ = torch.linspace(-3, 3, x_, dtype=float)
+                min_x1, max_x1 = -3., 3.
+            elif isinstance(x_, tuple):
+                x_ = torch.linspace(*x_, dtype=float)
+                min_x1, max_x1 = x_
+            elif not isinstance(x_, torch.Tensor):
+                x_ = torch.tensor(x_, dtype=float)
+                min_x1, max_x1 = torch.min(x_), torch.max(x_)
+
+            min_x2, max_x2 = None, None
+            if inputs:
+                min_x2, max_x2 = mod.input_range(name=snap_name[name])
+                mod.show_inputs()
+
+            if (min_x2 is not None) and (min_x1 is not None):
+                if x_mode == "expand":
+                    min_x = min(min_x1, min_x2)
+                    max_x = max(max_x1, max_x2)
+                elif x_mode == "clip":
+                    min_x = max(min_x1, min_x2)
+                    max_x = min(max_x1, max_x2)
+                else:
+                    msg = f"Invalid value for `x_mode`, got {x_mode}"
+                    raise ValueError(msg)
+
+            mod.show_function(
+                x=x_,
                 other_func=other_func,
                 axis=axes[name],
                 color=colors[name],
                 name=snap_name[name],
-                x_label=x_label[name],
-                y_label=y_label[name],
             )
+
+            if other_func is not None:
+                for other_func_name in other_func:
+                    axes[name].plot(
+                        x_,
+                        other_func[other_func_name](x_),
+                        label=other_func_name,
+                    )
+            
+            axes[name].set_xlim((min_x, max_x))
+
             if ax_title:
                 axes[name].set_title(snap_name)
+            if x_label[name] is not None:
+                axes[name].set_xlabel(x_label)
+            if y_label[name] is not None:
+                axes[name].set_ylabel(y_label)
 
         if display:
             fig.legend()
@@ -446,119 +504,3 @@ class ActivationModule:
                 cls.logger.info(msg)
         elif returns:
             return fig
-                     
-
-    @classmethod
-    def show(cls, name=None, group=None, snap_name=None, x=None, function=False,
-                inputs=False, gradients=False, animated=False, other_func=None,
-                display=False, save_to=None, title=None, layout="auto", writer=None,
-                step=None, colors="#1f77b4"):
-        if not isinstance(snap_name, list):
-            snap_name = [snap_name]
-        if not isinstance(title, list):
-            title = [title] * len(snap_name)
-
-        modules = cls._get_modules(name, group, as_dict=True)
-
-        if layout == "auto":
-            layout = _get_auto_axis_layout(len(modules))
-        figsize = (layout[1] * 3, layout[0] * 2)
-
-        figs = []
-        try:
-            import seaborn as sns
-            use_seaborn = True
-        except ImportError:
-            cls.logger.warn("Could not import seaborn")
-            use_seaborn = False
-
-        for title_, snapshot in zip(title, snap_name):
-            if use_seaborn:
-                with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
-            else:
-                fig, axes = plt.subplots(*layout, figsize=figsize)
-            fig.suptitle(title_)
-
-            if function:
-                cls.show_function(
-                    name=name,
-                    group=group,
-                    snap_name=snapshot,
-                    x=x,
-                    other_func=other_func,
-                    display=False,
-                    title=None,
-                    axes=axes,
-                    writer=None,
-                    step=None,
-                    colors=colors,
-                    x_label=None,
-                    y_label=None,
-                )
-
-            if inputs:
-                # TODO
-                ...
-
-            fig.legend()
-            fig.tight_layout()
-            figs.append(fig)
-        
-        if animated:
-            images = []
-            buffer = io.BytesIO()
-
-            for fig in figs:
-                buffer.seek(0, whence=0)  # overwrite old buffer data
-                fig.savefig(buffer, format="png")
-                images.append(PIL.Image.open(buffer))
-
-            if save_to is not None:
-                images[0].save(save_to, save_all=True, duration=800, loop=0, append_images=images[1:], optimize=False)
-
-            if writer is not None:
-                vid = torchvision.transforms.ToTensor(images[0])
-                vid_tensor = torch.empty(1, len(images), *vid.shape, dtype=vid.dtype)
-                for i, img in enumerate(images[1:]):
-                    vid_tensor[0, i+1] = torchvision.transforms.ToTensor(img)
-
-                try:
-                    writer.add_video(
-                        tag=title,
-                        vid_tensor=vid_tensor,
-                        global_step=step,
-                        fps=1.25  # 800 ms per frame
-                    )
-                except AttributeError:
-                    msg = f"Could not use given writer to add video, got {writer}"
-                    cls.logger.info(msg)
-            
-            if display:
-                msg = "Cannot show animation, use save_to or writer argument to store animation."
-                cls.logger.info(msg)
-        else:  # no animation
-            if save_to is not None:
-                for i, fig in enumerate(figs):
-                    fig.savefig(os.path.join(save_to, f"figure_{i}.png"))
-
-            if writer is not None:
-                try:
-                    for i, fig in enumerate(figs):
-                        writer.add_figure(
-                            tag=f"{title[i]}_{i}",
-                            figure=fig,
-                            global_step=step,
-                        )
-                except AttributeError:
-                    msg = f"Could not use given writer to add figure, got {writer}"
-                    cls.logger.info(msg)
-
-                if display:
-                    plt.show()
-
-                if (not display) and (writer is None) and (save_to is None):
-                    return figs
-                else:
-                    for fig in figs:
-                        plt.close(fig)
