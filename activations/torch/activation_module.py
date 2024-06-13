@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+import torch.linalg
 import torch
 import torch.nn.functional as F
 from activations.utils.find_init_weights import find_weights
@@ -97,6 +99,11 @@ class RegisteredModule:
     def __call__(self, *args, **kwargs):
         return self.module(*args, **kwargs)
     
+    @torch.no_grad()
+    def _call_nohook(self, *args, **kwargs):
+        """Runs the ``forward`` method without calling any registered hooks."""
+        return self.module.forward(*args, **kwargs)
+    
     def save_inputs(self, name, saving=True, max_saves=-1,
                     bin_width=0.1, mode=None, label=None):
         if not saving:
@@ -156,32 +163,56 @@ class RegisteredModule:
             )
         )
             
-    def capture(self, name="snapshot_0", other_func=None, returns=False):
-        """
-        Captures a snapshot of the rational functions and related in the
-        snapshot_list variable (or returns it if ``returns=True``).
-
-        Arguments:
-                name (str):
-                    Name of the snapshot.\n
-                    Default ``"snapshot_0"``
-                other_funcs (callable):
-                    another function to be plotted or a list of other callable
-                    functions or a dictionary with the function name as key
-                    and the callable as value.
-                returns (bool):
-                    If ``True``, returns the snapshot.
-                    Otherwise, saves it in self.snapshot_list \n
-                    Default ``False``
-        """
-        name = self._increment_snapshot_name(name)
-
+    def capture(self, name="snapshot_0", other_func=None, label_in=None, label_out=None):
         # self.module.distribution is always None therefore 3rd argument
         # does not influence behaviour
-        snapshot = Snapshot(name, self, False, other_func)
-        if returns:
-            return snapshot
+        snapshot = (self.module.state_dict(), other_func, label_in, label_out)
+        
+        name = self._increment_snapshot_name(name)
         self.snapshots[name] = snapshot
+
+    def show(self, x, other_func, axis, color,
+             name="snapshot_0", x_label=None, y_label=None):
+        if x is None:
+            x = torch.arange(-3, 3, 0.01, dtype=float)
+        elif isinstance(x, int):
+            x = torch.linspace(-3, 3, x, dtype=float)
+        elif isinstance(x, tuple):
+            if len(x) == 3:
+                x = torch.linspace(*x, dtype=float)
+            else:
+                x = torch.arange(*x, dtype=float)
+        elif isinstance(x, np.array):
+            x = torch.tensor(x, dtype=float)
+        elif not isinstance(x, torch.Tensor):
+            msg = f"Unsupported type for argument `x`, got {x}"
+            raise ValueError(msg)
+
+        current_state = None
+        if name is not None:
+            current_state = self.module.state_dict()
+            state, other_func, label_in, label_out = self.snapshots[name]
+            
+            self.module.load_state_dict(state)
+
+            if x_label is None:
+                x_label = label_in
+            if y_label is None:
+                y_label = label_out
+
+        y = self._call_nohook(x)
+        axis.plot(x, y, color=color, color=self.name)
+        for other_func_name in other_func:
+            axis.plot(
+                x,
+                other_func[other_func_name](x),
+                label=other_func_name,
+            )
+        axis.set_xlabel(x_label)
+        axis.set_ylabel(y_label)
+
+        if current_state is not None:
+            self.module.load_state_dict(current_state)
 
 
 class ActivationModule:
@@ -274,18 +305,20 @@ class ActivationModule:
         return names
     
     @classmethod
-    def _get_modules(cls, name=None, group=None):
+    def _get_modules(cls, name=None, group=None, as_dict=False):
         if name is not None and group is not None:
             msg = "Name and group are exclusive"
             raise ValueError(msg)
         
-        if name is None:
+        if group is not None:
             module_names = cls.get_groups(group)
-        elif isinstance(name, list):
-            module_names = name
-        else:
+        elif isinstance(name, str):
             module_names = [name]
+        else:
+            module_names = name
 
+        if as_dict:
+            return {name_: cls._registered_modules[name_] for name_ in module_names}
         return [cls._registered_modules[name] for name in module_names]
 
     @classmethod
@@ -320,24 +353,6 @@ class ActivationModule:
     @classmethod
     def capture(cls, name=None, group=None, snap_name="snapshot_0",
                 other_func=None, returns=False):
-        """
-        Captures a snapshot of every instanciated rational functions and \
-        related in the snapshot_list variable (or returns a list of them if \
-        ``returns=True``).
-
-        Arguments:
-                name (str):
-                    Name of the snapshot.\n
-                    Default ``"snapshot_0"``
-                other_funcs (callable):
-                    another function to be plotted or a list of other callable
-                    functions or a dictionary with the function name as key
-                    and the callable as value.
-                returns (bool):
-                    If ``True``, returns the snapshot.
-                    Otherwise, saves it in self.snapshot_list \n
-                    Default ``False``
-        """
         modules = cls._get_modules(name=name, group=group)
 
         if returns:
@@ -353,7 +368,79 @@ class ActivationModule:
         for module in modules:
             module.capture(name=snap_name, other_func=other_func, returns=False)
 
-    def show(cls, name=None, group=None, snap_name=None, function=False,
+    @classmethod
+    def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
+                      display=False, title=None, axes=None, layout="auto", writer=None,
+                      step=None, colors="#1f77b4", x_label=None, y_label=None):
+        returns = (axes is None) and not display and (writer is None)
+        display = (axes is None) and display and (writer is None)
+        tensorboard = (axes is None) and (writer is not None)
+        
+        modules = cls._get_modules(name, group, as_dict=True)
+        n_modules = len(modules)
+
+        if isinstance(colors, str):
+            colors = {name: colors for name in modules}
+        if not isinstance(x, dict):
+            x = {name: x for name in modules}
+        if not isinstance(x_label, dict):
+            x_label = {name: x_label for name in modules}
+        if not isinstance(y_label, dict):
+            y_label = {name: y_label for name in modules}
+        if not isinstance(snap_name, dict):
+            snap_name = {name: snap_name for name in modules}
+
+        if axes is None:
+            if layout == "auto":
+                layout = _get_auto_axis_layout(n_modules)
+            elif len(layout) != 2:
+                msg = 'layout should be either "auto" or a tuple of size 2'
+                raise ValueError(msg)
+
+            figsize = (layout[1] * 3, layout[0] * 2)
+            try:
+                import seaborn as sns
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+            except ImportError:
+                cls.logger.warn("Could not import seaborn")
+                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+            fig.suptitle(title)
+        
+        if isinstance(axes, plt.Axes):
+            axes = {name: axes for name in modules}
+        else:
+            for ax in axes[n_modules:]:
+                ax.remove()
+            axes = {name: axes[i] for i, name in enumerate(modules)}
+
+        for name, mod in modules.items():
+            mod.show(
+                x=x[name],
+                other_func=other_func,
+                axis=axes[name],
+                color=colors[name],
+                name=snap_name[name],
+                x_label=x_label[name],
+                y_label=y_label[name],
+            )
+
+        if display:
+            fig.legend()
+            fig.tight_layout()
+            fig.show()
+        elif tensorboard:
+            try:
+                writer.add_figure(title, fig, step)
+            except AttributeError as e:
+                msg = f"Could not use given writer to add figure, got {writer}\n"
+                cls.logger.info(msg)
+        elif returns:
+            return fig
+                     
+
+    @classmethod
+    def show(cls, name=None, group=None, snap_name=None, x=None, function=False,
                 inputs=False, gradients=False, animated=False, other_func=None,
                 display=False, title=None, axes=None, layout="auto", writer=None,
                 step=None, colors="#1f77b4"):
