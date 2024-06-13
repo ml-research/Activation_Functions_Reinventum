@@ -10,9 +10,14 @@ from activations.utils.activation_logger import ActivationLogger
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import seaborn as sns
+import io
+import PIL.Image
 import numpy as np
 from termcolor import colored
 from random import randint
+import torchvision.transforms
+
+import os
 
 from activations.torch.utils.histograms_numpy import Histogram, NeuronsHistogram
 
@@ -375,6 +380,7 @@ class ActivationModule:
         returns = (axes is None) and not display and (writer is None)
         display = (axes is None) and display and (writer is None)
         tensorboard = (axes is None) and (writer is not None)
+        ax_title = isinstance(snap_name, dict)
         
         modules = cls._get_modules(name, group, as_dict=True)
         n_modules = len(modules)
@@ -405,7 +411,8 @@ class ActivationModule:
             except ImportError:
                 cls.logger.warn("Could not import seaborn")
                 fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
-            fig.suptitle(title)
+            if title is not None:
+                fig.suptitle(title)
         
         if isinstance(axes, plt.Axes):
             axes = {name: axes for name in modules}
@@ -424,6 +431,8 @@ class ActivationModule:
                 x_label=x_label[name],
                 y_label=y_label[name],
             )
+            if ax_title:
+                axes[name].set_title(snap_name)
 
         if display:
             fig.legend()
@@ -432,7 +441,7 @@ class ActivationModule:
         elif tensorboard:
             try:
                 writer.add_figure(title, fig, step)
-            except AttributeError as e:
+            except AttributeError:
                 msg = f"Could not use given writer to add figure, got {writer}\n"
                 cls.logger.info(msg)
         elif returns:
@@ -442,7 +451,114 @@ class ActivationModule:
     @classmethod
     def show(cls, name=None, group=None, snap_name=None, x=None, function=False,
                 inputs=False, gradients=False, animated=False, other_func=None,
-                display=False, title=None, axes=None, layout="auto", writer=None,
+                display=False, save_to=None, title=None, layout="auto", writer=None,
                 step=None, colors="#1f77b4"):
-        pass  # TODO
+        if not isinstance(snap_name, list):
+            snap_name = [snap_name]
+        if not isinstance(title, list):
+            title = [title] * len(snap_name)
+
+        modules = cls._get_modules(name, group, as_dict=True)
+
+        if layout == "auto":
+            layout = _get_auto_axis_layout(len(modules))
+        figsize = (layout[1] * 3, layout[0] * 2)
+
+        figs = []
+        try:
+            import seaborn as sns
+            use_seaborn = True
+        except ImportError:
+            cls.logger.warn("Could not import seaborn")
+            use_seaborn = False
+
+        for title_, snapshot in zip(title, snap_name):
+            if use_seaborn:
+                with sns.axes_style("whitegrid"):
+                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+            else:
+                fig, axes = plt.subplots(*layout, figsize=figsize)
+            fig.suptitle(title_)
+
+            if function:
+                cls.show_function(
+                    name=name,
+                    group=group,
+                    snap_name=snapshot,
+                    x=x,
+                    other_func=other_func,
+                    display=False,
+                    title=None,
+                    axes=axes,
+                    writer=None,
+                    step=None,
+                    colors=colors,
+                    x_label=None,
+                    y_label=None,
+                )
+
+            if inputs:
+                # TODO
+                ...
+
+            fig.legend()
+            fig.tight_layout()
+            figs.append(fig)
         
+        if animated:
+            images = []
+            buffer = io.BytesIO()
+
+            for fig in figs:
+                buffer.seek(0, whence=0)  # overwrite old buffer data
+                fig.savefig(buffer, format="png")
+                images.append(PIL.Image.open(buffer))
+
+            if save_to is not None:
+                images[0].save(save_to, save_all=True, duration=800, loop=0, append_images=images[1:], optimize=False)
+
+            if writer is not None:
+                vid = torchvision.transforms.ToTensor(images[0])
+                vid_tensor = torch.empty(1, len(images), *vid.shape, dtype=vid.dtype)
+                for i, img in enumerate(images[1:]):
+                    vid_tensor[0, i+1] = torchvision.transforms.ToTensor(img)
+
+                try:
+                    writer.add_video(
+                        tag=title,
+                        vid_tensor=vid_tensor,
+                        global_step=step,
+                        fps=1.25  # 800 ms per frame
+                    )
+                except AttributeError:
+                    msg = f"Could not use given writer to add video, got {writer}"
+                    cls.logger.info(msg)
+            
+            if display:
+                msg = "Cannot show animation, use save_to or writer argument to store animation."
+                cls.logger.info(msg)
+        else:  # no animation
+            if save_to is not None:
+                for i, fig in enumerate(figs):
+                    fig.savefig(os.path.join(save_to, f"figure_{i}.png"))
+
+            if writer is not None:
+                try:
+                    for i, fig in enumerate(figs):
+                        writer.add_figure(
+                            tag=f"{title[i]}_{i}",
+                            figure=fig,
+                            global_step=step,
+                        )
+                except AttributeError:
+                    msg = f"Could not use given writer to add figure, got {writer}"
+                    cls.logger.info(msg)
+
+                if display:
+                    plt.show()
+
+                if (not display) and (writer is None) and (save_to is None):
+                    return figs
+                else:
+                    for fig in figs:
+                        plt.close(fig)
