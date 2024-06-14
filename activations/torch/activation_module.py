@@ -179,6 +179,55 @@ class RegisteredModule:
     def input_range(self, name):
         pass # TODO
 
+    def plot_histogram(self, hist, axis, color=None, label=None, tolerance=0.001):
+        """Wrapper function for :func:`_plot_histogram`."""
+        weights, bins = hist.weights, hist.bins
+        kde_fn = lambda n: None
+        
+        if self.input_retrieval_mode == "neurons":
+            if self.display_mode == "kde":
+                kde_fn = hist.kde
+        else:
+            weights, bins = [weights], [bins]
+            if self.display_mode == "kde":
+                kde_fn = lambda n: hist.kde
+
+        for n, (weights, bins) in enumerate(zip(hist.weights, hist.bins)):
+            weights, bins = _cleared_arrays(weights, bins, tolerance=tolerance)
+            self._plot_hist(
+                weights=weights,
+                bins=bins,
+                axis=axis,
+                kde_fn=kde_fn(n),
+                color=color,
+                label=label,
+            )
+
+    def _plot_histogram(self, weights, bins, axis, kde_fn=None, color=None, label=None):
+        """Plots a histogram on a :obj:``plt.Axes``."""
+        if kde_fn is None:  # display mode 'bar'
+            if len(bins) == len(weights):
+                axis.bar(bins, weights/weights.max(),
+                         linewidth=0, alpha=0.7, label=label)
+            else:
+                axis.bar(bins[1:], weights/weights.max(),
+                         linewidth=0, alpha=0.7, label=label)
+        else:  # display mode 'kde'
+            if len(bins) < 5:
+                msg = msg = f"Too few bins, maybe reduce bin size. Expected at least 5, got {len(bins)}"
+                self.logger.info(msg)
+                return
+
+            x = np.linspace(bins[0], bins[-1], 200)
+            y = kde_fn(x)
+            axis.fill_between(
+                x,
+                y,
+                alpha=0.45,
+                color=color,
+                label=label
+            )
+
     def show_function(self, x, axis, color,
              name="snapshot_0"):
         current_state = None
@@ -406,6 +455,7 @@ class ActivationModule:
             y_label = {name: y_label for name in modules}
 
         if axes is not None:
+            fig = None
             if len(axes) != n_modules:
                 msg = f"Expected one axis for each module, got {len(axes)} axes but {n_modules} modules"
                 raise ValueError(msg)
@@ -492,9 +542,12 @@ class ActivationModule:
             if y_label[name] is not None:
                 axes[name].set_ylabel(y_label)
 
-        if display:
-            fig.legend()
+        if fig is not None:
+            legend = fig.legend(fancybox=True, shadow=True)
+            legend.get_frame().set_alpha(0.4)
             fig.tight_layout()
+
+        if display:
             fig.show()
         elif tensorboard:
             try:
@@ -502,5 +555,5 @@ class ActivationModule:
             except AttributeError:
                 msg = f"Could not use given writer to add figure, got {writer}\n"
                 cls.logger.info(msg)
-        elif returns:
-            return fig
+        
+        return fig
