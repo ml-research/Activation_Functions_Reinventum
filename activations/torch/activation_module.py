@@ -68,19 +68,6 @@ class RegisteredModule:
     def groups(self):
         return self._groups
     
-    @property
-    def use_kde(self):
-        return self.display_mode == "kde"
-    
-    @staticmethod
-    def _increment_snapshot_name(name, snapshots):
-        while name in snapshots:
-            name_ = name.split("_")
-            name_[-1] = f"{int(name_[-1]) + 1}"
-            name = "_".join(name)
-
-        return name
-    
     def set_input_category(self, new_category):
         self._current_x_label = new_category
 
@@ -128,7 +115,6 @@ class RegisteredModule:
         else:
             hist = Histogram(bin_width)
 
-        name = self._increment_snapshot_name(name, self.input_distributions)
         self.input_distributions[name] = (hist, label)
         self._update_axis_labels(name)
 
@@ -154,7 +140,6 @@ class RegisteredModule:
         if label_out is None:
             label_out = f"{self.name}_out_grad"
         
-        name = self._increment_snapshot_name(name, self.input_gradient_distributions)
         self.input_gradient_distributions[name] = (Histogram(bin_width), label_in)
         self.output_gradient_distributions[name] = (Histogram(bin_width), label_out)
 
@@ -169,14 +154,16 @@ class RegisteredModule:
             )
         )
             
-    def capture(self, name="snapshot_0", other_func=None, label=None):
+    def capture(self, name="snapshot_0", other_func=None, label=None, returns=False):
         # self.module.distribution is always None therefore 3rd argument
         # does not influence behaviour
         if label is None:
             label = self.name
         snapshot = (self.module.state_dict(), other_func, label)
         
-        name = self._increment_snapshot_name(name)
+        if returns:
+            return snapshot
+
         self.snapshots[name] = snapshot
 
         self._update_axis_labels(name)
@@ -303,6 +290,7 @@ class RegisteredModule:
 
 class ActivationModule:
     _registered_modules = {}  # {module-name: RegisteredModule}
+    _snapshot_names = []
     count = 0
     _step = 0
     use_multiple_axis = False
@@ -328,7 +316,7 @@ class ActivationModule:
             group = [group]
 
         if name in cls._registered_modules:
-            name = cls._increment_name(f"{name}_0")
+            name = cls._increment_name(f"{name}_0", tuple(cls._registered_modules.keys()))
 
         dist_display_mode = "kde"
         if "bar" in mode:
@@ -356,7 +344,7 @@ class ActivationModule:
         return name
 
     @classmethod
-    def _increment_name(cls, name):
+    def _increment_name(cls, name, blocked_names):
         """Helper method for numerating string.
         
         Args:
@@ -366,7 +354,7 @@ class ActivationModule:
         Returns:
             new_name (str): Name for which no other module is registered.
         """
-        while name in cls._registered_modules:
+        while name in blocked_names:
             name_ = name.split("_")
             name_[-1] = f"{int(name_[-1])+1}"
             name = "_".join(name_)
@@ -404,7 +392,7 @@ class ActivationModule:
         return [cls._registered_modules[name] for name in module_names]
 
     @classmethod
-    def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
+    def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
                          max_saves=1000, bin_width=0.1, mode=None, label=None):
         """Saves inputs of registered modules."""
         modules = cls._get_modules(name=name, group=group, as_dict=True)
@@ -414,17 +402,17 @@ class ActivationModule:
 
         for module in modules:
             module.save_inputs(
-                snap_name=snap_name,
+                name=snap_name,
                 saving=saving,
-                max_saves=max_saves if auto_stop else -1,
+                max_saves=-1 if max_saves is None else max_saves,
                 bin_width=bin_width,
                 mode=mode,
                 label=label[module.name],
             )
 
     @classmethod
-    def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
-                           max_saves=1000, bin_width="auto", mode=None, input_label=None, output_label=None):
+    def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
+                           max_saves=1000, bin_width="auto", input_label=None, output_label=None):
         """Saves gradients of registered modules."""
 
         modules = cls._get_modules(name=name, group=group)
@@ -436,11 +424,10 @@ class ActivationModule:
 
         for module in modules:
             module.save_gradients(
-                snap_name=snap_name,
+                name=snap_name,
                 saving=saving,
-                max_saves=max_saves if auto_stop else -1,
+                max_saves=-1 if max_saves is None else max_saves,
                 bin_width=bin_width,
-                mode=mode,
                 label_in=input_label[module.name],
                 label_out=output_label[module.name],
             )
@@ -462,6 +449,71 @@ class ActivationModule:
 
         for module in modules:
             module.capture(name=snap_name, other_func=other_func, returns=False)
+
+    @classmethod
+    def create_snapshot(cls, name=None, group=None, snap_name="snapshot_0",
+                        other_func=None, max_saves=1000, bin_width="auto", label_in=None,
+                        label_grad_in=None, label_grad_out=None, irm="layer",
+                        function=False, inputs=False, gradients=False):
+        snap_name = cls._increment_name(snap_name, cls._snapshot_names)
+
+        if function:
+            cls.capture(
+                name=name,
+                group=group,
+                snap_name=snap_name,
+                other_func=other_func,
+                returns=False,
+            )
+        if inputs:
+            cls.save_inputs(
+                name=name,
+                group=group,
+                snap_name=snap_name,
+                saving=True,
+                max_saves=max_saves,
+                bin_width=bin_width,
+                mode=irm,
+                label=label_in,
+            )
+        if gradients:
+            cls.save_gradients(
+                name=name,
+                group=group,
+                snap_name=snap_name,
+                saving=True,
+                max_saves=max_saves,
+                bin_width=bin_width,
+                input_label=label_grad_in,
+                output_label=label_grad_out,
+            )
+
+    @classmethod
+    def stop_saving(cls, name=None, group=None, inputs=True, gradients=True):
+        """Stop retrieving inputs/gradients.
+        
+        Removes all forward/backward handles attached to modules.
+        
+        Args:
+            name (str or list(str), optional):
+            group (str or list(str), optional):
+            inputs (bool): If ``True``, stop retrieving inputs.
+            gradients (bool): If ``True``, stop retrieving gradients.
+        """
+        if inputs:
+            cls.save_inputs(
+                name=name,
+                group=group,
+                saving=False,
+            )
+
+        if gradients:
+            cls.save_gradients(
+                name=name,
+                group=group,
+                saving=False,
+            )
+        
 
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
