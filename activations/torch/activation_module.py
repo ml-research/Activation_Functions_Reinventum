@@ -62,19 +62,21 @@ class RegisteredModule:
 
         self.display_mode = mode["dist_display"]
 
+        # axis labels
+        self.axis_labels = OrderedDict()
+        self._current_x_label = None
+        self._current_y_label = None
+
         # function snapshots
         self.snapshots = OrderedDict()
 
         # input distributions
         self.input_retrieval_mode = mode["irm"]
         self.input_distributions = OrderedDict()
-        self.input_labels = OrderedDict()
 
         # gradient distributions
         self.input_gradient_distributions = OrderedDict()
         self.output_gradient_distributions = OrderedDict()
-        self.input_gradient_labels = OrderedDict()
-        self.output_gradient_labels = OrderedDict()
 
         self._grad_handle = None
         self._input_handle = None
@@ -95,6 +97,16 @@ class RegisteredModule:
             name = "_".join(name)
 
         return name
+    
+    def set_input_category(self, new_category):
+        self._current_x_label = new_category
+
+    def set_output_category(self, new_category):
+        self._current_y_label = new_category
+
+    def _update_axis_labels(self, name):
+        if name not in self.axis_labels:
+            self.axis_labels[name] = (self._current_x_label, self._current_y_label)
     
     # needed for compability with Snapshot class
     def numpy(self, *args, **kwargs):
@@ -125,21 +137,23 @@ class RegisteredModule:
         else:
             self.input_retrieval_mode = mode
 
+        if label is None:
+            label = f"{self.name}_inputs"
+
         if mode == "neurons":
             hist = NeuronsHistogram(bin_width)
         else:
             hist = Histogram(bin_width)
 
         name = self._increment_snapshot_name(name, self.input_distributions)
-        self.input_distributions[name] = hist
-        self.input_labels[name] = label
+        self.input_distributions[name] = (hist, label)
+        self._update_axis_labels(name)
 
         self._input_handle = self.module.register_forward_hook(
             _input_hook(
                 self, self.input_distributions[name], max_saves,
             )
         )
-        
 
     def save_gradients(self, name, saving=True, max_saves=-1,
                        bin_width="auto", label_in=None, label_out=None):
@@ -152,12 +166,16 @@ class RegisteredModule:
         if self._handle_grads is not None:
             return
         
+        if label_in is None:
+            label_in = f"{self.name}_in_grad"
+        if label_out is None:
+            label_out = f"{self.name}_out_grad"
+        
         name = self._increment_snapshot_name(name, self.input_gradient_distributions)
-        self.input_gradient_distributions[name] = Histogram(bin_width)
-        self.output_gradient_distributions[name] = Histogram(bin_width)
+        self.input_gradient_distributions[name] = (Histogram(bin_width), label_in)
+        self.output_gradient_distributions[name] = (Histogram(bin_width), label_out)
 
-        self.input_gradient_labels[name] = label_in
-        self.output_gradient_labels[name] = label_out
+        self._update_axis_labels(name)
 
         self._grad_handle = self.register_full_backward_hook(
             _gradient_hook(
@@ -168,13 +186,17 @@ class RegisteredModule:
             )
         )
             
-    def capture(self, name="snapshot_0", other_func=None, label_in=None, label_out=None):
+    def capture(self, name="snapshot_0", other_func=None, label=None):
         # self.module.distribution is always None therefore 3rd argument
         # does not influence behaviour
-        snapshot = (self.module.state_dict(), other_func, label_in, label_out)
+        if label is None:
+            label = self.name
+        snapshot = (self.module.state_dict(), other_func, label)
         
         name = self._increment_snapshot_name(name)
         self.snapshots[name] = snapshot
+
+        self._update_axis_labels(name)
 
     def input_range(self, name):
         pass # TODO
@@ -228,30 +250,72 @@ class RegisteredModule:
                 label=label
             )
 
-    def show_function(self, x, axis, color,
-             name="snapshot_0"):
+    def show_function(self, x, axis, color, name="snapshot_0"):
         current_state = None
         if name is not None:
             current_state = self.module.state_dict()
-            state, other_func, label_in, label_out = self.snapshots[name]
+            state, other_func, label = self.snapshots[name]
             
             self.module.load_state_dict(state)
 
         y = self._call_nohook(x)
-        axis.plot(x, y, color=color, color=self.name)
+        axis.plot(x, y, color=color, color=self.name, label=label)
         for other_func_name in other_func:
             axis.plot(
                 x,
                 other_func[other_func_name](x),
                 label=other_func_name,
             )
-        if label_in is not None:
-            axis.set_xlabel(label_in)
-        if label_out is not None:
-            axis.set_ylabel(label_out)
+        
+        if name in self.axis_labels:
+            x_label, y_label = self.axis_labels[name]
+            axis.set_xlabel(x_label)
+            axis.set_ylabel(y_label)
 
         if current_state is not None:
             self.module.load_state_dict(current_state)
+
+    def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+        if name is None:
+            hist, label = next(reversed(self.input_distributions.values()))  # last element
+        else:
+            hist, label = self.input_distributions[name]
+
+        self.plot_histogram(
+            hist=hist,
+            axis=axis,
+            color=color,
+            label=label,
+            tolerance=tolerance
+        )
+
+    def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+        if name is None:
+            hist, label = next(reversed(self.input_gradient_distributions.values()))
+        else:
+            hist, label = self.input_gradient_distributions[name]
+
+        self.plot_histogram(
+            hist=hist,
+            axis=axis,
+            color=color,
+            label=label,
+            tolerance=tolerance
+        )
+
+    def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+        if name is None:
+            hist, label = next(reversed(self.output_gradient_distributions.values()))
+        else:
+            hist, label = self.output_gradient_distributions[name]
+
+        self.plot_histogram(
+            hist=hist,
+            axis=axis,
+            color=color,
+            label=label,
+            tolerance=tolerance
+        )
 
 
 class ActivationModule:
@@ -342,7 +406,7 @@ class ActivationModule:
         return names
     
     @classmethod
-    def _get_modules(cls, name=None, group=None, as_dict=False):
+    def _get_modules(cls, name=None, group=None):
         if name is not None and group is not None:
             msg = "Name and group are exclusive"
             raise ValueError(msg)
@@ -354,37 +418,48 @@ class ActivationModule:
         else:
             module_names = name
 
-        if as_dict:
-            return {name_: cls._registered_modules[name_] for name_ in module_names}
         return [cls._registered_modules[name] for name in module_names]
 
     @classmethod
     def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
-                         max_saves=1000, bin_width=0.1, mode=None, input_label=None):
+                         max_saves=1000, bin_width=0.1, mode=None, label=None):
         """Saves inputs of registered modules."""
-        for module in cls._get_modules(name=name, group=group):
+        modules = cls._get_modules(name=name, group=group, as_dict=True)
+
+        if not isinstance(label, dict):
+            label = {module.name: label for module in modules}
+
+        for module in modules:
             module.save_inputs(
                 snap_name=snap_name,
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
                 bin_width=bin_width,
                 mode=mode,
-                label=input_label,
+                label=label[module.name],
             )
 
     @classmethod
     def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True, auto_stop=False,
                            max_saves=1000, bin_width="auto", mode=None, input_label=None, output_label=None):
         """Saves gradients of registered modules."""
-        for module in cls._get_modules(name=name, group=group):
+
+        modules = cls._get_modules(name=name, group=group)
+
+        if not isinstance(input_label, dict):
+            input_label = {module.name: input_label for module in modules}
+        if not isinstance(output_label, dict):
+            input_label = {module.name: output_label for module in modules}
+
+        for module in modules:
             module.save_gradients(
                 snap_name=snap_name,
                 saving=saving,
                 max_saves=max_saves if auto_stop else -1,
                 bin_width=bin_width,
                 mode=mode,
-                label_in=input_label,
-                label_out=output_label,
+                label_in=input_label[module.name],
+                label_out=output_label[module.name],
             )
         
     @classmethod
@@ -409,7 +484,7 @@ class ActivationModule:
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
                       step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False,
-                      inputs=False, gradients=False, x_mode="expand"):
+                      inputs=False, gradients_input=False, gradients_output=False, x_mode="expand", tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001):
         """Create figure of multiple modules for one snapshot.
         
         Creates a figure with one subplot for each module. Each module can only be plotted for a single snapshot,
@@ -424,7 +499,10 @@ class ActivationModule:
             display (bool):
             title (str):
             axes (list(plt.Axes)):
-            layout (str or tuple):
+            layout ("auto" or tuple(n_rows, n_cols)): Determines the `subplot layout`_. If ``layout=="auto"``
+                the number of rows and columns is determined automatically. Otherwise ``n_rows*n_cols``
+                should be greater than number of modules to plot or equal to 1, in which case all modules
+                will be plotted in single plot.
             writer ():
             step ():
             colors (str or dict(str, str)):
@@ -435,24 +513,27 @@ class ActivationModule:
                 * ``"expand"``: Always expand to greatest range.
                 * ``"clip"``: Always clip to smallest range.
                 Defaults to ``"expand"``.
+
+
+            .. _subplot layout:
+                https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
         """
-        returns = (axes is None) and not display and (writer is None)
         display = (axes is None) and display and (writer is None)
         tensorboard = (axes is None) and (writer is not None)
         
-        modules = cls._get_modules(name, group, as_dict=True)
+        modules = cls._get_modules(name, group)
         n_modules = len(modules)
 
         if isinstance(snap_name, str):
-            snap_name = {name: snap_name for name in modules}
+            snap_name = {module.name: snap_name for module in modules}
         if isinstance(colors, str):
-            colors = {name: colors for name in modules}
+            colors = {module.name: colors for module in modules}
         if not isinstance(x, dict):
-            x = {name: x for name in modules}
+            x = {module.name: x for module in modules}
         if not isinstance(x_label, dict):
-            x_label = {name: x_label for name in modules}
+            x_label = {module.name: x_label for module in modules}
         if not isinstance(y_label, dict):
-            y_label = {name: y_label for name in modules}
+            y_label = {module.name: y_label for module in modules}
 
         if axes is not None:
             fig = None
@@ -463,7 +544,7 @@ class ActivationModule:
             if layout == "auto":
                 layout = _get_auto_axis_layout(n_modules)
             elif len(layout) != 2:
-                msg = 'layout should be either "auto" or a tuple of size 2'
+                msg = 'layout should be either "auto", "together" or a tuple of size 2'
                 raise ValueError(msg)
 
             figsize = (layout[1] * 3, layout[0] * 2)
@@ -478,14 +559,15 @@ class ActivationModule:
                 fig.suptitle(title)
         
         if isinstance(axes, plt.Axes):
-            axes = {name: axes for name in modules}
+            axes = {module.name: axes for module in modules}
         else:
             for ax in axes[n_modules:]:
                 ax.remove()
-            axes = {name: axes[i] for i, name in enumerate(modules)}
+            axes = {module.name: axes[i] for i, module in enumerate(modules)}
 
-        for name, mod in modules.items():
-            x_ = x[name]
+        for module in modules:
+            x_ = x[module.name]
+            axis = axes[module.name]
 
             min_x1, max_x1 = None, None
             if (x_ is None) and (not inputs):
@@ -503,8 +585,28 @@ class ActivationModule:
 
             min_x2, max_x2 = None, None
             if inputs:
-                min_x2, max_x2 = mod.input_range(name=snap_name[name])
-                mod.show_inputs()
+                min_x2, max_x2 = module.input_range(name=snap_name[module.name])
+                module.show_inputs(
+                    axis=axis,
+                    color=colors[module.name],
+                    name=snap_name[module.name],
+                    tolerance=tol_in,
+                )
+
+            if gradients_input:
+                module.show_input_gradients(
+                    axis=axis,
+                    color=colors[module.name],
+                    name=snap_name[module.name],
+                    tolerance=tol_grad_in,
+                )
+            if gradients_output:
+                module.show_output_gradients(
+                    axis=axis,
+                    color=colors[module.name],
+                    name=snap_name[module.name],
+                    tolerance=tol_grad_out,
+                )    
 
             if (min_x2 is not None) and (min_x1 is not None):
                 if x_mode == "expand":
@@ -517,30 +619,30 @@ class ActivationModule:
                     msg = f"Invalid value for `x_mode`, got {x_mode}"
                     raise ValueError(msg)
 
-            mod.show_function(
+            module.show_function(
                 x=x_,
                 other_func=other_func,
-                axis=axes[name],
-                color=colors[name],
-                name=snap_name[name],
+                axis=axis,
+                color=colors[module.name],
+                name=snap_name[module.name],
             )
 
             if other_func is not None:
                 for other_func_name in other_func:
-                    axes[name].plot(
+                    axis.plot(
                         x_,
                         other_func[other_func_name](x_),
                         label=other_func_name,
                     )
             
-            axes[name].set_xlim((min_x, max_x))
+            axis.set_xlim((min_x, max_x))
 
             if ax_title:
-                axes[name].set_title(snap_name)
-            if x_label[name] is not None:
-                axes[name].set_xlabel(x_label)
-            if y_label[name] is not None:
-                axes[name].set_ylabel(y_label)
+                axis.set_title(snap_name)
+            if x_label[module.name] is not None:
+                axis.set_xlabel(x_label)
+            if y_label[module.name] is not None:
+                axis.set_ylabel(y_label)
 
         if fig is not None:
             legend = fig.legend(fancybox=True, shadow=True)
@@ -557,3 +659,74 @@ class ActivationModule:
                 cls.logger.info(msg)
         
         return fig
+    
+    @classmethod
+    def export_evolution_graphs(cls, path, name=None, group=None, snap_names=None, layout="auto", video_writer=None, step=None, tag=None, **kwargs):
+        """Creates an animation of plots over multiple `snapshots`.
+        
+        Args:
+            path (str or pathlike): File to save animation to.
+            snap_names (list(str) or list(dict(str, str))): All snapshots to animate over.
+                Each element should be accepted by :func:``~activation_module.ActivationModule.show_function``.
+            layout (str or tuple):
+            video_writer ():
+            step ():
+            tag (str):
+            kwargs: Keyword arguments passed to :func:``~activation_module.ActivationModule.show_function``.
+                If ``axes`` is passed as ``kwarg``, it is ignored.
+        """
+        if len(snap_names) == 1:
+            msg = "At least 2 snapshots must be given, got 1"
+            raise ValueError(msg)
+        
+        kwargs["axes"] = None
+
+        n_modules = len(cls._get_modules(name=name, group=group))
+        if layout == "auto":
+            layout = _get_auto_axis_layout(n_modules)
+
+        figsize = (layout[1] * 3, layout[0] * 2)
+        try:
+            import seaborn as sns
+            with sns.axes_style("whitegrid"):
+                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+        except ImportError:
+            cls.logger.warn("Could not import seaborn")
+            fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+
+        images = []
+        buffer = io.BytesIO()
+        for snap_name in snap_names:
+            fig.clf()  # clear figure
+            cls.show_function(
+                name=name,
+                group=group,
+                layout=None,
+                axes=axes,
+                snap_name=snap_name,
+                step=step,
+                **kwargs
+            )
+
+            buffer.seek(0, whence=0)  # overwrite old buffer data
+            fig.savefig(buffer, format="png")
+            images.append(PIL.Image.open(buffer))
+
+        images[0].save(path, save_all=True, duration=800, loop=0, append_images=images[1:], optimize=False)
+
+        if video_writer is not None:
+            vid = torchvision.transforms.ToTensor(images[0])
+            vid_tensor = torch.empty(1, len(images), *vid.shape, dtype=vid.dtype)
+            for i, img in enumerate(images[1:]):
+                vid_tensor[0, i+1] = torchvision.transforms.ToTensor(img)
+
+            try:
+                video_writer.add_video(
+                    tag=tag,
+                    vid_tensor=vid_tensor,
+                    global_step=step,
+                    fps=1.25  # 800 ms per frame
+                )
+            except AttributeError:
+                msg = f"Could not use given writer to add video, got {video_writer}"
+                cls.logger.info(msg)
