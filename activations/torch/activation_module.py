@@ -1,4 +1,5 @@
 import io
+import copy
 from collections import OrderedDict
 
 import torch
@@ -120,7 +121,7 @@ class RegisteredModule:
 
         self._input_handle = self.module.register_forward_hook(
             _input_hook(
-                self, self.input_distributions[name], max_saves,
+                self, self.input_distributions[name][0], max_saves,
             )
         )
 
@@ -132,7 +133,7 @@ class RegisteredModule:
             self._grad_handle = None
             return
         
-        if self._handle_grads is not None:
+        if self._grad_handle is not None:
             return
         
         if label_in is None:
@@ -145,11 +146,11 @@ class RegisteredModule:
 
         self._update_axis_labels(name)
 
-        self._grad_handle = self.register_full_backward_hook(
+        self._grad_handle = self.module.register_full_backward_hook(
             _gradient_hook(
                 self,
-                self.input_gradient_distributions[-1],
-                self.output_gradient_distributions[-1],
+                self.input_gradient_distributions[name][0],
+                self.output_gradient_distributions[name][0],
                 max_saves,
             )
         )
@@ -159,7 +160,7 @@ class RegisteredModule:
         # does not influence behaviour
         if label is None:
             label = self.name
-        snapshot = (self.module.state_dict(), other_func, label)
+        snapshot = (copy.deepcopy(self.module.state_dict()), other_func, label)
         
         if returns:
             return snapshot
@@ -222,20 +223,19 @@ class RegisteredModule:
 
     def show_function(self, x, axis, color, name="snapshot_0"):
         current_state = None
+        label = self.name
         if name is not None:
-            current_state = self.module.state_dict()
+            current_state = copy.deepcopy(self.module.state_dict())
             state, other_func, label = self.snapshots[name]
+
+            if other_func is not None:
+                for other_func_name in other_func:
+                    axis.plot(x, other_func(x), label=other_func_name)
             
             self.module.load_state_dict(state)
 
         y = self._call_nohook(x)
         axis.plot(x, y, color=color, label=label)
-        for other_func_name in other_func:
-            axis.plot(
-                x,
-                other_func[other_func_name](x),
-                label=other_func_name,
-            )
         
         if name in self.axis_labels:
             x_label, y_label = self.axis_labels[name]
@@ -395,7 +395,7 @@ class ActivationModule:
     def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
                          max_saves=1000, bin_width=0.1, mode=None, label=None):
         """Saves inputs of registered modules."""
-        modules = cls._get_modules(name=name, group=group, as_dict=True)
+        modules = cls._get_modules(name=name, group=group)
 
         if not isinstance(label, dict):
             label = {module.name: label for module in modules}
@@ -420,7 +420,7 @@ class ActivationModule:
         if not isinstance(input_label, dict):
             input_label = {module.name: input_label for module in modules}
         if not isinstance(output_label, dict):
-            input_label = {module.name: output_label for module in modules}
+            output_label = {module.name: output_label for module in modules}
 
         for module in modules:
             module.save_gradients(
@@ -560,7 +560,7 @@ class ActivationModule:
         modules = cls._get_modules(name, group)
         n_modules = len(modules)
 
-        if isinstance(snap_name, str):
+        if not isinstance(snap_name, dict):
             snap_name = {module.name: snap_name for module in modules}
         if isinstance(colors, str):
             colors = {module.name: colors for module in modules}
@@ -573,7 +573,7 @@ class ActivationModule:
         
         if axes is not None:
             fig = None
-            if len(axes) != n_modules:
+            if not isinstance(axes, plt.Axes) and (len(axes) != n_modules):
                 msg = f"Expected one axis for each module, got {len(axes)} axes but {n_modules} modules"
                 raise ValueError(msg)
         else:
@@ -607,16 +607,16 @@ class ActivationModule:
 
             min_x1, max_x1 = None, None
             if (x_ is None) and (not inputs):
-                x_ = torch.arange(-3, 3, 0.01, dtype=float)
-                min_x1, max_x1 = -3., 3., 600
+                x_ = torch.arange(-3, 3, 0.01)
+                min_x1, max_x1 = -3., 3.
             if isinstance(x_, int):
-                x_ = torch.linspace(-3, 3, x_, dtype=float)
+                x_ = torch.linspace(-3, 3, x_)
                 min_x1, max_x1 = -3., 3.
             elif isinstance(x_, tuple):
-                x_ = torch.linspace(*x_, dtype=float)
-                min_x1, max_x1 = x_
+                min_x1, max_x1 = x_[0], x_[1]
+                x_ = torch.linspace(*x_)
             elif not isinstance(x_, torch.Tensor):
-                x_ = torch.tensor(x_, dtype=float)
+                x_ = torch.tensor(x_)
                 min_x1, max_x1 = torch.min(x_), torch.max(x_)
 
             min_x2, max_x2 = None, None
@@ -654,11 +654,15 @@ class ActivationModule:
                 else:
                     msg = f"Invalid value for `x_mode`, got {x_mode}"
                     raise ValueError(msg)
+            if min_x2 is None:
+                min_x, max_x = min_x1, max_x2
+            else:
+                min_x, max_x = min_x2, max_x2
+                
 
             if function:
                 module.show_function(
                     x=x_,
-                    other_func=other_func,
                     axis=axis,
                     color=colors[module.name],
                     name=snap_name[module.name],
@@ -717,8 +721,6 @@ class ActivationModule:
         if len(snap_names) == 1:
             msg = "At least 2 snapshots must be given, got 1"
             raise ValueError(msg)
-        
-        kwargs["axes"] = None
 
         n_modules = len(cls._get_modules(name=name, group=group))
         if layout == "auto":
@@ -747,7 +749,7 @@ class ActivationModule:
                 **kwargs
             )
 
-            buffer.seek(0, whence=0)  # overwrite old buffer data
+            buffer.seek(0, 0)  # overwrite old buffer data
             fig.savefig(buffer, format="png")
             images.append(PIL.Image.open(buffer))
 
