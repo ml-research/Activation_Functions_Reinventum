@@ -1,33 +1,16 @@
-from dataclasses import dataclass
-
-import torch.linalg
-import torch
-import torch.nn.functional as F
-from activations.utils.find_init_weights import find_weights
-from activations.utils.utils import _get_auto_axis_layout, _cleared_arrays
-from activations.utils.warnings import RationalImportScipyWarning
-from activations.utils.activation_logger import ActivationLogger
-from collections import OrderedDict
-import matplotlib.pyplot as plt
-import seaborn as sns
 import io
+from collections import OrderedDict
+
+import torch
+import matplotlib.pyplot as plt
 import PIL.Image
 import numpy as np
-from termcolor import colored
-from random import randint
 import torchvision.transforms
 
-import os
-
 from activations.torch.utils.histograms_numpy import Histogram, NeuronsHistogram
+from activations.utils.utils import _get_auto_axis_layout, _cleared_arrays
+from activations.utils.activation_logger import ActivationLogger
 
-
-
-def create_colors(n):
-    colors = []
-    for i in range(n):
-        colors.append('#%06X' % randint(0, 0xFFFFFF))
-    return colors
 
 
 def _input_hook(registered_module, histogram, max_saves):
@@ -484,7 +467,8 @@ class ActivationModule:
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
                       step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False,
-                      inputs=False, gradients_input=False, gradients_output=False, x_mode="expand", tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001):
+                      inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
+                      tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, **fig_kw):
         """Create figure of multiple modules for one snapshot.
         
         Creates a figure with one subplot for each module. Each module can only be plotted for a single snapshot,
@@ -513,14 +497,14 @@ class ActivationModule:
                 * ``"expand"``: Always expand to greatest range.
                 * ``"clip"``: Always clip to smallest range.
                 Defaults to ``"expand"``.
+            tol_in, tol_grad_in, tol_grad_out (float):
+            save_to (str): 
+            fig_kw: Keyword arguments passed to :func:``matplotlib.pyplot.plt.subplots``. If ``axes is not None`` ignored.
 
 
             .. _subplot layout:
                 https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
         """
-        display = (axes is None) and display and (writer is None)
-        tensorboard = (axes is None) and (writer is not None)
-        
         modules = cls._get_modules(name, group)
         n_modules = len(modules)
 
@@ -534,7 +518,7 @@ class ActivationModule:
             x_label = {module.name: x_label for module in modules}
         if not isinstance(y_label, dict):
             y_label = {module.name: y_label for module in modules}
-
+        
         if axes is not None:
             fig = None
             if len(axes) != n_modules:
@@ -649,15 +633,17 @@ class ActivationModule:
             legend.get_frame().set_alpha(0.4)
             fig.tight_layout()
 
-        if display:
-            fig.show()
-        elif tensorboard:
-            try:
-                writer.add_figure(title, fig, step)
-            except AttributeError:
-                msg = f"Could not use given writer to add figure, got {writer}\n"
-                cls.logger.info(msg)
-        
+            if save_to is not None:
+                fig.savefig(save_to, dpi="figure")
+            if writer is not None:
+                try:
+                    writer.add_figure(title, fig, step)
+                except AttributeError:
+                    msg = f"Could not use given writer to add figure, got {writer}\n"
+                    cls.logger.info(msg)
+            if display:
+                fig.show()
+
         return fig
     
     @classmethod
@@ -673,7 +659,7 @@ class ActivationModule:
             step ():
             tag (str):
             kwargs: Keyword arguments passed to :func:``~activation_module.ActivationModule.show_function``.
-                If ``axes`` is passed as ``kwarg``, it is ignored.
+                * `Kwarg` ``axes`` is ignored.
         """
         if len(snap_names) == 1:
             msg = "At least 2 snapshots must be given, got 1"
