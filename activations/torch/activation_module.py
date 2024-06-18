@@ -229,7 +229,7 @@ class RegisteredModule:
             self.module.load_state_dict(state)
 
         y = self._call_nohook(x)
-        axis.plot(x, y, color=color, color=self.name, label=label)
+        axis.plot(x, y, color=color, label=label)
         for other_func_name in other_func:
             axis.plot(
                 x,
@@ -518,7 +518,7 @@ class ActivationModule:
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
-                      step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False,
+                      step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False, function=False,
                       inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
                       tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, **fig_kw):
         """Create figure of multiple modules for one snapshot.
@@ -587,10 +587,10 @@ class ActivationModule:
             try:
                 import seaborn as sns
                 with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True, **fig_kw)
             except ImportError:
                 cls.logger.warn("Could not import seaborn")
-                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
+                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True, **fig_kw)
             if title is not None:
                 fig.suptitle(title)
         
@@ -655,13 +655,14 @@ class ActivationModule:
                     msg = f"Invalid value for `x_mode`, got {x_mode}"
                     raise ValueError(msg)
 
-            module.show_function(
-                x=x_,
-                other_func=other_func,
-                axis=axis,
-                color=colors[module.name],
-                name=snap_name[module.name],
-            )
+            if function:
+                module.show_function(
+                    x=x_,
+                    other_func=other_func,
+                    axis=axis,
+                    color=colors[module.name],
+                    name=snap_name[module.name],
+                )
 
             if other_func is not None:
                 for other_func_name in other_func:
