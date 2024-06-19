@@ -22,7 +22,7 @@ def _input_hook(registered_module, histogram, max_saves):
         histogram.fill_n(input[0])
         n_saves[0] += 1
         if max_saves > 0 and n_saves[0] >= max_saves:
-            registered_module.save_inputs(saving=False)
+            registered_module.save_inputs(name=None, saving=False)
     return hook
 
 
@@ -33,7 +33,7 @@ def _gradient_hook(registered_module, histogram_input, histogram_output, max_sav
         histogram_output.fill_n(out_grad[0])
         n_saves[0] += 1
         if max_saves > 0 and n_saves[0] >= max_saves:
-            registered_module.save_gradients(saving=False)
+            registered_module.save_gradients(name=None, saving=False)
     return hook
 
 
@@ -101,6 +101,7 @@ class RegisteredModule:
             return
         
         if self._input_handle is not None:  # already retrieving inputs
+            self.logger.info("Already retrieving inputs")
             return
         
         if mode is None:
@@ -134,6 +135,7 @@ class RegisteredModule:
             return
         
         if self._grad_handle is not None:
+            self.logger.info("Already retrieving inputs")
             return
         
         if label_in is None:
