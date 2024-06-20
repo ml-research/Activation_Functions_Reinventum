@@ -3,11 +3,19 @@ import scipy.stats as sts
 
 
 
+def get_bin_size(min, max):
+    """Computes the number `x` such that `x` fits `100` times into `max - min`."""
+    dist = 1/int(1/(max - min))
+    bin_size = dist * 0.01
+
+    return bin_size
+
+
 class Histogram:
     def __init__(self, bin_size=None, device="cpu"):
         if bin_size is None:
             self.auto_bin_size = True
-            self.bin_size = 0.0001
+            self.bin_size = None
         else:
             self.auto_bin_size = False
             self.bin_size = bin_size
@@ -20,12 +28,12 @@ class Histogram:
 
     def fill_n(self, input):
         input = input.to(self.bins)  # cast to correct dtype/device
-        left_edge, right_edge = input.min(), input.max() + self.bin_size/2
 
         if self.auto_bin_size:
-            self.bin_size = self.get_bin_size(left_edge, right_edge)
+            self.bin_size = get_bin_size(input.min(), input.max())
             self.auto_bin_size = False
 
+        left_edge, right_edge = min, max + self.bin_size/2
         if len(self.bins) > 0:
             left_edge = torch.minimum(left_edge, self.bins[0])
             right_edge = torch.maximum(right_edge, self.bins[-1])
@@ -45,22 +53,8 @@ class Histogram:
             new_counts[idx0:idx1+1] += self.counts
             self.counts = new_counts
         self.bins = new_bins
-
-    def get_bin_size(min, max):
-        """Computes the number `x` such that `x` fits `100` times into `max - min`."""
-        dist = 1/int(1/(max - min))
-        bin_size = dist * 0.01
-
-        return bin_size
     
     def kde(self, bw_method=0.13797296614612148):
         return sts.gaussian_kde(self.bins, bw_method=bw_method, weights=self.weights).pdf
-    
-
-class NeuronsHistogram(Histogram):
-    def __init__(self, bin_size="auto", device="cpu"):
-        super().__init__(bin_size, device)
-
-
 
     
