@@ -179,7 +179,7 @@ class RegisteredModule:
         weights, bins = hist.weights, hist.bins
         kde_fn = lambda n: None
         
-        if self.input_retrieval_mode == "neurons":
+        if isinstance(hist, NeuronsHistogram):
             if self.display_mode == "kde":
                 kde_fn = hist.kde
         else:
@@ -189,7 +189,7 @@ class RegisteredModule:
 
         for n, (weights, bins) in enumerate(zip(hist.weights, hist.bins)):
             weights, bins = _cleared_arrays(weights, bins, tolerance=tolerance)
-            self._plot_hist(
+            self._plot_histogram(
                 weights=weights,
                 bins=bins,
                 axis=axis,
@@ -301,14 +301,17 @@ class ActivationModule:
     logger = ActivationLogger(f"ActivationModule")
 
     @classmethod
-    def register(cls, module, name, mode="kde_neurons", group=None, logger=None):
+    def register(cls, module, name, display_mode="kde", irm="layer", group=None, logger=None):
         """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
         
         Args:
             module (torch.nn.Module):
             name (str): If name already exists an incrementing integer will be appended.
-            mode (str, optional): The mode in which input will be retrieved/plotted. For example
-                ``'bar_neurons'`` will create a bar plot for each neuron in layer.
+            display_mode (str): Whether to display histogram as bar-plot (``display_mode='bar'``)
+                or density function ``display_mode='kde'``.
+            irm (str): The mode in which input will be retrieved. Can be `layer` or `neurons`. 
+                ``irm='layer'`` will create a histogram of all inputs. ``irm='neurons' will create ``N`` seperate histograms
+                for input with shape `Nx...`.
             group (hashable or list of hashables, optional): Group(s) to assign ``module`` to. 
             
         Returns:
@@ -319,24 +322,14 @@ class ActivationModule:
 
         if name in cls._registered_modules:
             name = cls._increment_name(f"{name}_0", tuple(cls._registered_modules.keys()))
-
-        dist_display_mode = "kde"
-        if "bar" in mode:
-            dist_display_mode = "bar"
-        elif "points" in mode:
-            dist_display_mode = "points"
-
-        input_retrieval_mode = "neurons"
-        if "neurons" not in input_retrieval_mode:
-            input_retrieval_mode = "normal"
         
         cls._registered_modules[name] = RegisteredModule(
             name=name,
             module=module,
             groups=group,
             mode={
-                "dist_display": dist_display_mode,
-                "irm": input_retrieval_mode, 
+                "dist_display": display_mode,
+                "irm": irm, 
             },
             logger=cls.logger if logger is None else logger,
         )
