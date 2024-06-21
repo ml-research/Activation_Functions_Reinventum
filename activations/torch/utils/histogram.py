@@ -11,6 +11,22 @@ def get_bin_size(min, max):
     return bin_size
 
 
+def get_bin_edges(left_edge, right_edge, min, max, bin_size):
+    if min < left_edge:
+        n = int((left_edge - min) / bin_size) + 1
+        left_edge = left_edge - n*bin_size
+        if left_edge + bin_size <= min:
+            left_edge += bin_size
+
+    if max > right_edge:
+        n = int((max - right_edge) / bin_size) + 1
+        right_edge = right_edge + n*bin_size
+        if right_edge - bin_size >= max:
+            right_edge -= bin_size
+
+    return left_edge, right_edge
+
+
 class NeuronsHistogram:
     def __init__(self, bin_size=None, device="cpu"):
         if bin_size is None:
@@ -35,15 +51,25 @@ class NeuronsHistogram:
         return [self.counts[n] / self.counts[n].sum() for n in range(self.n_neurons)]
 
     def _fill_n(self, n, input):
-        left_edge, right_edge = input.min(), input.max() + self.bin_size/2
-        if len(self.bins) > 0:
-            left_edge = torch.minimum(left_edge, self.bins[n][0])
-            right_edge = torch.maximum(right_edge, self.bins[n][-1])
+        if len(self.bins[n]) == 0:
+            left_edge = torch.floor(input.min() / self.bin_size) * self.bin_size
+            right_edge = torch.ceil(input.max() / self.bin_size) * self.bin_size
+        else:
+            left_edge, right_edge = get_bin_edges(
+                self.bins[n][0],
+                self.bins[n][1],
+                input.min(),
+                input.max(),
+                self.bin_size,
+            )
 
-        new_bins = torch.arange(left_edge, right_edge, self.bin_size, device=self.device)
-        new_counts = torch.histogram(input, self.bins[n], density=False).hist
+        n_bins = int(torch.round((right_edge - left_edge) / self.bin_size).item())  # round for numerical stability
+        new_bins = torch.linspace(left_edge, right_edge, n_bins + 1, device=self.device)
+        new_counts = torch.histc(input, n_bins, min=left_edge, max=right_edge)
 
-        if len(new_counts) == len(self.counts):  # no new bins added
+        if len(self.counts[n]) == 0:
+            self.counts[n] = new_counts
+        elif len(new_counts) == len(self.counts):  # no new bins added
             self.counts[n] += new_counts
         else:  # find indices to insert `self.counts`
             m = len(self.bins[n])  # len(self.bins) <= len(bins)
@@ -90,3 +116,9 @@ class Histogram(NeuronsHistogram):
         return super().kde(0, bw_method)
         
     
+
+if __name__ == "__main__":
+    hist = NeuronsHistogram(0.1)
+
+    data = torch.rand(1, 10)
+    hist.fill_n(data)
