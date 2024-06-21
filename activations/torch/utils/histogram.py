@@ -95,7 +95,12 @@ class NeuronsHistogram:
             self._fill_n(n, input[n].view(-1))
     
     def kde(self, n, bw_method=0.13797296614612148):
-        return sts.gaussian_kde(self.bins[n], bw_method=bw_method, weights=self.weights[n]).pdf
+        return sts.gaussian_kde(self.bins[n][:-1], bw_method=bw_method, weights=self.weights[n]).pdf
+    
+    def get_bin_edges(self):
+        left_edge = min([self.bins[n][0] for n in range(self.n_neurons)])
+        right_edge = max([self.bins[n][-1] for n in range(self.n_neurons)])
+        return left_edge, right_edge
 
     
 class Histogram(NeuronsHistogram):
@@ -112,13 +117,5 @@ class Histogram(NeuronsHistogram):
     def weights(self):
         return super().weights[0]
     
-    def kde(self, n, bw_method=0.13797296614612148):
+    def kde(self, n=None, bw_method=0.13797296614612148):
         return super().kde(0, bw_method)
-        
-    
-
-if __name__ == "__main__":
-    hist = NeuronsHistogram(0.1)
-
-    data = torch.rand(1, 10)
-    hist.fill_n(data)

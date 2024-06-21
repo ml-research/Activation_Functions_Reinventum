@@ -172,7 +172,9 @@ class RegisteredModule:
         self._update_axis_labels(name)
 
     def input_range(self, name):
-        pass # TODO
+        hist, _ = self.input_distributions[name]
+        left_edge, right_edge = hist.get_bin_edges()
+        return left_edge, right_edge
 
     def plot_histogram(self, hist, axis, color=None, label=None, tolerance=0.001):
         kde_fn = lambda n: None
@@ -505,7 +507,6 @@ class ActivationModule:
                 group=group,
                 saving=False,
             )
-        
 
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
