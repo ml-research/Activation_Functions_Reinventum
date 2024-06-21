@@ -1,20 +1,13 @@
-import glob
 from pathlib import Path
-import airspeed
 from setuptools import setup, find_packages
 from distutils.command.clean import clean
-from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-from torch.cuda import is_available as torch_cuda_available
-from activations import __version__
-import os
 
 
 
 degrees = [(5, 4), (7, 6)]
 name='activation-functions'
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+long_description = ""
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.readlines()
@@ -33,7 +26,7 @@ class clean_all(clean):
 
 setup(
     name=name,
-    version=__version__,
+    version=1,
     author="Quentin Delfosse, Patrick Schramowski",
     author_email="quentin.delfosse@cs.tu-darmstadt.de",
     description="Activations functions",
@@ -53,8 +46,6 @@ setup(
     install_requires=requirements,
     ext_modules= [],
     cmdclass={
-        'build_ext': BuildExtension,
         'clean': clean_all
     },
-    setup_requires=['airspeed'],
     python_requires='>=3.5.0',)

@@ -8,9 +8,9 @@ import PIL.Image
 import numpy as np
 import torchvision.transforms
 
-from activations.torch.utils.histograms_numpy import Histogram, NeuronsHistogram
-from activations.utils.utils import _get_auto_axis_layout, _cleared_arrays
-from activations.utils.activation_logger import ActivationLogger
+import activations.torch.utils.histogram as histogram
+from activations.utils.utils import _get_auto_axis_layout
+# from activations.utils.activation_logger import ActivationLogger
 
 
 
@@ -93,7 +93,7 @@ class RegisteredModule:
         return self.module.forward(*args, **kwargs)
     
     def save_inputs(self, name, saving=True, max_saves=-1,
-                    bin_width=0.1, mode=None, label=None):
+                    bin_width=None, mode=None, label=None):
         if not saving:
             self.logger.info("Not retrieving input anymore")
             self._input_handle.remove()
@@ -113,9 +113,9 @@ class RegisteredModule:
             label = f"{self.name}_inputs"
 
         if mode == "neurons":
-            hist = NeuronsHistogram(bin_width)
+            hist = histogram.NeuronsHistogram(bin_width)
         else:
-            hist = Histogram(bin_width)
+            hist = histogram.Histogram(bin_width)
 
         self.input_distributions[name] = (hist, label)
         self._update_axis_labels(name)
@@ -127,7 +127,7 @@ class RegisteredModule:
         )
 
     def save_gradients(self, name, saving=True, max_saves=-1,
-                       bin_width="auto", label_in=None, label_out=None):
+                       bin_width=None, label_in=None, label_out=None):
         if not saving:
             self.logger.warn("Not retrieving gradients anymore")
             self._grad_handle.remove()
@@ -143,8 +143,8 @@ class RegisteredModule:
         if label_out is None:
             label_out = f"{self.name}_out_grad"
         
-        self.input_gradient_distributions[name] = (Histogram(bin_width), label_in)
-        self.output_gradient_distributions[name] = (Histogram(bin_width), label_out)
+        self.input_gradient_distributions[name] = (histogram.Histogram(bin_width), label_in)
+        self.output_gradient_distributions[name] = (histogram.Histogram(bin_width), label_out)
 
         self._update_axis_labels(name)
 
@@ -176,36 +176,45 @@ class RegisteredModule:
         left_edge, right_edge = hist.get_bin_edges()
         return left_edge, right_edge
 
-    def plot_histogram(self, hist, axis, color=None, label=None, tolerance=0.001):
+    def plot_histogram(self, name, histograms, axis, color=None, tolerance=0.001):
+        if name is None:
+            hist, label = next(reversed(histograms.values()))  # last element
+        else:
+            hist, label = histograms[name]
+
+        if hist.is_empty():
+            return
+
         kde_fn = lambda n: None
-        if isinstance(hist, NeuronsHistogram):
+        if type(hist) == histogram.NeuronsHistogram:
+            weights, bins = hist.weights, hist.bins
             if self.display_mode == "kde":
                 kde_fn = hist.kde
         else:
-            weights, bins = [weights], [bins]
+            weights, bins = [hist.weights], hist.bins
             if self.display_mode == "kde":
                 kde_fn = lambda n: hist.kde
 
-        for n, (weights, bins) in enumerate(zip(hist.weights, hist.bins)):
-            weights, bins = _cleared_arrays(weights[n], bins[n], tolerance=tolerance)
+        for n, (w, b) in enumerate(zip(weights, bins)):
+            filtered_idxs = histogram.filter_weights(w, tolerance)
+            w = w[filtered_idxs]
+            b = b[filtered_idxs]
+
             self._plot_histogram(
-                weights=weights,
-                bins=bins,
+                weights=w,
+                bins=b,
+                bin_size=hist.bin_size,
                 axis=axis,
                 kde_fn=kde_fn(n),
                 color=color,
                 label=label,
             )
 
-    def _plot_histogram(self, weights, bins, axis, kde_fn=None, color=None, label=None):
+    def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, color=None, label=None):
         """Plots a histogram on a :obj:``plt.Axes``."""
         if kde_fn is None:  # display mode 'bar'
-            if len(bins) == len(weights):
-                axis.bar(bins, weights/weights.max(),
-                         linewidth=0, alpha=0.7, label=label)
-            else:
-                axis.bar(bins[1:], weights/weights.max(),
-                         linewidth=0, alpha=0.7, label=label)
+            axis.bar(bins, weights, linewidth=0,
+                     alpha=0.7, label=label, align="edge", width=bin_size)
         else:  # display mode 'kde'
             if len(bins) < 5:
                 msg = msg = f"Too few bins, maybe reduce bin size. Expected at least 5, got {len(bins)}"
@@ -247,44 +256,29 @@ class RegisteredModule:
             self.module.load_state_dict(current_state)
 
     def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001):
-        if name is None:
-            hist, label = next(reversed(self.input_distributions.values()))  # last element
-        else:
-            hist, label = self.input_distributions[name]
-
         self.plot_histogram(
-            hist=hist,
+            name=name,
+            histograms=self.input_distributions,
             axis=axis,
             color=color,
-            label=label,
             tolerance=tolerance
         )
 
     def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
-        if name is None:
-            hist, label = next(reversed(self.input_gradient_distributions.values()))
-        else:
-            hist, label = self.input_gradient_distributions[name]
-
         self.plot_histogram(
-            hist=hist,
+            name=name,
+            histograms=self.input_gradient_distributions,
             axis=axis,
             color=color,
-            label=label,
             tolerance=tolerance
         )
 
     def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
-        if name is None:
-            hist, label = next(reversed(self.output_gradient_distributions.values()))
-        else:
-            hist, label = self.output_gradient_distributions[name]
-
         self.plot_histogram(
-            hist=hist,
+            name=name,
+            histograms=self.output_gradient_distributions,
             axis=axis,
             color=color,
-            label=label,
             tolerance=tolerance
         )
 
@@ -297,7 +291,9 @@ class ActivationModule:
     use_multiple_axis = False
     distribution_display_mode = "kde"
     histograms_colors = ["red", "green", "black"]
-    logger = ActivationLogger(f"ActivationModule")
+    # logger = ActivationLogger(f"ActivationModule")
+    logger = type("TMP", (), {"info": lambda msg: print(msg), "warn": lambda msg: print(msg)})
+    _plotting_style = {}
 
     @classmethod
     def get_plotting_style(cls):
@@ -413,7 +409,7 @@ class ActivationModule:
 
     @classmethod
     def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
-                         max_saves=1000, bin_width=0.1, mode=None, label=None):
+                         max_saves=1000, bin_width=None, mode=None, label=None):
         """Saves inputs of registered modules."""
         modules = cls._get_modules(name=name, group=group)
 
@@ -432,7 +428,7 @@ class ActivationModule:
 
     @classmethod
     def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
-                           max_saves=1000, bin_width="auto", input_label=None, output_label=None):
+                           max_saves=1000, bin_width=None, input_label=None, output_label=None):
         """Saves gradients of registered modules."""
 
         modules = cls._get_modules(name=name, group=group)
@@ -472,7 +468,7 @@ class ActivationModule:
 
     @classmethod
     def create_snapshot(cls, name=None, group=None, snap_name="snapshot_0",
-                        other_func=None, max_saves=1000, bin_width="auto", label_in=None,
+                        other_func=None, max_saves=1000, bin_width=None, label_in=None,
                         label_grad_in=None, label_grad_out=None, irm="layer",
                         function=False, inputs=False, gradients=False):
         snap_name = cls._increment_name(snap_name, cls._snapshot_names)
@@ -563,10 +559,11 @@ class ActivationModule:
             colors (str or dict(str, str)):
             x_label, y_label (str or dict(str, str)):
             ax_title (bool):
-            x_mode (str): Determines how x axis range is expanded/clipped based
-                on given x range (see :param:``x``) and input range. One of ``"expand", "clip"``.
-                * ``"expand"``: Always expand to greatest range.
-                * ``"clip"``: Always clip to smallest range.
+            x_mode (str): Determines how x axis range is determined between given :param:``x`` and range of input.
+                Can be one of ``'expand', 'clip', 'x'``:
+                * ``'expand'``: Always expand to greatest range.
+                * ``'clip``: Always clip to smallest range.
+                * ``'x'``: Use only :param:``x``.
                 Defaults to ``"expand"``.
             tol_in, tol_grad_in, tol_grad_out (float):
             save_to (str): 
@@ -576,6 +573,12 @@ class ActivationModule:
             .. _subplot layout:
                 https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
         """
+        if x_mode not in ["expand", "clip", "x"]:
+            msg = f"Invalid x_mode, got {x_mode}"
+            raise ValueError(msg)
+        if (not inputs):
+            x_mode = "x"
+
         modules = cls._get_modules(name, group)
         n_modules = len(modules)
 
@@ -658,21 +661,19 @@ class ActivationModule:
                     tolerance=tol_grad_out,
                 )    
 
-            if (min_x2 is not None) and (min_x1 is not None):
+            if (x_mode == "x") or (min_x2 is None):
+                min_x = min_x1
+                max_x = max_x1
+            elif (min_x2 is not None) and (min_x1 is not None):
                 if x_mode == "expand":
                     min_x = min(min_x1, min_x2)
                     max_x = max(max_x1, max_x2)
                 elif x_mode == "clip":
                     min_x = max(min_x1, min_x2)
                     max_x = min(max_x1, max_x2)
-                else:
-                    msg = f"Invalid value for `x_mode`, got {x_mode}"
-                    raise ValueError(msg)
-            if min_x2 is None:
-                min_x, max_x = min_x1, max_x2
-            else:
-                min_x, max_x = min_x2, max_x2
-                
+            elif min_x1 is None:
+                min_x = min_x2
+                max_x = max_x2
 
             if function:
                 module.show_function(
