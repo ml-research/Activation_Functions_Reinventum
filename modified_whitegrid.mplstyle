@@ -25,5 +25,4 @@ axes.spines.right : True
 axes.spines.top : True
 xtick.bottom : False
 ytick.left : False
-text.usetex : True
 legend.fontsize : 14
