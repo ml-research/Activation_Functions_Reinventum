@@ -175,10 +175,7 @@ class RegisteredModule:
         pass # TODO
 
     def plot_histogram(self, hist, axis, color=None, label=None, tolerance=0.001):
-        """Wrapper function for :func:`_plot_histogram`."""
-        weights, bins = hist.weights, hist.bins
         kde_fn = lambda n: None
-        
         if isinstance(hist, NeuronsHistogram):
             if self.display_mode == "kde":
                 kde_fn = hist.kde
@@ -188,7 +185,7 @@ class RegisteredModule:
                 kde_fn = lambda n: hist.kde
 
         for n, (weights, bins) in enumerate(zip(hist.weights, hist.bins)):
-            weights, bins = _cleared_arrays(weights, bins, tolerance=tolerance)
+            weights, bins = _cleared_arrays(weights[n], bins[n], tolerance=tolerance)
             self._plot_histogram(
                 weights=weights,
                 bins=bins,
