@@ -300,6 +300,32 @@ class ActivationModule:
     logger = ActivationLogger(f"ActivationModule")
 
     @classmethod
+    def get_plotting_style(cls):
+        return {}.update(cls._plotting_style)  # copy to prevent modifications
+
+    @classmethod
+    def set_plotting_style(cls, path=None, rc_params=None):
+        """Set the used ``matplotlib`` style.
+         
+        This method will only modify the `rc_params` in local scope.
+         
+        Args:
+            path (str or pathlike, optional): Path to file containing ``rcparam, value`` pairs (seperated by colon) on each line.
+            rc_params (dict(str, str), optional): ``rcparams`` to use. Will overwrite existing ``rcparams`` in ``path``.
+        """
+        params = {}
+        if path is not None:
+            with open(path, "rt") as f:
+                for line in f.readlines():
+                    key, value = line.split(":")
+                    params[key.strip(" ")] = value.strip(" ").strip("\n")
+
+        if rc_params is not None:
+            params.update(rc_params)
+
+        cls._plotting_style = params
+
+    @classmethod
     def register(cls, module, name, display_mode="kde", irm="layer", group=None, logger=None):
         """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
         
@@ -577,12 +603,7 @@ class ActivationModule:
                 raise ValueError(msg)
 
             figsize = (layout[1] * 3, layout[0] * 2)
-            try:
-                import seaborn as sns
-                with sns.axes_style("whitegrid"):
-                    fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True, **fig_kw)
-            except ImportError:
-                cls.logger.warn("Could not import seaborn")
+            with plt.rc_context(rc=cls._plotting_style):
                 fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True, **fig_kw)
             if title is not None:
                 fig.suptitle(title)
@@ -720,12 +741,7 @@ class ActivationModule:
             layout = _get_auto_axis_layout(n_modules)
 
         figsize = (layout[1] * 3, layout[0] * 2)
-        try:
-            import seaborn as sns
-            with sns.axes_style("whitegrid"):
-                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
-        except ImportError:
-            cls.logger.warn("Could not import seaborn")
+        with plt.rc_context(rc=cls._plotting_style):
             fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
 
         images = []
