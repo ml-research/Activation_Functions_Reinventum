@@ -189,11 +189,11 @@ class RegisteredModule:
         if type(hist) == histogram.NeuronsHistogram:
             weights, bins = hist.weights, hist.bins
             if self.display_mode == "kde":
-                kde_fn = hist.kde
+                kde_fn = hist.kde()
         else:
             weights, bins = [hist.weights], hist.bins
             if self.display_mode == "kde":
-                kde_fn = lambda n: hist.kde
+                kde_fn = lambda n: hist.kde()
 
         for n, (w, b) in enumerate(zip(weights, bins)):
             filtered_idxs = histogram.filter_weights(w, tolerance)

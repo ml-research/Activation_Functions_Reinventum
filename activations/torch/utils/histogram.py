@@ -123,4 +123,4 @@ class Histogram(NeuronsHistogram):
         return super().weights[0]
     
     def kde(self, bw_method=0.13797296614612148):
-        return super().kde(0, bw_method)
+        return sts.gaussian_kde(self.bins[0][:-1], bw_method=bw_method, weights=self.weights).pdf
