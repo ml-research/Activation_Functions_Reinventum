@@ -621,12 +621,14 @@ class ActivationModule:
         for module in modules:
             x_ = x[module.name]
             axis = axes[module.name]
+            if inputs or gradients_input or gradients_output:
+                twin_x = axis.twinx()
 
             min_x1, max_x1 = None, None
-            if (x_ is None) and (not inputs):
-                x_ = torch.arange(-3, 3, 0.01)
+            if x_ is None:
+                x_ = torch.linspace(-3., 3., 100)
                 min_x1, max_x1 = -3., 3.
-            if isinstance(x_, int):
+            elif isinstance(x_, int):
                 x_ = torch.linspace(-3, 3, x_)
                 min_x1, max_x1 = -3., 3.
             elif isinstance(x_, tuple):
@@ -640,7 +642,7 @@ class ActivationModule:
             if inputs:
                 min_x2, max_x2 = module.input_range(name=snap_name[module.name])
                 module.show_inputs(
-                    axis=axis,
+                    axis=twin_x,
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_in,
@@ -648,14 +650,14 @@ class ActivationModule:
 
             if gradients_input:
                 module.show_input_gradients(
-                    axis=axis,
+                    axis=twin_x,
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_in,
                 )
             if gradients_output:
                 module.show_output_gradients(
-                    axis=axis,
+                    axis=twin_x,
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_out,
@@ -719,7 +721,8 @@ class ActivationModule:
         return fig
     
     @classmethod
-    def export_evolution_graphs(cls, path, name=None, group=None, snap_names=None, layout="auto", video_writer=None, step=None, tag=None, **kwargs):
+    def export_evolution_graphs(cls, path, name=None, group=None, snap_names=None, layout="auto", video_writer=None, step=None, tag=None,
+                                function=True, inputs=False, gradients_input=False, gradients_output=False, **kwargs):
         """Creates an animation of plots over multiple `snapshots`.
         
         Args:
@@ -742,13 +745,11 @@ class ActivationModule:
             layout = _get_auto_axis_layout(n_modules)
 
         figsize = (layout[1] * 3, layout[0] * 2)
-        with plt.rc_context(rc=cls._plotting_style):
-            fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
 
         images = []
-        buffer = io.BytesIO()
         for snap_name in snap_names:
-            fig.clf()  # clear figure
+            with plt.rc_context(rc=cls._plotting_style):
+                fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True)
             cls.show_function(
                 name=name,
                 group=group,
@@ -756,14 +757,22 @@ class ActivationModule:
                 axes=axes,
                 snap_name=snap_name,
                 step=step,
+                function=function,
+                inputs=inputs,
+                gradients_input=gradients_input,
+                gradients_output=gradients_output,
                 **kwargs
             )
 
-            buffer.seek(0, 0)  # overwrite old buffer data
+            buffer = io.BytesIO()
+            fig.legend()
+            fig.tight_layout()
             fig.savefig(buffer, format="png")
+            buffer.seek(0, 0)
             images.append(PIL.Image.open(buffer))
+            plt.close(fig)
 
-        images[0].save(path, save_all=True, duration=800, loop=0, append_images=images[1:], optimize=False)
+        images[0].save(path, save_all=True, duration=800, loop=0, append_images=images[1:], format="GIF")
 
         if video_writer is not None:
             vid = torchvision.transforms.ToTensor(images[0])

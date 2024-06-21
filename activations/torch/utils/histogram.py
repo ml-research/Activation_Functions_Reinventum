@@ -107,7 +107,7 @@ class NeuronsHistogram:
         return left_edge, right_edge
     
     def is_empty(self):
-        return (self.bins is None) or (sum(map(len, self.bins)))
+        return (self.bins is None) or (sum(map(len, self.bins)) == 0)
 
     
 class Histogram(NeuronsHistogram):
