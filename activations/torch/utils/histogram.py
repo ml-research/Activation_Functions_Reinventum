@@ -76,7 +76,7 @@ class NeuronsHistogram:
         elif len(new_counts) == len(self.counts[n]):  # no new bins added
             self.counts[n] += new_counts
         else:  # find indices to insert `self.counts`
-            idx = (self.bins[n][0] >= new_bins).nonzero()[0].item()
+            idx = torch.isclose(self.bins[n][0], new_bins, atol=self.bin_size/10).nonzero()[0].item()
             new_counts[idx:idx + len(self.bins[n]) - 1] += self.counts[n]
             self.counts[n] = new_counts
 
