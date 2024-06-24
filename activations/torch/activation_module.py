@@ -605,7 +605,7 @@ class ActivationModule:
                 msg = 'layout should be either "auto", "together" or a tuple of size 2'
                 raise ValueError(msg)
 
-            figsize = (layout[1] * 3, layout[0] * 2)
+            figsize = (layout[1] * 6, layout[0] * 4)
             with plt.rc_context(rc=cls._plotting_style):
                 fig, axes = plt.subplots(*layout, figsize=figsize, squeeze=True, **fig_kw)
             if title is not None:
