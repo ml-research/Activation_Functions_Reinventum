@@ -2,7 +2,7 @@
 **/*.pyc
 .vscode
 *.ipynb
-example.py
+#example.py
 debug.py
 
 # Byte-compiled / optimized / DLL files
