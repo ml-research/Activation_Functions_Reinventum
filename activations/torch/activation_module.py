@@ -744,7 +744,7 @@ class ActivationModule:
         if layout == "auto":
             layout = _get_auto_axis_layout(n_modules)
 
-        figsize = (layout[1] * 3, layout[0] * 2)
+        figsize = (layout[1] * 6, layout[0] * 4)
 
         images = []
         for snap_name in snap_names:
