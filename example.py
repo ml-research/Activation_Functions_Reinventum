@@ -78,5 +78,5 @@ if __name__ == "__main__":
     ActivationModule.export_evolution_graphs(
         name="actfn", path=r"test.gif",
         snap_names=[f"epoch_{i}" for i in range(6)],
-        inputs=True, function=True, gradients_input=True, gradients_output=True,
+        inputs=True, function=True, gradients_input=False, gradients_output=False,
     )
