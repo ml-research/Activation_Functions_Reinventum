@@ -171,7 +171,7 @@ class RegisteredModule:
         left_edge, right_edge = hist.get_bin_edges()
         return left_edge, right_edge
 
-    def plot_histogram(self, name, histograms, axis, color=None, tolerance=0.001, use_kde=False):
+    def plot_histogram(self, name, histograms, axis, tolerance=0.001, use_kde=False):
         if name is None:
             hist, label = next(reversed(histograms.values()))  # last element
         else:
@@ -201,11 +201,10 @@ class RegisteredModule:
                 bin_size=hist.bin_size,
                 axis=axis,
                 kde_fn=kde_fn(n),
-                color=color,
                 label=label,
             )
 
-    def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, color=None, label=None):
+    def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, label=None):
         """Plots a histogram on a :obj:``plt.Axes``."""
         if kde_fn is None:  # display mode 'bar'
             axis.bar(bins, weights, linewidth=0,
@@ -222,11 +221,10 @@ class RegisteredModule:
                 x,
                 y,
                 alpha=0.45,
-                color=color,
                 label=label
             )
 
-    def show_function(self, x, axis, color, name="snapshot_0"):
+    def show_function(self, x, axis, name="snapshot_0"):
         current_state = None
         label = self.name
         if name is not None:
@@ -240,7 +238,7 @@ class RegisteredModule:
             self.module.load_state_dict(state)
 
         y = self._call_nohook(x)
-        axis.plot(x, y, color=color, label=label)
+        axis.plot(x, y, label=label)
         
         if name in self.axis_labels:
             x_label, y_label = self.axis_labels[name]
@@ -308,7 +306,7 @@ class ActivationModule:
         return {}.update(cls._plotting_style)  # copy to prevent modifications
 
     @classmethod
-    def set_plotting_style(cls, path=None, rc_params=None):
+    def set_plotting_style(cls, path=None, rc_params=None, update=False):
         """Set the used ``matplotlib`` style.
          
         This method will only modify the `rc_params` in local scope.
@@ -316,6 +314,7 @@ class ActivationModule:
         Args:
             path (str or pathlike, optional): Path to file containing ``rcparam, value`` pairs (seperated by colon) on each line.
             rc_params (dict(str, str), optional): ``rcparams`` to use. Will overwrite existing ``rcparams`` in ``path``.
+            update (bool): If ``True``, only update existing `rc_params`.
         """
         params = {}
         if path is not None:
@@ -327,7 +326,10 @@ class ActivationModule:
         if rc_params is not None:
             params.update(rc_params)
 
-        cls._plotting_style = params
+        if update:
+            cls._plotting_style.update(params)
+        else:
+            cls._plotting_style = params
 
     @classmethod
     def register(cls, module, name, group=None, logger=None):
@@ -532,7 +534,7 @@ class ActivationModule:
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
-                      step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False, function=False,
+                      step=None, x_label=None, y_label=None, ax_title=False, function=False,
                       inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
                       tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, use_kde=False, **fig_kw):
         """Create figure of multiple modules for one snapshot.
@@ -555,7 +557,6 @@ class ActivationModule:
                 will be plotted in single plot.
             writer ():
             step ():
-            colors (str or dict(str, str)):
             x_label, y_label (str or dict(str, str)):
             ax_title (bool):
             x_mode (str): Determines how x axis range is determined between given :param:``x`` and range of input.
@@ -584,8 +585,6 @@ class ActivationModule:
 
         if not isinstance(snap_name, dict):
             snap_name = {module.name: snap_name for module in modules}
-        if isinstance(colors, str):
-            colors = {module.name: colors for module in modules}
         if not isinstance(x, dict):
             x = {module.name: x for module in modules}
         if not isinstance(x_label, dict):
@@ -643,7 +642,6 @@ class ActivationModule:
                 min_x2, max_x2 = module.input_range(name=snap_name[module.name])
                 module.show_inputs(
                     axis=twin_x,
-                    color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_in,
                     use_kde=use_kde,
@@ -652,7 +650,6 @@ class ActivationModule:
             if gradients_input:
                 module.show_input_gradients(
                     axis=twin_x,
-                    color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_in,
                     use_kde=use_kde,
@@ -660,7 +657,6 @@ class ActivationModule:
             if gradients_output:
                 module.show_output_gradients(
                     axis=twin_x,
-                    color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_out,
                     use_kde=use_kde,
@@ -684,7 +680,6 @@ class ActivationModule:
                 module.show_function(
                     x=x_,
                     axis=axis,
-                    color=colors[module.name],
                     name=snap_name[module.name],
                 )
 
