@@ -1,34 +1,46 @@
-from activations.torch.activation_module import ActivationModule
+import torch.nn as nn
 import torch.nn.functional as F
 from torch import sin
 
+from activations.torch.activation_module import ActivationModule
 
-class ReLU(ActivationModule):
-    def __init__(self, *args, **kwargs):
-        self.function = F.relu
-        super().__init__(self.function, *args, **kwargs)
 
-class LReLU(ActivationModule):
-    def __init__(self, *args, **kwargs):
-        self.function = F.leaky_relu
-        super().__init__(self.function, *args, **kwargs)
 
-class Tanh(ActivationModule):
-    def __init__(self, device):
-        self.function = F.tanh
-        super().__init__(self.function, device)
+class _Base(nn.Module):
+    def __init__(self, function, name, group, logger=None):
+        self.function = function
+        ActivationModule.register(self, name=name, group=group, logger=None)
 
-class Sigmoid(ActivationModule):
-    def __init__(self, device):
-        self.function = F.sigmoid
-        super().__init__(self.function, device)
+    def forward(self, *args, **kwargs):
+        return self.function(*args, **kwargs)
 
-class GLU(ActivationModule):
-    def __init__(self, device, dim=-1):
-        self.function = F.glu
-        super().__init__(self.function, device)
 
-class OneSin(ActivationModule):
-    def __init__(self, *args, **kwargs):
-        self.function = lambda x: (x+1>0).float() * (x-1<0).float() * sin(x*3.141592653589793)
-        super().__init__(self.function, *args, **kwargs)
+class ReLU(_Base):
+    def __init__(self, name, group, logger=None):
+        super().__init__(F.relu, name, group, logger)
+
+
+class LReLU(_Base):
+    def __init__(self, name, group, logger=None):
+        super().__init__(F.leaky_relu, name, group, logger)
+
+
+class Tanh(_Base):
+    def __init__(self, name, group, logger=None):
+        super().__init__(F.tanh, name, group, logger)
+
+
+class Sigmoid(_Base):
+    def __init__(self, name, group, logger=None):
+        super().__init__(F.sigmoid, name, group, logger)
+
+
+class GLU(_Base):
+    def __init__(self, name, group, logger=None):
+        super().__init__(F.glu, name, group, logger)
+
+
+class OneSin(_Base):
+    def __init__(self, name, group, logger=None):
+        function = lambda x: (x+1>0).float() * (x-1<0).float() * sin(x*3.141592653589793)
+        super().__init__(function, name, group, logger)
