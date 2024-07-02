@@ -10,7 +10,7 @@ import torchvision.transforms
 
 import activations.torch.utils.histogram as histogram
 from activations.utils.utils import _get_auto_axis_layout
-# from activations.utils.activation_logger import ActivationLogger
+from activations.utils.activation_logger import ActivationLogger
 
 
 
@@ -291,9 +291,12 @@ class ActivationModule:
     use_multiple_axis = False
     distribution_display_mode = "kde"
     histograms_colors = ["red", "green", "black"]
-    # logger = ActivationLogger(f"ActivationModule")
-    logger = type("TMP", (), {"info": lambda msg: print(msg), "warn": lambda msg: print(msg)})
+    logger = ActivationLogger(f"ActivationModule")
     _plotting_style = {}
+
+    @classmethod
+    def set_logger(cls, logger):
+        cls.logger = logger
 
     @classmethod
     def get_plotting_style(cls):
