@@ -75,6 +75,9 @@ class RegisteredModule:
     def _update_axis_labels(self, name):
         if name not in self.axis_labels:
             self.axis_labels[name] = (self._current_x_label, self._current_y_label)
+
+    def _has_snapshot(self, name):
+        return name in self.axis_labels
     
     # needed for compability with Snapshot class
     def numpy(self, *args, **kwargs):
@@ -387,10 +390,12 @@ class ActivationModule:
             group = [group]
 
         _groups = set(group)
-        names = tuple(filter(
-            lambda name: not set(cls._registered_modules[name].groups).isdisjoint(_groups),
-            cls._registered_modules.keys()
-        ))
+        names = tuple(
+            filter(
+                lambda name: not set(cls._registered_modules[name].groups).isdisjoint(_groups),
+                cls._registered_modules.keys()
+            )
+        )
         return names
     
     @classmethod
@@ -407,6 +412,22 @@ class ActivationModule:
             module_names = name
 
         return [cls._registered_modules[name] for name in module_names]
+    
+    @classmethod
+    def get_snapshots(cls, name=None, group=None):
+        """Return all shared snapshots in order.
+
+        Returns:
+            snapshots (list(str)): Snapshots that are common to all given modules.
+        """
+        modules = cls._get_modules(name=name, group=group)
+
+        snapshots = [
+            snapshot for snapshot in cls._snapshot_names
+            if len(filter(lambda x: x._has_snapshot(snapshot), modules)) == len(modules)
+        ]
+
+        return snapshots
 
     @classmethod
     def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
