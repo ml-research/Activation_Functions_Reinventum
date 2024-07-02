@@ -38,13 +38,11 @@ def _gradient_hook(registered_module, histogram_input, histogram_output, max_sav
 
 
 class RegisteredModule:
-    def __init__(self, name, module, groups, mode, logger):
+    def __init__(self, name, module, groups, logger):
         self.name = name
         self._groups = groups
         self.module = module
         self.logger = logger
-
-        self.display_mode = mode["dist_display"]
 
         # axis labels
         self.axis_labels = OrderedDict()
@@ -55,7 +53,6 @@ class RegisteredModule:
         self.snapshots = OrderedDict()
 
         # input distributions
-        self.input_retrieval_mode = mode["irm"]
         self.input_distributions = OrderedDict()
 
         # gradient distributions
@@ -105,9 +102,7 @@ class RegisteredModule:
             return
         
         if mode is None:
-            mode = self.input_retrieval_mode
-        else:
-            self.input_retrieval_mode = mode
+            mode = ActivationModule._default_irm
 
         if label is None:
             label = f"{self.name}_inputs"
@@ -176,7 +171,7 @@ class RegisteredModule:
         left_edge, right_edge = hist.get_bin_edges()
         return left_edge, right_edge
 
-    def plot_histogram(self, name, histograms, axis, color=None, tolerance=0.001):
+    def plot_histogram(self, name, histograms, axis, color=None, tolerance=0.001, use_kde=False):
         if name is None:
             hist, label = next(reversed(histograms.values()))  # last element
         else:
@@ -188,11 +183,11 @@ class RegisteredModule:
         kde_fn = lambda n: None
         if type(hist) == histogram.NeuronsHistogram:
             weights, bins = hist.weights, hist.bins
-            if self.display_mode == "kde":
+            if use_kde:
                 kde_fn = hist.kde()
         else:
             weights, bins = [hist.weights], hist.bins
-            if self.display_mode == "kde":
+            if use_kde:
                 kde_fn = lambda n: hist.kde()
 
         for n, (w, b) in enumerate(zip(weights, bins)):
@@ -255,48 +250,58 @@ class RegisteredModule:
         if current_state is not None:
             self.module.load_state_dict(current_state)
 
-    def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+    def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_distributions,
             axis=axis,
             color=color,
-            tolerance=tolerance
+            tolerance=tolerance,
+            use_kde=use_kde,
         )
 
-    def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+    def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_gradient_distributions,
             axis=axis,
             color=color,
-            tolerance=tolerance
+            tolerance=tolerance,
+            use_kde=use_kde,
         )
 
-    def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001):
+    def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.output_gradient_distributions,
             axis=axis,
             color=color,
-            tolerance=tolerance
+            tolerance=tolerance,
+            use_kde=use_kde
         )
 
 
 class ActivationModule:
     _registered_modules = {}  # {module-name: RegisteredModule}
     _snapshot_names = []
-    count = 0
+    _count = 0
     _step = 0
-    use_multiple_axis = False
-    distribution_display_mode = "kde"
-    histograms_colors = ["red", "green", "black"]
-    logger = ActivationLogger(f"ActivationModule")
+    _logger = ActivationLogger(f"ActivationModule")
     _plotting_style = {}
+    _default_irm = "layer"
+
+    @classmethod
+    def default_irm(cls, irm=None):
+        if irm is None:
+            return cls._default_irm
+        
+        if not irm in ["layer", "neurons"]:
+            raise ValueError(f"Unsupported irm, got {irm}")
+        cls._default_irm = irm
 
     @classmethod
     def set_logger(cls, logger):
-        cls.logger = logger
+        cls._logger = logger
 
     @classmethod
     def get_plotting_style(cls):
@@ -325,17 +330,12 @@ class ActivationModule:
         cls._plotting_style = params
 
     @classmethod
-    def register(cls, module, name, display_mode="kde", irm="layer", group=None, logger=None):
+    def register(cls, module, name, group=None, logger=None):
         """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
         
         Args:
             module (torch.nn.Module):
             name (str): If name already exists an incrementing integer will be appended.
-            display_mode (str): Whether to display histogram as bar-plot (``display_mode='bar'``)
-                or density function ``display_mode='kde'``.
-            irm (str): The mode in which input will be retrieved. Can be `layer` or `neurons`. 
-                ``irm='layer'`` will create a histogram of all inputs. ``irm='neurons' will create ``N`` seperate histograms
-                for input with shape `Nx...`.
             group (hashable or list of hashables, optional): Group(s) to assign ``module`` to. 
             
         Returns:
@@ -351,14 +351,10 @@ class ActivationModule:
             name=name,
             module=module,
             groups=group,
-            mode={
-                "dist_display": display_mode,
-                "irm": irm, 
-            },
-            logger=cls.logger if logger is None else logger,
+            logger=cls._logger if logger is None else logger,
         )
 
-        cls.count += 1
+        cls._count += 1
 
         return name
 
@@ -538,7 +534,7 @@ class ActivationModule:
                       display=False, title=None, axes=None, layout="auto", writer=None,
                       step=None, colors="#1f77b4", x_label=None, y_label=None, ax_title=False, function=False,
                       inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
-                      tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, **fig_kw):
+                      tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, use_kde=False, **fig_kw):
         """Create figure of multiple modules for one snapshot.
         
         Creates a figure with one subplot for each module. Each module can only be plotted for a single snapshot,
@@ -570,6 +566,7 @@ class ActivationModule:
                 Defaults to ``"expand"``.
             tol_in, tol_grad_in, tol_grad_out (float):
             save_to (str): 
+            use_kde (bool):
             fig_kw: Keyword arguments passed to :func:``matplotlib.pyplot.plt.subplots``. If ``axes is not None`` ignored.
 
 
@@ -649,6 +646,7 @@ class ActivationModule:
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_in,
+                    use_kde=use_kde,
                 )
 
             if gradients_input:
@@ -657,6 +655,7 @@ class ActivationModule:
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_in,
+                    use_kde=use_kde,
                 )
             if gradients_output:
                 module.show_output_gradients(
@@ -664,6 +663,7 @@ class ActivationModule:
                     color=colors[module.name],
                     name=snap_name[module.name],
                     tolerance=tol_grad_out,
+                    use_kde=use_kde,
                 )    
 
             if (x_mode == "x") or (min_x2 is None):
@@ -717,7 +717,7 @@ class ActivationModule:
                     writer.add_figure(title, fig, step)
                 except AttributeError:
                     msg = f"Could not use given writer to add figure, got {writer}\n"
-                    cls.logger.info(msg)
+                    cls._logger.info(msg)
             if display:
                 fig.show()
 
@@ -792,4 +792,4 @@ class ActivationModule:
                 )
             except AttributeError:
                 msg = f"Could not use given writer to add video, got {video_writer}"
-                cls.logger.info(msg)
+                cls._logger.info(msg)
