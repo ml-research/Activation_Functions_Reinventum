@@ -31,7 +31,7 @@ class Model(nn.Module):
 if __name__ == "__main__":    
     model = Model()
 
-    ActivationModule.register(model.act, "actfn", display_mode="bar", irm="layer")
+    ActivationModule.register(model.act, "actfn")
 
     optim = torch.optim.SGD(params=model.parameters(), lr=0.1)
     criterion = nn.MSELoss()
@@ -69,11 +69,11 @@ if __name__ == "__main__":
         )
 
 
-    for i in range(6):
-        ActivationModule.show_function(
-            name="actfn", snap_name=f"epoch_{i}", display=False, save_to=rf"epoch_{i}.png",
-            function=True, inputs=True, gradients_input=False, gradients_output=False, title=f"Epoch {i}"
-        )
+    # for i in range(6):
+    #     ActivationModule.show_function(
+    #         name="actfn", snap_name=f"epoch_{i}", display=False, save_to=rf"epoch_{i}.png",
+    #         function=True, inputs=True, gradients_input=False, gradients_output=False, title=f"Epoch {i}"
+    #     )
 
     ActivationModule.export_evolution_graphs(
         name="actfn", path=r"test.gif",

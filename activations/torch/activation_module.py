@@ -251,32 +251,29 @@ class RegisteredModule:
         if current_state is not None:
             self.module.load_state_dict(current_state)
 
-    def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_inputs(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_distributions,
             axis=axis,
-            color=color,
             tolerance=tolerance,
             use_kde=use_kde,
         )
 
-    def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_input_gradients(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_gradient_distributions,
             axis=axis,
-            color=color,
             tolerance=tolerance,
             use_kde=use_kde,
         )
 
-    def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_output_gradients(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.output_gradient_distributions,
             axis=axis,
-            color=color,
             tolerance=tolerance,
             use_kde=use_kde
         )
