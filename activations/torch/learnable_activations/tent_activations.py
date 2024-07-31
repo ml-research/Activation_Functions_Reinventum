@@ -3,6 +3,7 @@ import torch.nn as nn
 
 
 
+
 def tent_activation(x, delta):
     """
     Functional implementation of TentActivation.
@@ -15,7 +16,7 @@ class TentActivation(nn.Module):
         super().__init__()
 
         if torch.is_tensor(delta):
-            self.delta = nn.Parameter(delta, requires_grad=learnable)
+            delta = nn.Parameter(delta, requires_grad=learnable)
         else:
             self.delta = nn.Parameter(torch.tensor(delta), requires_grad=learnable)
 
