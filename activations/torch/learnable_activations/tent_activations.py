@@ -3,7 +3,6 @@ import torch.nn as nn
 
 
 
-
 def tent_activation(x, delta):
     """
     Functional implementation of TentActivation.
