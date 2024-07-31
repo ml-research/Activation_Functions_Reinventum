@@ -79,11 +79,6 @@ class RegisteredModule:
     def _has_snapshot(self, name):
         return name in self.axis_labels
     
-    # needed for compability with Snapshot class
-    def numpy(self, *args, **kwargs):
-        return self.module.numpy(*args, **kwargs)
-    
-    # needed for compability with Snapshot class
     def __call__(self, *args, **kwargs):
         return self.module(*args, **kwargs)
     
