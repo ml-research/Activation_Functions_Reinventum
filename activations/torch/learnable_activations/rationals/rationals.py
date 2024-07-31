@@ -11,14 +11,27 @@ import torch.nn as nn
 import scipy.optimize
 
 from activations.torch.activation_module import ActivationModule
-from activations.utils.get_weights import get_parameters
 from activations.utils.utils import find_closest_equivalent
 from activations.utils.rational_json import JsonHandler
+from activations.torch.learnable_activations.rationals.functions import rational_A, rational_B, rational_C, rational_D, rational_nonsafe, rational_spline
 
 
 
 def _get_rational_fn(version):
-    pass
+    if version == "A":
+        return rational_A
+    elif version == "B":
+        return rational_B
+    elif version == "C":
+        return rational_C
+    elif version == "D":
+        return rational_D
+    elif version == "N":
+        return rational_nonsafe
+    elif version == "S":
+        return rational_spline
+    else:
+        raise ValueError(f"Unsupported version, got {version} expected one of [A, B, C, D, N, S]")
 
 
 def find_weights(func, x, degrees, version, **scipyargs):
@@ -67,7 +80,7 @@ def find_weights(func, x, degrees, version, **scipyargs):
         **scipyargs
     )[0]
 
-    w_numerator, w_denominator = params[1:n_num], params[n_num:]
+    w_numerator, w_denominator = params[:n_num], params[n_num:]
     return w_numerator, w_denominator
 
 
@@ -147,7 +160,7 @@ class Rational(RationalBase):
     """
     def __init__(self, init=None, degrees=(5, 4), device="cpu",
                  version="A", train_numerator=True, train_denominator=True,
-                 name="Rational", group=None, logger=None):
+                 name="Rational", group=None, logger=None, **kwargs):
         super().__init__(name=name, group=group, logger=logger)
 
         n_num, n_denom = degrees
@@ -167,13 +180,32 @@ class Rational(RationalBase):
         self.version = version
         self.init_approximation = f"{init}"
 
+        self.version_kwargs = {}
         self.activation_function = _get_rational_fn(version)
+        if version == "D":
+            if "random_deviation" in kwargs:
+                noise_deviation = kwargs["random_deviation"]
+            else:
+                noise_deviation = 0.1
+            self.register_buffer("noise_deviation", torch.tensor(noise_deviation))
+            self.version_kwargs["noise_deviation"] = self.noise_deviation
+        elif version == "S":
+            if "k" in kwargs:
+                k = kwargs["k"]
+            else:
+                k = 2.0
+            self.register_buffer("k", torch.tensor(k))
+            self.version_kwargs["k"] = self.k
+
         self.to(device)
 
     def forward(self, x):
-        return self.activation_function(x, self.numerator, self.denominator)
+        return self.activation_function(x, self.numerator, self.denominator, **self.version_kwargs)
 
     def change_version(self, version):
+        if (self.version in ["S", "D"]) or (version in ["S", "D"]):
+            raise ValueError(f"Rationals of version 'S' or 'D' can not be changed, got change from version {self.version} to {version}")
+
         if version == self.version:
             return
 
@@ -197,7 +229,7 @@ class RARE(Rational):
 class EmbeddedRational(nn.Module):
     def __init__(self, name="EmbeddedRational", group=None, init=None,
                  degrees=(3, 2), device="cpu", version="A", num_rationals=5,
-                 train_numerator=True, train_denominator=True, logger=None):
+                 train_numerator=True, train_denominator=True, logger=None, **rat_kwargs):
         super().__init__()
 
         self.num_rationals = num_rationals
@@ -205,7 +237,7 @@ class EmbeddedRational(nn.Module):
             Rational(
                 init=init, degrees=degrees, device=device, version=version,
                 train_numerator=train_numerator, train_denominator=train_denominator,
-                name=f"{name}({i})", group=group, logger=logger,
+                name=f"{name}({i})", group=group, logger=logger, **rat_kwargs,
             ) for i in range(self.num_rationals)
         ]
 
