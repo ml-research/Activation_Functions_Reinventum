@@ -300,6 +300,10 @@ class ActivationModule:
     @classmethod
     def get_plotting_style(cls):
         return {}.update(cls._plotting_style)  # copy to prevent modifications
+    
+    @classmethod
+    def modules(cls):
+        return list(cls._registered_modules.keys())
 
     @classmethod
     def set_plotting_style(cls, path=None, rc_params=None, update=False):
@@ -343,7 +347,9 @@ class ActivationModule:
             group = [group]
 
         if name in cls._registered_modules:
-            name = cls._increment_name(f"{name}_0", tuple(cls._registered_modules.keys()))
+            if not name.split("_")[-1].isdigit():
+                name = f"{name}_0"
+            name = cls._increment_name(name, tuple(cls._registered_modules.keys()))
         
         cls._registered_modules[name] = RegisteredModule(
             name=name,
@@ -393,13 +399,13 @@ class ActivationModule:
     
     @classmethod
     def _get_modules(cls, name=None, group=None):
-        if name is not None and group is not None:
+        if (name is not None) and (group is not None):
             msg = "Name and group are exclusive"
             raise ValueError(msg)
         
         if group is not None:
             module_names = cls.get_groups(group)
-        if name is None:
+        elif name is None:
             module_names = cls._registered_modules.keys()
         elif isinstance(name, str):
             module_names = [name]
@@ -629,6 +635,7 @@ class ActivationModule:
         if isinstance(axes, plt.Axes):
             axes = {module.name: axes for module in modules}
         else:
+            axes = axes.flatten()
             for ax in axes[n_modules:]:
                 ax.remove()
             axes = {module.name: axes[i] for i, module in enumerate(modules)}
