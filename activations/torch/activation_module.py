@@ -398,6 +398,8 @@ class ActivationModule:
         
         if group is not None:
             module_names = cls.get_groups(group)
+        if name is None:
+            module_names = cls._registered_modules.keys()
         elif isinstance(name, str):
             module_names = [name]
         else:
@@ -547,7 +549,7 @@ class ActivationModule:
     @classmethod
     def show_function(cls, name=None, group=None, snap_name=None, x=None, other_func=None,
                       display=False, title=None, axes=None, layout="auto", writer=None,
-                      step=None, x_label=None, y_label=None, ax_title=False, function=False,
+                      step=None, x_label=None, y_label=None, ax_title=True, function=False,
                       inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
                       tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, use_kde=False, **fig_kw):
         """Create figure of multiple modules for one snapshot.
@@ -707,7 +709,7 @@ class ActivationModule:
             axis.set_xlim((min_x, max_x))
 
             if ax_title:
-                axis.set_title(snap_name)
+                axis.set_title(module.name)
             if x_label[module.name] is not None:
                 axis.set_xlabel(x_label)
             if y_label[module.name] is not None:
@@ -733,7 +735,7 @@ class ActivationModule:
     
     @classmethod
     def export_evolution_graphs(cls, path, name=None, group=None, snap_names=None, layout="auto", video_writer=None, step=None, tag=None,
-                                function=True, inputs=False, gradients_input=False, gradients_output=False, **kwargs):
+                                function=True, inputs=False, gradients_input=False, gradients_output=False, legend=False, **kwargs):
         """Creates an animation of plots over multiple `snapshots`.
         
         Args:
@@ -776,7 +778,9 @@ class ActivationModule:
             )
 
             buffer = io.BytesIO()
-            fig.legend()
+            fig.suptitle(snap_name)
+            if legend:
+                fig.legend()
             fig.tight_layout()
             fig.savefig(buffer, format="png")
             buffer.seek(0, 0)

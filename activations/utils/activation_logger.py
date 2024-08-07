@@ -37,12 +37,13 @@ class ActivationLogger(object):
         console = logging.StreamHandler()
         console.setLevel(log_level)
 
-        messageFormat = self.setFormatter(show_logger_name, show_time)
+        message_format = self.get_format(show_logger_name, show_time)
+        formatter = logging.Formatter(message_format)
 
         if os.name != 'nt':
-            console.setFormatter(ColoredFormatter(messageFormat))
+            console.setFormatter(ColoredFormatter(formatter))
         if os.name == 'nt':
-            console.setFormatter(messageFormat)
+            console.setFormatter(formatter)
 
         self._logger.addHandler(console)
 
@@ -62,7 +63,7 @@ class ActivationLogger(object):
     def critical(self, msg):
         self._logger.critical(msg)
 
-    def setFormatter(self, show_logger_name, show_time):
+    def get_format(self, show_logger_name, show_time):
         format = ''
 
         if show_logger_name:

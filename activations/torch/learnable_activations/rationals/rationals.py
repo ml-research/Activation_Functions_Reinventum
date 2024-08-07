@@ -173,8 +173,8 @@ class Rational(RationalBase):
             w_numerator = init(n_num, True)
             w_denominator = init(n_denom, False)
 
-        self.numerator = nn.Parameter(torch.tensor(w_numerator, device=device), requires_grad=train_numerator)
-        self.denominator = nn.Parameter(torch.tensor(w_denominator, device=device), requires_grad=train_denominator)
+        self.numerator = nn.Parameter(w_numerator, requires_grad=train_numerator)
+        self.denominator = nn.Parameter(w_denominator, requires_grad=train_denominator)
         
         self.degrees = degrees
         self.version = version
