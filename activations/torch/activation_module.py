@@ -205,8 +205,8 @@ class RegisteredModule:
     def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, label=None):
         """Plots a histogram on a :obj:``plt.Axes``."""
         if kde_fn is None:  # display mode 'bar'
-            axis.bar(bins, weights, linewidth=0,
-                     alpha=0.7, label=label, align="edge", width=bin_size)
+            bars = axis.bar(bins, weights, alpha=0.7, label=label, align="edge", width=bin_size)
+            axis.set_ylim(0, max(bars.datavalues))
         else:  # display mode 'kde'
             if len(bins) < 5:
                 msg = msg = f"Too few bins, maybe reduce bin size. Expected at least 5, got {len(bins)}"
@@ -221,6 +221,7 @@ class RegisteredModule:
                 alpha=0.45,
                 label=label
             )
+            axis.set_ylim(bottom=0.0)
 
     def show_function(self, x, axis, name="snapshot_0"):
         current_state = None

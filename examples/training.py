@@ -83,7 +83,19 @@ def main(device, num_epochs, batch_size):
         print(f"Epoch: {e}")
         train_epoch(model, criterion, optim, data, labels, batch_size, device)
     
-    ActivationModule.export_evolution_graphs(path="./training_example_animation.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)])
+    ActivationModule.export_evolution_graphs(path="./training_example_bar_inputs.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, inputs=True)
+    ActivationModule.export_evolution_graphs(path="./training_example_bar_grad_in.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, gradients_input=True)
+    ActivationModule.export_evolution_graphs(path="./training_example_bar_grad_out.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, gradients_output=True)
+
+    ActivationModule.export_evolution_graphs(path="./training_example_kde_inputs.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, inputs=True, use_kde=True)
+    ActivationModule.export_evolution_graphs(path="./training_example_kde_grad_in.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, gradients_input=True, use_kde=True)
+    ActivationModule.export_evolution_graphs(path="./training_example_kde_grad_out.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
+                                             function=True, gradients_output=True, use_kde=True)
 
 
 if __name__ == "__main__":
