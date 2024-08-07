@@ -1,2 +1,1 @@
-from .rationals import Rational, RecurrentRational, RecurrentRationalModule, \
-    RationalNonSafe, EmbeddedRational, RARE
+from .rationals import RationalBase, Rational, RARE, EmbeddedRational, find_weights
