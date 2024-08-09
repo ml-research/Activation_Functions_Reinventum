@@ -58,12 +58,12 @@ def find_weights(func, x, degrees, version, **scipyargs):
     if version == "RARE":
         k1 = x - torch.abs(x)
         k2 = x + torch.abs(x)
-        def rational(x, params):
-            y = rat_fn(x, params[:n_num], params[n_num:])
+        def rational(x, *params):
+            y = rat_fn(x, torch.tensor(params[:n_num]), torch.tensor(params[n_num:]))
             return y * k1 * k2
     else:
-        def rational(x, params):
-            return rat_fn(x, params[:n_num], params[n_num:])
+        def rational(x, *params):
+            return rat_fn(x, torch.tensor(params[:n_num]), torch.tensor(params[n_num:]))
 
     if version == "RARE":
         w_init = torch.rand(n_total)
@@ -81,7 +81,7 @@ def find_weights(func, x, degrees, version, **scipyargs):
     )[0]
 
     w_numerator, w_denominator = params[:n_num], params[n_num:]
-    return w_numerator, w_denominator
+    return w_numerator.tolist(), w_denominator.tolist()
 
 
 class RationalBase(nn.Module):

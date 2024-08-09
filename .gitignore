@@ -5,6 +5,7 @@
 #example.py
 debug.py
 examples/*.gif
+examples/example.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

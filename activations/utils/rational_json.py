@@ -10,6 +10,9 @@ class JsonHandler:
 
     @staticmethod
     def _read_data(path):
+        if os.path.getsize(path) == 0:
+            return {}
+        
         with open(path, "rt") as fin:
             data = json.load(fin)
         return data
@@ -21,7 +24,7 @@ class JsonHandler:
 
     @classmethod
     def set_current(cls, path):
-        cls._json_file = os.path.abspath(path)
+        cls._json_file = os.path.abspath(path) 
         data = cls._read_data(cls._json_file)
         cls._known_rationals = {version: [func for func in data[version]] for version in data}
 
