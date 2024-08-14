@@ -82,7 +82,7 @@ def main(device, num_epochs, batch_size):
         )
         print(f"Epoch: {e}")
         train_epoch(model, criterion, optim, data, labels, batch_size, device)
-    
+        
     ActivationModule.export_evolution_graphs(path="./training_example_bar_inputs.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],
                                              function=True, inputs=True)
     ActivationModule.export_evolution_graphs(path="./training_example_bar_grad_in.gif", snap_names=[f"Epoch_{e}" for e in range(num_epochs)],

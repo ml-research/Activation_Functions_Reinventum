@@ -1,8 +1,10 @@
 import io
 import copy
+import itertools
 from collections import OrderedDict
 
 import torch
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import PIL.Image
 import numpy as np
@@ -169,7 +171,7 @@ class RegisteredModule:
         left_edge, right_edge = hist.get_bin_edges()
         return left_edge, right_edge
 
-    def plot_histogram(self, name, histograms, axis, tolerance=0.001, use_kde=False):
+    def plot_histogram(self, name, histograms, axis, tolerance=0.001, use_kde=False, color=None):
         if name is None:
             hist, label = next(reversed(histograms.values()))  # last element
         else:
@@ -200,12 +202,13 @@ class RegisteredModule:
                 axis=axis,
                 kde_fn=kde_fn(n),
                 label=label,
+                color=color,
             )
 
-    def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, label=None):
+    def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, label=None, color=None):
         """Plots a histogram on a :obj:``plt.Axes``."""
         if kde_fn is None:  # display mode 'bar'
-            bars = axis.bar(bins, weights, alpha=0.7, label=label, align="edge", width=bin_size)
+            bars = axis.bar(bins, weights, alpha=0.7, label=label, align="edge", width=bin_size, color=color)
             axis.set_ylim(0, max(bars.datavalues))
         else:  # display mode 'kde'
             if len(bins) < 5:
@@ -219,11 +222,15 @@ class RegisteredModule:
                 x,
                 y,
                 alpha=0.45,
-                label=label
+                label=label,
+                color=color
             )
             axis.set_ylim(bottom=0.0)
 
-    def show_function(self, x, axis, name="snapshot_0"):
+    def show_function(self, x, axis, next_color=None, name="snapshot_0"):
+        if next_color is None:
+            next_color = lambda: None
+
         current_state = None
         label = self.name
         if name is not None:
@@ -232,12 +239,12 @@ class RegisteredModule:
 
             if other_func is not None:
                 for other_func_name in other_func:
-                    axis.plot(x, other_func(x), label=other_func_name)
+                    axis.plot(x, other_func(x), label=other_func_name, color=next_color())
             
             self.module.load_state_dict(state)
 
         y = self._call_nohook(x)
-        axis.plot(x, y, label=label)
+        axis.plot(x, y, label=label, color=next_color())
         
         if name in self.axis_labels:
             x_label, y_label = self.axis_labels[name]
@@ -247,31 +254,34 @@ class RegisteredModule:
         if current_state is not None:
             self.module.load_state_dict(current_state)
 
-    def show_inputs(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_distributions,
             axis=axis,
             tolerance=tolerance,
             use_kde=use_kde,
+            color=color,
         )
 
-    def show_input_gradients(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.input_gradient_distributions,
             axis=axis,
             tolerance=tolerance,
             use_kde=use_kde,
+            color=color,
         )
 
-    def show_output_gradients(self, axis, name="snapshot_0", tolerance=0.001, use_kde=False):
+    def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         self.plot_histogram(
             name=name,
             histograms=self.output_gradient_distributions,
             axis=axis,
             tolerance=tolerance,
-            use_kde=use_kde
+            use_kde=use_kde,
+            color=color,
         )
 
 
@@ -284,6 +294,21 @@ class ActivationModule:
     _plotting_style = {}
     _default_irm = "layer"
     _color_cycle = None
+
+    @classmethod
+    def set_global_color_cycle(cls, colors):
+        if colors is None:
+            cls._color_cycle = None
+            return
+
+        cls._color_cycle = itertools.cycle(colors)
+
+    @classmethod
+    def _get_next_color(cls):
+        if cls._color_cycle is None:
+            return None
+        
+        return next(cls._color_cycle)
 
     @classmethod
     def default_irm(cls, irm=None):
@@ -669,6 +694,7 @@ class ActivationModule:
                     name=snap_name[module.name],
                     tolerance=tol_in,
                     use_kde=use_kde,
+                    color=cls._get_next_color(),
                 )
 
             if gradients_input:
@@ -677,6 +703,7 @@ class ActivationModule:
                     name=snap_name[module.name],
                     tolerance=tol_grad_in,
                     use_kde=use_kde,
+                    color=cls._get_next_color(),
                 )
             if gradients_output:
                 module.show_output_gradients(
@@ -684,6 +711,7 @@ class ActivationModule:
                     name=snap_name[module.name],
                     tolerance=tol_grad_out,
                     use_kde=use_kde,
+                    color=cls._get_next_color(),
                 )    
 
             if (x_mode == "x") or (min_x2 is None):
@@ -705,6 +733,7 @@ class ActivationModule:
                     x=x_,
                     axis=axis,
                     name=snap_name[module.name],
+                    next_color=cls._get_next_color,
                 )
 
             if other_func is not None:
@@ -713,6 +742,7 @@ class ActivationModule:
                         x_,
                         other_func[other_func_name](x_),
                         label=other_func_name,
+                        color=cls._get_next_color(),
                     )
             
             axis.set_xlim((min_x, max_x))
