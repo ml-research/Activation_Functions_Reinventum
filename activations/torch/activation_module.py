@@ -4,7 +4,6 @@ import itertools
 from collections import OrderedDict
 
 import torch
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import PIL.Image
 import numpy as np
