@@ -283,6 +283,7 @@ class ActivationModule:
     _logger = ActivationLogger(f"ActivationModule")
     _plotting_style = {}
     _default_irm = "layer"
+    _color_cycle = None
 
     @classmethod
     def default_irm(cls, irm=None):
