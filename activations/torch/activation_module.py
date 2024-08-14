@@ -15,12 +15,12 @@ from activations.utils.activation_logger import ActivationLogger
 
 
 
-def _input_hook(registered_module, histogram, max_saves):
+def _input_hook(registered_module, histogram, max_saves, idx=0):
     # by using a list instead of integer the hook can modify ``n_saves``
     # and not just a copy of it. This way it can remove itself when desired.
     n_saves = [0]
     def hook(module, input, output):
-        histogram.fill_n(input[0])
+        histogram.fill_n(input[0], ax_idx=idx)
         n_saves[0] += 1
         if max_saves > 0 and n_saves[0] >= max_saves:
             registered_module.save_inputs(name=None, saving=False)
@@ -30,8 +30,8 @@ def _input_hook(registered_module, histogram, max_saves):
 def _gradient_hook(registered_module, histogram_input, histogram_output, max_saves):
     n_saves = [0]
     def hook(module, in_grad, out_grad):
-        histogram_input.fill_n(in_grad[0])
-        histogram_output.fill_n(out_grad[0])
+        histogram_input.fill_n(in_grad[0], ax_idx=None)
+        histogram_output.fill_n(out_grad[0], ax_idx=None)
         n_saves[0] += 1
         if max_saves > 0 and n_saves[0] >= max_saves:
             registered_module.save_gradients(name=None, saving=False)
@@ -39,7 +39,23 @@ def _gradient_hook(registered_module, histogram_input, histogram_output, max_sav
 
 
 class RegisteredModule:
+    """Wrapper for :obj:``torch.nn.Module`` which handles captureing/plotting of data."""
+
     def __init__(self, name, module, groups, logger):
+        """
+        Args:
+            name (str):
+                Unique ID. Is used for registration in :class:``AcivationModule`` and as label.
+            
+            module (:obj:``torch.nn.Module``):
+                Wrapped module.
+            
+            groups (list(hashable)):
+                All groups module belongs to.
+            
+            logger:
+                Logger used. 
+        """
         self.name = name
         self._groups = groups
         self.module = module
@@ -68,9 +84,11 @@ class RegisteredModule:
         return self._groups
     
     def set_input_category(self, new_category):
+        """Sets x-label for all future snapshots."""
         self._current_x_label = new_category
 
     def set_output_category(self, new_category):
+        """Sets y-label for all future snapshots."""
         self._current_y_label = new_category
 
     def _update_axis_labels(self, name):
@@ -85,11 +103,39 @@ class RegisteredModule:
     
     @torch.no_grad()
     def _call_nohook(self, *args, **kwargs):
-        """Runs the ``forward`` method without calling any registered hooks."""
+        # Calls self.module.forward without calling any registered hooks
         return self.module.forward(*args, **kwargs)
     
     def save_inputs(self, name, saving=True, max_saves=-1,
                     bin_width=None, mode=None, label=None):
+        """Save input data as histogram.
+
+        All data is stored by attaching hooks that will be called when module is called.
+        
+        Args:
+            name (str):
+                Snapshot name.
+            
+            saving (bool):
+                * If ``True`` start saving inputs.
+                * If ``False`` stop saving inputs.
+            
+            max_saves (int):
+                After equal number of calls to :meth:``self.module.forward`` stop saving inputs.
+            
+            bin_width (float):
+                Width of bins.
+            
+            mode (str or int, optional):
+                * If ``'layer'``: store all input values in single histogram.
+                * otherwise should be the index of axis in input tensor
+                  that represents number of neurons in layer.
+                
+                Defaults to :param:``ActivationModule._default_irm``.
+            
+            label (str, optional):
+                Label for plot legend to use. Defaults to ``'<name>_inputs'``.
+        """
         if not saving:
             self.logger.info("Not retrieving input anymore")
             self._input_handle.remove()
@@ -101,27 +147,52 @@ class RegisteredModule:
             return
         
         if mode is None:
-            mode = ActivationModule._default_irm
+            mode = ActivationModule.default_irm()
 
         if label is None:
             label = f"{self.name}_inputs"
 
-        if mode == "neurons":
-            hist = histogram.NeuronsHistogram(bin_width)
-        else:
+        if mode == "layer":
             hist = histogram.Histogram(bin_width)
+            idx = None
+        else:
+            hist = histogram.NeuronsHistogram(bin_width)
+            idx = mode
 
         self.input_distributions[name] = (hist, label)
         self._update_axis_labels(name)
 
         self._input_handle = self.module.register_forward_hook(
             _input_hook(
-                self, self.input_distributions[name][0], max_saves,
+                self, self.input_distributions[name][0], max_saves, idx=idx,
             )
         )
 
     def save_gradients(self, name, saving=True, max_saves=-1,
                        bin_width=None, label_in=None, label_out=None):
+        """
+        Saves gradients as histogram.
+
+        Saves gradients of output wrt. input aswell as upstream gradients in seperate histograms.
+        All data is stored by attaching hooks that will be called when tensors ``backward`` is called.
+        
+        Args:
+            name (str):
+                Snapshot name.
+            
+            saving (bool):
+                * If ``True`` start saving inputs.
+                * If ``False`` stop saving inputs.
+            
+            max_saves (int):
+                After equal number of calls to :meth:``self.module.forward`` stop saving inputs.
+            
+            bin_width (float):
+                Width of bins.
+            
+            label_in, label_out (str, optional):
+                Label for plot legend to use. Defaults to ``'<name>_in_grad'``/``'<name>_out_grad'``.
+        """
         if not saving:
             self.logger.warn("Not retrieving gradients anymore")
             self._grad_handle.remove()
@@ -151,9 +222,24 @@ class RegisteredModule:
             )
         )
             
-    def capture(self, name="snapshot_0", other_func=None, label=None, returns=False):
-        # self.module.distribution is always None therefore 3rd argument
-        # does not influence behaviour
+    def capture(self, name, other_func=None, label=None, returns=False):
+        """Creates a snapshot of current function.
+        
+        The snapshot is stored via modules ``state_dict``.
+        
+        Args:
+            name (str):
+                Snapshot name.
+            
+            other_func (dict(str, callable), optional):
+                Other functions to include in this snapshot. Keys of ``dict`` will be used as labels.
+            
+            label (str, optional):
+                Plot label used. Defaults to ``'<name>'``
+            
+            returns (bool):
+                If True only return snapshot. In this case snapshot can not be plotted via :obj:``ActivationModule``.
+        """
         if label is None:
             label = self.name
         snapshot = (copy.deepcopy(self.module.state_dict()), other_func, label)
@@ -166,16 +252,33 @@ class RegisteredModule:
         self._update_axis_labels(name)
 
     def input_range(self, name):
+        """Return x-axis range for snapshot."""
         hist, _ = self.input_distributions[name]
         left_edge, right_edge = hist.get_bin_edges()
         return left_edge, right_edge
 
-    def plot_histogram(self, name, histograms, axis, tolerance=0.001, use_kde=False, color=None):
-        if name is None:
-            hist, label = next(reversed(histograms.values()))  # last element
-        else:
-            hist, label = histograms[name]
-
+    def plot_histogram(self, hist, label, axis, tolerance=0.001, use_kde=False, color=None):
+        """Plots data from histogram.
+        
+        Args:
+            hist (:class:``activations.torch.utils.histogram.NeuronsHistogram``):
+                Data to plot.
+            
+            label (str):
+                Plot label.
+            
+            axis (``plt.Axes``):
+                Axis to plot on.
+            
+            tolerance (float):
+                All bars with a relative fraction less than ``tolerance`` will be removed before plotting.
+            
+            use_kde (bool):
+                If True plot kde function of histogram.
+            
+            color (`color <https://matplotlib.org/stable/users/explain/colors/colors.html>`_):
+                Color used for plotting.
+        """
         if hist.is_empty():
             return
 
@@ -205,7 +308,6 @@ class RegisteredModule:
             )
 
     def _plot_histogram(self, weights, bins, bin_size, axis, kde_fn=None, label=None, color=None):
-        """Plots a histogram on a :obj:``plt.Axes``."""
         if kde_fn is None:  # display mode 'bar'
             bars = axis.bar(bins, weights, alpha=0.7, label=label, align="edge", width=bin_size, color=color)
             axis.set_ylim(0, max(bars.datavalues))
@@ -227,6 +329,21 @@ class RegisteredModule:
             axis.set_ylim(bottom=0.0)
 
     def show_function(self, x, axis, next_color=None, name="snapshot_0"):
+        """Plots snapshot of function.
+        
+        Args:
+            x (any):
+                X-Axis values to plot on. Must be accepted by ``forward`` pass of module and ``other_func`` (see :meth:``RegisteredModule.capture``)
+            
+            axis (``plt.Axes``):
+                Axis to plot on.
+            
+            next_color (callable, optional):
+                A function with no arguments which returns a color on call. First for each ``other_func`` a color is used and then for the module.
+            
+            name (str):
+                Name of snapshot to plot.
+        """
         if next_color is None:
             next_color = lambda: None
 
@@ -254,9 +371,32 @@ class RegisteredModule:
             self.module.load_state_dict(current_state)
 
     def show_inputs(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+        """Plots captured input data.
+        
+        Args:
+            axis (``plt.Axes``):
+                Axis to plot on.
+            
+            color (`color <https://matplotlib.org/stable/users/explain/colors/colors.html>`_):
+                Color used for Histogram data.
+            
+            name (str):
+                Name of snapshot.
+            
+            tolerance (float):
+                See :meth:``RegisteredModule.plot_histogram``.
+            
+            use_kde (bool):
+                See :meth:``RegisteredModule.plot_histogram``.
+        """
+        if name is None:
+            hist, label = next(reversed(self.input_distributions.values()))
+        else:
+            hist, label = self.input_distributions[name]
+
         self.plot_histogram(
-            name=name,
-            histograms=self.input_distributions,
+            hist=hist,
+            label=label,
             axis=axis,
             tolerance=tolerance,
             use_kde=use_kde,
@@ -264,9 +404,18 @@ class RegisteredModule:
         )
 
     def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+        """Plots captured gradients of output wrt. input.
+        
+        See :meth:``RegisteredModule.show_inputs`` for more info.
+        """
+        if name is None:
+            hist, label = next(reversed(self.input_gradient_distributions.values()))
+        else:
+            hist, label = self.input_gradient_distributions[name]
+
         self.plot_histogram(
-            name=name,
-            histograms=self.input_gradient_distributions,
+            hist=hist,
+            label=label,
             axis=axis,
             tolerance=tolerance,
             use_kde=use_kde,
@@ -274,17 +423,29 @@ class RegisteredModule:
         )
 
     def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
+        """Plots captured upstream gradients.
+        
+        See :meth:``RegisteredModule.show_inputs`` for more info.
+        """
+        if name is None:
+            hist, label = next(reversed(self.output_gradient_distributions.values()))
+        else:
+            hist, label = self.output_gradient_distributions[name]
+
         self.plot_histogram(
-            name=name,
-            histograms=self.output_gradient_distributions,
+            hist=hist,
+            label=label,
             axis=axis,
             tolerance=tolerance,
             use_kde=use_kde,
             color=color,
         )
+        
 
 
 class ActivationModule:
+    """Static class which provides functionality to capture/plot data of multiple :class:``torch.nn.Module``."""
+
     _registered_modules = {}  # {module-name: RegisteredModule}
     _snapshot_names = []
     _count = 0
@@ -296,6 +457,15 @@ class ActivationModule:
 
     @classmethod
     def set_global_color_cycle(cls, colors):
+        """Set a cycle of colors used across axes.
+        
+        Each time smething is plotted the next color drawn. The cycle is not reset for each axis. 
+
+        Args:
+            colors (iterable):
+                Colors to endlessly cycle through. If ``None`` will remove current
+                cycle and use ``matplotlb.rc_params['prop_cycle']`` for each axis.
+        """
         if colors is None:
             cls._color_cycle = None
             return
@@ -311,23 +481,35 @@ class ActivationModule:
 
     @classmethod
     def default_irm(cls, irm=None):
+        """Setter/Getter for the default input retrieval mode (irm).
+        
+        Args:
+            irm (str or int, optional):
+                See :meth:``RegisteredModule.capture`` for detailed information about irm. If omitted will return current irm.
+        """
         if irm is None:
             return cls._default_irm
         
-        if not irm in ["layer", "neurons"]:
+        if (not isinstance(irm, int)) and (not irm == "layer"):
             raise ValueError(f"Unsupported irm, got {irm}")
         cls._default_irm = irm
 
     @classmethod
     def set_logger(cls, logger):
+        """Set default logger.
+        
+        Does not change assigned loggers for already registered modules.
+        """
         cls._logger = logger
 
     @classmethod
     def get_plotting_style(cls):
+        """Get current ``rc_params`` modifications."""
         return {}.update(cls._plotting_style)  # copy to prevent modifications
     
     @classmethod
     def modules(cls):
+        """Get list of names for registered modules."""
         return list(cls._registered_modules.keys())
 
     @classmethod
@@ -337,9 +519,14 @@ class ActivationModule:
         This method will only modify the `rc_params` in local scope.
          
         Args:
-            path (str or pathlike, optional): Path to file containing ``rcparam, value`` pairs (seperated by colon) on each line.
-            rc_params (dict(str, str), optional): ``rcparams`` to use. Will overwrite existing ``rcparams`` in ``path``.
-            update (bool): If ``True``, only update existing `rc_params`.
+            path (str or pathlike, optional):
+                Path to file containing ``rcparam, value`` pairs (seperated by colon) on each line.
+            
+            rc_params (dict(str, str), optional):
+                ``rcparams`` to use. If a param is used in ``path`` and ``rc_params`` will use value of ``rc_params``.
+            
+            update (bool):
+                If ``True``, only update existing `rc_params` instead of overwriting.
         """
         params = {}
         if path is not None:
@@ -358,15 +545,21 @@ class ActivationModule:
 
     @classmethod
     def register(cls, module, name, group=None, logger=None):
-        """Registers a ``torch.nn.Module``. Registered modules can be captured/plotted.
+        """Registers a :class:``torch.nn.Module``. Registered modules can be captured/plotted.
         
         Args:
-            module (torch.nn.Module):
-            name (str): If name already exists an incrementing integer will be appended.
-            group (hashable or list of hashables, optional): Group(s) to assign ``module`` to. 
+            module (:class:``torch.nn.Module``):
+                The module to register.
+            
+            name (str):
+                Name under which module will be registered. If name already exists an incrementing integer will be appended.
+            
+            group (hashable or list of hashables, optional):
+                Group(s) to assign ``module`` to. 
             
         Returns:
-            name (str): Name under which module is registered.
+            name (str):
+                Name under which module is registered.
         """
         if not isinstance(group, list):
             group = [group]
@@ -389,14 +582,16 @@ class ActivationModule:
 
     @classmethod
     def _increment_name(cls, name, blocked_names):
-        """Helper method for numerating string.
+        """Helper method for enumerating a string.
         
         Args:
-            name (str): Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
+            name (str):
+                Must end with ``'_i'`` where ``i`` can be any number. Will Increment ``i`` aslong as modules
                 are registered under (incremented) name.
                 
         Returns:
-            new_name (str): Name for which no other module is registered.
+            new_name (str):
+                Name for which no other module is registered.
         """
         while name in blocked_names:
             name_ = name.split("_")
@@ -407,6 +602,18 @@ class ActivationModule:
 
     @classmethod
     def get_groups(cls, group):
+        """Get names of modules belonging to specific groups.
+        
+        Args:
+            group (str or list(str)):
+                * If ``str``: return all module names registered in this group.
+                * If ``list(str)``: return all module names registered in at least one group.
+                * If ``None``: return all registered modules.
+                
+        Returns:
+            names (tuple):
+                All registered modules matching given group(s).
+        """
         if group is None:
             return tuple(cls._registered_modules.keys())
         
@@ -424,6 +631,17 @@ class ActivationModule:
     
     @classmethod
     def _get_modules(cls, name=None, group=None):
+        """Get all modules based on given name(s) and group(s).
+        
+        Args:
+            name, group (str or list(str)):
+                Mutually exclusive parameters to filter modules.
+                If both are ``None`` all modules will be returned.
+        Returns:
+            modules (list(:class:``RegisteredModule``)):
+                Found modules.
+        """
+        
         if (name is not None) and (group is not None):
             msg = "Name and group are exclusive"
             raise ValueError(msg)
@@ -443,8 +661,11 @@ class ActivationModule:
     def get_snapshots(cls, name=None, group=None):
         """Return all shared snapshots in order.
 
+        A snapshot is shared if all modules have a snapshot of equal name.
+
         Returns:
-            snapshots (list(str)): Snapshots that are common to all given modules.
+            snapshots (list(str)):
+                Snapshots that are common to all given modules.
         """
         modules = cls._get_modules(name=name, group=group)
 
@@ -457,12 +678,18 @@ class ActivationModule:
 
     @classmethod
     def save_inputs(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
-                         max_saves=1000, bin_width=None, mode=None, label=None):
-        """Saves inputs of registered modules."""
+                         max_saves=1000, bin_width=None, mode=None, label_in=None):
+        """Saves inputs of registered modules.
+        
+        For detailed information see :meth:``ActivationModule.create_snapshot``.
+
+        Note:
+            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+        """
         modules = cls._get_modules(name=name, group=group)
 
-        if not isinstance(label, dict):
-            label = {module.name: label for module in modules}
+        if not isinstance(label_in, dict):
+            label_in = {module.name: label_in for module in modules}
 
         for module in modules:
             module.save_inputs(
@@ -471,20 +698,25 @@ class ActivationModule:
                 max_saves=-1 if max_saves is None else max_saves,
                 bin_width=bin_width,
                 mode=mode,
-                label=label[module.name],
+                label=label_in[module.name],
             )
 
     @classmethod
     def save_gradients(cls, name=None, group=None, snap_name="snapshot_0", saving=True,
-                           max_saves=1000, bin_width=None, input_label=None, output_label=None):
-        """Saves gradients of registered modules."""
+                           max_saves=1000, bin_width=None, label_grad_in=None, label_grad_out=None):
+        """Saves gradients of registered modules.
+        
+        For detailed information see :meth:``ActivationModule.create_snapshot``.
 
+        Note:
+            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+        """
         modules = cls._get_modules(name=name, group=group)
 
-        if not isinstance(input_label, dict):
-            input_label = {module.name: input_label for module in modules}
-        if not isinstance(output_label, dict):
-            output_label = {module.name: output_label for module in modules}
+        if not isinstance(label_grad_in, dict):
+            label_grad_in = {module.name: label_grad_in for module in modules}
+        if not isinstance(label_grad_out, dict):
+            label_grad_out = {module.name: label_grad_out for module in modules}
 
         for module in modules:
             module.save_gradients(
@@ -492,13 +724,24 @@ class ActivationModule:
                 saving=saving,
                 max_saves=-1 if max_saves is None else max_saves,
                 bin_width=bin_width,
-                label_in=input_label[module.name],
-                label_out=output_label[module.name],
+                label_in=label_grad_in[module.name],
+                label_out=label_grad_out[module.name],
             )
         
     @classmethod
     def capture(cls, name=None, group=None, snap_name="snapshot_0",
                 other_func=None, returns=False):
+        """Saves snapshot of registered modules
+
+        Args:
+            returns (bool):
+                If ``True`` snapshots are returned and not saved.
+        
+        For detailed information of parameters see :meth:``ActivationModule.create_snapshot``.
+
+        Note:
+            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+        """
         modules = cls._get_modules(name=name, group=group)
 
         if returns:
@@ -519,6 +762,33 @@ class ActivationModule:
                         other_func=None, max_saves=1000, bin_width=None, label_in=None,
                         label_grad_in=None, label_grad_out=None, irm="layer",
                         function=False, inputs=False, gradients=False):
+        """Create snapshots for later plotting.
+        
+        Args:
+            name, group (str or list(str)):
+                Mutually exclusive parameters to specify all registered modules for which a snapshot is created.
+            
+            snap_name (str):
+                Name of new snapshot. If name is already existing an increasing integer will be suffixed.
+            
+            other_func (dict(str, callable)):
+                Other functions to include in plots (the keys will be used as labels).
+            
+            max_saves (int):
+                Maximum number of times inputs/gradients are saved. After the maximum is exceeded hooks will automatically remove themselfs.
+            
+            bin_width (float):
+                Width of histogram bins.
+            
+            label_in, label_grad_in, label_grad_out (str or dict(str, str)):
+                Labels for inputs/gradients. If given as dict should have a key matching each module name.
+            
+            irm (str or int):
+                Input retrieval mode. See :meth:``RegisteredModule.capture`` for more information.
+            
+            function, inputs, gradients (bool):
+                Data to be stored in snapshot.
+        """
         snap_name = cls._increment_name(snap_name, cls._snapshot_names)
 
         if function:
@@ -538,7 +808,7 @@ class ActivationModule:
                 max_saves=max_saves,
                 bin_width=bin_width,
                 mode=irm,
-                label=label_in,
+                label_in=label_in,
             )
         if gradients:
             cls.save_gradients(
@@ -548,21 +818,23 @@ class ActivationModule:
                 saving=True,
                 max_saves=max_saves,
                 bin_width=bin_width,
-                input_label=label_grad_in,
-                output_label=label_grad_out,
+                label_grad_in=label_grad_in,
+                label_grad_out=label_grad_out,
             )
 
     @classmethod
     def stop_saving(cls, name=None, group=None, inputs=True, gradients=True):
         """Stop retrieving inputs/gradients.
         
-        Removes all forward/backward handles attached to modules.
+        Removes all attached forward/backward hooks.
         
         Args:
-            name (str or list(str), optional):
-            group (str or list(str), optional):
-            inputs (bool): If ``True``, stop retrieving inputs.
-            gradients (bool): If ``True``, stop retrieving gradients.
+            name, group (str or list(str)):
+                Mutually exclusive parameters for specifying modules.
+            inputs (bool):
+                If ``True`` stop retrieving inputs.
+            gradients (bool):
+                If ``True`` stop retrieving gradients.
         """
         if inputs:
             cls.save_inputs(
@@ -583,43 +855,89 @@ class ActivationModule:
                       display=False, title=None, axes=None, layout="auto", writer=None,
                       step=None, x_label=None, y_label=None, ax_title=True, function=False,
                       inputs=False, gradients_input=False, gradients_output=False, x_mode="expand",
-                      tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, use_kde=False, **fig_kw):
-        """Create figure of multiple modules for one snapshot.
+                      tol_in=0.001, tol_grad_in=0.001, tol_grad_out=0.001, save_to=None, use_kde=False,
+                      legend=True, **fig_kw):
+        """Create figure of multiple modules for single snapshot.
         
-        Creates a figure with one subplot for each module. Each module can only be plotted for a single snapshot,
+        Creates a figure with one axis for each module. Each module can only be plotted for a single snapshot,
         but snapshots do not have to be equal for all modules.
 
         Args:
-            name (str or list(str), optional):
-            group (str or list(str), optional):
-            snap_name (str or dict(str, str), optional):
-            x (int or tuple or array-like, optional):
+            name, group (str or list(str)):
+                Mutually exclusive parameters specifying modules.
+            
+            snap_name (str or dict(str, str)):
+                Snapshot to be used.
+            
+            x (int or tuple(float, float, int) or array-like):
+                The x-values to plot snapshot on.
+                    * If ``int`` number of points in interval [-3, 3].
+                    * If ``tuple(float, float, int)`` specifies min, max value and number of points.
+                    * If ``array-like`` Concrete values to use.
+
+                Defaults to ``torch.linspace(-3., 3., 100)``.
+            
             other_func (dict(str, callable)):
+                Other functions to use. Keys are used as plot labels.
+            
             display (bool):
+                If ``True`` shows plot using ``plt.show`` (blocking until figure is closed).
+            
             title (str):
-            axes (list(plt.Axes)):
-            layout ("auto" or tuple(n_rows, n_cols)): Determines the `subplot layout`_. If ``layout=="auto"``
+                Title of figure. Is also used as tag for SummaryWriter.
+            
+            axes (``plt.Axes`` or list(``plt.Axes``)):
+                Axes to plot on.
+                    * If ``plt.Axes`` plot all snapshots on single axis.
+                    * If ``list(plt.Axes)``: plots each module on own axis.
+                
+            layout ("auto" or tuple(n_rows, n_cols)):
+                Determines the `subplot layout`_. If ``layout=="auto"``
                 the number of rows and columns is determined automatically. Otherwise ``n_rows*n_cols``
                 should be greater than number of modules to plot or equal to 1, in which case all modules
                 will be plotted in single plot.
-            writer ():
-            step ():
+            
+            writer (:class:``torch.utils.tensorboard.SummaryWriter``):
+                Add figure on SummaryWriter. Will add before showing if ``display==True``.
+            
+            step (int):
+                Global step for ``writer``.
+            
             x_label, y_label (str or dict(str, str)):
+                Label for x/y-axes.
+            
             ax_title (bool):
-            x_mode (str): Determines how x axis range is determined between given :param:``x`` and range of input.
-                Can be one of ``'expand', 'clip', 'x'``:
-                * ``'expand'``: Always expand to greatest range.
-                * ``'clip``: Always clip to smallest range.
-                * ``'x'``: Use only :param:``x``.
-                Defaults to ``"expand"``.
+                If ``True`` each axis uses the module name as title. Otherwise axis have no title.
+            
+            x_mode (str):
+                Determines how x axis limits are choosen between input histogram range and given parameter ``x``.
+                    * If ``'expand'`` expand to greatest range.
+                    * If ``'clip'`` clip to smallest range.
+                    * If ``'x'`` use only parameter ``x``.
+
+                Defaults to ``'expand'``.
+            
             tol_in, tol_grad_in, tol_grad_out (float):
-            save_to (str): 
+                Tolerance values for input/gradient histograms (see :meth:``RegisteredModule.plot_histogram``)
+            
+            save_to (str or pathlike):
+                Path to save figure to. File extension must be supported by matplotlib.
+            
             use_kde (bool):
-            fig_kw: Keyword arguments passed to :func:``matplotlib.pyplot.plt.subplots``. If ``axes is not None`` ignored.
+                Plot kde function instead of barplots for all histograms.
+            
+            legend (bool):
+                Create legend for plot.
+            
+            fig_kw:
+                Keyword arguments passed to :meth:``matplotlib.pyplot.plt.subplots``. Ignored if ``axes`` is given.
+
+        Note:
+            If a parameter can be passed as ``dict`` it should have a matching key for each name of selected modules.
 
 
-            .. _subplot layout:
-                https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
+        .. _subplot layout:
+            https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
         """
         if x_mode not in ["expand", "clip", "x"]:
             msg = f"Invalid x_mode, got {x_mode}"
@@ -754,8 +1072,9 @@ class ActivationModule:
                 axis.set_ylabel(y_label)
 
         if fig is not None:
-            legend = fig.legend(fancybox=True, shadow=True)
-            legend.get_frame().set_alpha(0.4)
+            if legend:
+                legend = fig.legend(fancybox=True, shadow=True)
+                legend.get_frame().set_alpha(0.4)
             fig.tight_layout()
 
             if save_to is not None:
@@ -774,18 +1093,29 @@ class ActivationModule:
     @classmethod
     def export_evolution_graphs(cls, path, name=None, group=None, snap_names=None, layout="auto", video_writer=None, step=None, tag=None,
                                 function=True, inputs=False, gradients_input=False, gradients_output=False, legend=False, **kwargs):
-        """Creates an animation of plots over multiple `snapshots`.
+        """Creates animation over multiple snapshots.
         
         Args:
-            path (str or pathlike): File to save animation to.
-            snap_names (list(str) or list(dict(str, str))): All snapshots to animate over.
-                Each element should be accepted by :func:``~activation_module.ActivationModule.show_function``.
-            layout (str or tuple):
-            video_writer ():
-            step ():
+            path (str or pathlike):
+                Path to save animation to.
+
+            snap_names (list(str) or list(dict(str, str))):
+                All snapshots to animate over.
+                Each element should be accepted by :meth:``ActivationModule.show_function``.
+            
+            video_writer (:class:`torch.utils.tensorboard.SummaryWriter`):
+                Writer to add animation. If writer does not support videos
+                only a log message is produced. 
+            
             tag (str):
-            kwargs: Keyword arguments passed to :func:``~activation_module.ActivationModule.show_function``.
-                * `Kwarg` ``axes`` is ignored.
+                Tag for ``video_writer``.
+            
+            kwargs:
+                For a full list of additional arguments see :meth:``ActivationModule.show_function``.
+
+        Raises:
+            TypeError:
+                If keyword argument ``axes`` is passed.
         """
         if len(snap_names) == 1:
             msg = "At least 2 snapshots must be given, got 1"

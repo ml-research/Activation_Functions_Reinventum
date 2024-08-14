@@ -82,7 +82,10 @@ class NeuronsHistogram:
 
         self.bins[n] = new_bins
 
-    def fill_n(self, input):
+    def fill_n(self, input, ax_idx=0):
+        if ax_idx > 0:  # move neuron axis to first
+            input = input.transpose(0, ax_idx)
+
         if self.bins is None:  # hist is uninitialized
             self.n_neurons = input.shape[0]
             self.initialize()
@@ -115,8 +118,8 @@ class Histogram(NeuronsHistogram):
         super().__init__(bin_size, device)
         self.n_neurons = 1
 
-    def fill_n(self, input):
-        super().fill_n(input.view(1, -1))
+    def fill_n(self, input, ax_idx=None):
+        super().fill_n(input.view(1, -1), ax_idx=0)
     
     @property
     def weights(self):
