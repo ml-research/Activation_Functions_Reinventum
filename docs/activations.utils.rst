@@ -28,14 +28,6 @@ activations.utils.utils module
    :undoc-members:
    :show-inheritance:
 
-activations.utils.warnings module
----------------------------------
-
-.. automodule:: activations.utils.warnings
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
