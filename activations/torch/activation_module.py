@@ -55,6 +55,32 @@ class RegisteredModule:
             
             logger:
                 Logger used. 
+
+        Variables:
+            name (str):
+                Name under which module is registered.
+
+            module (:class:`torch.nn.Module`):
+                Wrapped module.
+            
+            logger:
+                Used logger.
+
+            axis_labels (:class:`OrderedDict`(str, tuple(str, str))):
+                Mapping of snapshot name to (x-axis label, y-axis label).
+
+            snapshots (:class:`OrderedDict`(str, tuple(:meth:~`torch.nn.Module.state_dict`, dict(str, callable), str))):
+                Stores snapshots created by :meth:`RegisteredModule.capture`. Mapping of
+                snapshot name to (``state dict``, ``other_func``, ``label``) where
+                
+                * ``state dict`` is the current state of wrapped module (see :meth:`torch.nn.Module.state_dict`)
+                * ``other_func``, ``label`` are the corresponding parameters in :meth:`RegisteredModule.capture`
+
+            input_distributions (:class:`OrderedDict`(str, :class:~`histogram.NeuronsHistogram`)):
+                Captured distributions of inputs. Mapping of snapshot name to distribution.
+
+            input_gradient_distributions, output_gradient_distributions (:class:`OrderedDict`(str, :class:~`histogram.Histogram`)):
+                Captured distributions of gradients wrt input/output. Mapping of snapshot name to distribution.
         """
         self.name = name
         self._groups = groups
