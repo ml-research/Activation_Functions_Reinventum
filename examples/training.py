@@ -69,6 +69,8 @@ def main(device, num_epochs, batch_size):
 
     optim = torch.optim.SGD(model.parameters(), lr=0.001)
 
+    ActivationModule.set_labels(x_label="X Label", y_label="Y Label")
+
     for e in range(num_epochs):
         # Capture
         #  * a snapshot of current function

@@ -658,6 +658,34 @@ class ActivationModule:
         return [cls._registered_modules[name] for name in module_names]
     
     @classmethod
+    def set_labels(cls, name=None, group=None, x_label=None, y_label=None):
+        """Sets x/y labels for plot axes.
+        
+        Args:
+            x_label, y_label (str, optional):
+                Label for x/y-axis used in plots. If one is given (other is ``None``) changes only the given label.
+                If both are ``None`` removes current labels.
+
+        .. note::
+            Labels are stored in snapshots therefore changes to labels are only taken into account
+            by future calls to :meth:`ActivationModule.create_snapshot`. Changes to existing snapshot 
+            labels must be done manually (see :attr:`RegisteredModule.axis_labels`).
+        """
+        modules = cls._get_modules(name=name, group=group)
+
+        if (x_label is None) and (y_label is None):
+            for mod in modules:
+                mod.set_input_category(None)
+                mod.set_output_category(None)
+            return
+
+        for mod in modules:
+            if x_label is not None:
+                mod.set_input_category(x_label)
+            if y_label is not None:
+                mod.set_output_category(y_label)
+    
+    @classmethod
     def get_snapshots(cls, name=None, group=None):
         """Return all shared snapshots in order.
 
