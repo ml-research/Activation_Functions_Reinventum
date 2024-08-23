@@ -683,7 +683,7 @@ class ActivationModule:
         
         For detailed information see :meth:`ActivationModule.create_snapshot`.
 
-        Note:
+        .. note::
             :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
@@ -708,7 +708,7 @@ class ActivationModule:
         
         For detailed information see :meth:`ActivationModule.create_snapshot`.
 
-        Note:
+        .. note::
             :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
@@ -739,7 +739,7 @@ class ActivationModule:
         
         For detailed information of parameters see :meth:`ActivationModule.create_snapshot`.
 
-        Note:
+        .. note::
             :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
@@ -928,8 +928,9 @@ class ActivationModule:
             fig_kw:
                 Keyword arguments passed to :meth:`matplotlib.pyplot.plt.subplots`. Ignored if ``axes`` is given.
 
-        Note:
-            If a parameter can be passed as :class:`dict` it should have a matching key for each name of selected modules.
+        .. note::
+            If a parameter is allowed to be passed as :class:`dict` it can be specified per module by using module names as keys.
+            In this case the :class:`dict` must have a key matching each module name.
 
 
         .. _subplot layout:
