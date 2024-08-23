@@ -67,10 +67,10 @@ class NeuronsHistogram:
             Width of bins.
 
         bins (list(:class:`torch.Tensor`)):
-            Left edges of bins. Element at index :math:`i` belongs to **i**th histogram.
+            Left edges of bins. Element at index :math:`i` belongs to **ith** histogram.
 
         counts (list(:class:`torch.Tensor`)):
-            Height of bins. Element at index :math:`i` belongs to **i**th histogram.
+            Height of bins. Element at index :math:`i` belongs to **ith** histogram.
 
         n_neurons (int):
             Number of hisograms.
@@ -217,7 +217,7 @@ class Histogram(NeuronsHistogram):
             Width of bins.
 
         bins (list(:class:`torch.Tensor`)):
-            Left edges of bins. Element at index :math:`i` belongs to **i**th histogram.
+            Left edges of bins. Element at index :math:`i` belongs to **ith** histogram.
 
         counts (list(:class:`torch.Tensor`)):
             Height of bins.
