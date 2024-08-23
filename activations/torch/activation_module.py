@@ -39,15 +39,15 @@ def _gradient_hook(registered_module, histogram_input, histogram_output, max_sav
 
 
 class RegisteredModule:
-    """Wrapper for :obj:``torch.nn.Module`` which handles captureing/plotting of data."""
+    """Wrapper for :class:`torch.nn.Module` which handles captureing/plotting of data."""
 
     def __init__(self, name, module, groups, logger):
         """
         Args:
             name (str):
-                Unique ID. Is used for registration in :class:``AcivationModule`` and as label.
+                Unique ID. Is used for registration in :class:`AcivationModule` and as label.
             
-            module (:obj:``torch.nn.Module``):
+            module (:class:`torch.nn.Module`):
                 Wrapped module.
             
             groups (list(hashable)):
@@ -121,7 +121,7 @@ class RegisteredModule:
                 * If ``False`` stop saving inputs.
             
             max_saves (int):
-                After equal number of calls to :meth:``self.module.forward`` stop saving inputs.
+                After equal number of calls to :meth:`self.module.forward` stop saving inputs.
             
             bin_width (float):
                 Width of bins.
@@ -131,7 +131,7 @@ class RegisteredModule:
                 * otherwise should be the index of axis in input tensor
                   that represents number of neurons in layer.
                 
-                Defaults to :param:``ActivationModule._default_irm``.
+                Defaults to :func:`ActivationModule.default_irm`.
             
             label (str, optional):
                 Label for plot legend to use. Defaults to ``'<name>_inputs'``.
@@ -185,7 +185,7 @@ class RegisteredModule:
                 * If ``False`` stop saving inputs.
             
             max_saves (int):
-                After equal number of calls to :meth:``self.module.forward`` stop saving inputs.
+                After equal number of calls to :meth:`self.module.forward` stop saving inputs.
             
             bin_width (float):
                 Width of bins.
@@ -238,7 +238,7 @@ class RegisteredModule:
                 Plot label used. Defaults to ``'<name>'``
             
             returns (bool):
-                If True only return snapshot. In this case snapshot can not be plotted via :obj:``ActivationModule``.
+                If True only return snapshot. In this case snapshot can not be plotted via :class:`ActivationModule`.
         """
         if label is None:
             label = self.name
@@ -261,7 +261,7 @@ class RegisteredModule:
         """Plots data from histogram.
         
         Args:
-            hist (:class:``activations.torch.utils.histogram.NeuronsHistogram``):
+            hist (:class:`activations.torch.utils.histogram.NeuronsHistogram`):
                 Data to plot.
             
             label (str):
@@ -333,9 +333,9 @@ class RegisteredModule:
         
         Args:
             x (any):
-                X-Axis values to plot on. Must be accepted by ``forward`` pass of module and ``other_func`` (see :meth:``RegisteredModule.capture``)
+                X-Axis values to plot on. Must be accepted by ``forward`` pass of module and ``other_func`` (see :meth:`RegisteredModule.capture`)
             
-            axis (``plt.Axes``):
+            axis (:class:`plt.Axes`):
                 Axis to plot on.
             
             next_color (callable, optional):
@@ -384,10 +384,10 @@ class RegisteredModule:
                 Name of snapshot.
             
             tolerance (float):
-                See :meth:``RegisteredModule.plot_histogram``.
+                See :meth:`RegisteredModule.plot_histogram`.
             
             use_kde (bool):
-                See :meth:``RegisteredModule.plot_histogram``.
+                See :meth:`RegisteredModule.plot_histogram`.
         """
         if name is None:
             hist, label = next(reversed(self.input_distributions.values()))
@@ -406,7 +406,7 @@ class RegisteredModule:
     def show_input_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         """Plots captured gradients of output wrt. input.
         
-        See :meth:``RegisteredModule.show_inputs`` for more info.
+        See :meth:`RegisteredModule.show_inputs` for more info.
         """
         if name is None:
             hist, label = next(reversed(self.input_gradient_distributions.values()))
@@ -425,7 +425,7 @@ class RegisteredModule:
     def show_output_gradients(self, axis, color=None, name="snapshot_0", tolerance=0.001, use_kde=False):
         """Plots captured upstream gradients.
         
-        See :meth:``RegisteredModule.show_inputs`` for more info.
+        See :meth:`RegisteredModule.show_inputs` for more info.
         """
         if name is None:
             hist, label = next(reversed(self.output_gradient_distributions.values()))
@@ -444,7 +444,7 @@ class RegisteredModule:
 
 
 class ActivationModule:
-    """Static class which provides functionality to capture/plot data of multiple :class:``torch.nn.Module``."""
+    """Static class which provides functionality to capture/plot data of multiple :class:`torch.nn.Module`."""
 
     _registered_modules = {}  # {module-name: RegisteredModule}
     _snapshot_names = []
@@ -481,11 +481,11 @@ class ActivationModule:
 
     @classmethod
     def default_irm(cls, irm=None):
-        """Setter/Getter for the default input retrieval mode (irm).
+        """Setter/Getter for the default input retrieval mode (**irm**).
         
         Args:
             irm (str or int, optional):
-                See :meth:``RegisteredModule.capture`` for detailed information about irm. If omitted will return current irm.
+                See :meth:`RegisteredModule.capture` for detailed information about **irm**. If omitted will return current **irm**.
         """
         if irm is None:
             return cls._default_irm
@@ -516,7 +516,7 @@ class ActivationModule:
     def set_plotting_style(cls, path=None, rc_params=None, update=False):
         """Set the used ``matplotlib`` style.
          
-        This method will only modify the `rc_params` in local scope.
+        This method will only modify the ``rc_params`` in local scope.
          
         Args:
             path (str or pathlike, optional):
@@ -545,10 +545,10 @@ class ActivationModule:
 
     @classmethod
     def register(cls, module, name, group=None, logger=None):
-        """Registers a :class:``torch.nn.Module``. Registered modules can be captured/plotted.
+        """Registers a :class:`torch.nn.Module`. Registered modules can be captured/plotted.
         
         Args:
-            module (:class:``torch.nn.Module``):
+            module (:class:`torch.nn.Module`):
                 The module to register.
             
             name (str):
@@ -638,7 +638,7 @@ class ActivationModule:
                 Mutually exclusive parameters to filter modules.
                 If both are ``None`` all modules will be returned.
         Returns:
-            modules (list(:class:``RegisteredModule``)):
+            modules (list(:class:`RegisteredModule`)):
                 Found modules.
         """
         
@@ -681,10 +681,10 @@ class ActivationModule:
                          max_saves=1000, bin_width=None, mode=None, label_in=None):
         """Saves inputs of registered modules.
         
-        For detailed information see :meth:``ActivationModule.create_snapshot``.
+        For detailed information see :meth:`ActivationModule.create_snapshot`.
 
         Note:
-            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+            :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
 
@@ -706,10 +706,10 @@ class ActivationModule:
                            max_saves=1000, bin_width=None, label_grad_in=None, label_grad_out=None):
         """Saves gradients of registered modules.
         
-        For detailed information see :meth:``ActivationModule.create_snapshot``.
+        For detailed information see :meth:`ActivationModule.create_snapshot`.
 
         Note:
-            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+            :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
 
@@ -737,10 +737,10 @@ class ActivationModule:
             returns (bool):
                 If ``True`` snapshots are returned and not saved.
         
-        For detailed information of parameters see :meth:``ActivationModule.create_snapshot``.
+        For detailed information of parameters see :meth:`ActivationModule.create_snapshot`.
 
         Note:
-            :meth:``ActivationModule.create_snapshot`` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
+            :meth:`ActivationModule.create_snapshot` should be used for creating snapshots. Otherwise existing snapshots may be overwritten.
         """
         modules = cls._get_modules(name=name, group=group)
 
@@ -784,7 +784,7 @@ class ActivationModule:
                 Labels for inputs/gradients. If given as dict should have a key matching each module name.
             
             irm (str or int):
-                Input retrieval mode. See :meth:``RegisteredModule.capture`` for more information.
+                Input retrieval mode. See :meth:`RegisteredModule.capture` for more information.
             
             function, inputs, gradients (bool):
                 Data to be stored in snapshot.
@@ -870,12 +870,10 @@ class ActivationModule:
                 Snapshot to be used.
             
             x (int or tuple(float, float, int) or array-like):
-                The x-values to plot snapshot on.
+                The x-values to plot snapshot on. Defaults to ``torch.linspace(-3., 3., 100)``.
                     * If ``int`` number of points in interval [-3, 3].
                     * If ``tuple(float, float, int)`` specifies min, max value and number of points.
                     * If ``array-like`` Concrete values to use.
-
-                Defaults to ``torch.linspace(-3., 3., 100)``.
             
             other_func (dict(str, callable)):
                 Other functions to use. Keys are used as plot labels.
@@ -897,7 +895,7 @@ class ActivationModule:
                 should be greater than number of modules to plot or equal to 1, in which case all modules
                 will be plotted in single plot.
             
-            writer (:class:``torch.utils.tensorboard.SummaryWriter``):
+            writer (:class:`torch.utils.tensorboard.SummaryWriter`):
                 Add figure on SummaryWriter. Will add before showing if ``display==True``.
             
             step (int):
@@ -910,15 +908,13 @@ class ActivationModule:
                 If ``True`` each axis uses the module name as title. Otherwise axis have no title.
             
             x_mode (str):
-                Determines how x axis limits are choosen between input histogram range and given parameter ``x``.
+                Determines how x axis limits are choosen between input histogram range and given parameter ``x``. Defaults to ``'expand'``.
                     * If ``'expand'`` expand to greatest range.
                     * If ``'clip'`` clip to smallest range.
                     * If ``'x'`` use only parameter ``x``.
-
-                Defaults to ``'expand'``.
             
             tol_in, tol_grad_in, tol_grad_out (float):
-                Tolerance values for input/gradient histograms (see :meth:``RegisteredModule.plot_histogram``)
+                Tolerance values for input/gradient histograms (see :meth:`RegisteredModule.plot_histogram`)
             
             save_to (str or pathlike):
                 Path to save figure to. File extension must be supported by matplotlib.
@@ -930,10 +926,10 @@ class ActivationModule:
                 Create legend for plot.
             
             fig_kw:
-                Keyword arguments passed to :meth:``matplotlib.pyplot.plt.subplots``. Ignored if ``axes`` is given.
+                Keyword arguments passed to :meth:`matplotlib.pyplot.plt.subplots`. Ignored if ``axes`` is given.
 
         Note:
-            If a parameter can be passed as ``dict`` it should have a matching key for each name of selected modules.
+            If a parameter can be passed as :class:`dict` it should have a matching key for each name of selected modules.
 
 
         .. _subplot layout:
@@ -1101,7 +1097,7 @@ class ActivationModule:
 
             snap_names (list(str) or list(dict(str, str))):
                 All snapshots to animate over.
-                Each element should be accepted by :meth:``ActivationModule.show_function``.
+                Each element should be accepted by :meth:`ActivationModule.show_function`.
             
             video_writer (:class:`torch.utils.tensorboard.SummaryWriter`):
                 Writer to add animation. If writer does not support videos
@@ -1111,7 +1107,7 @@ class ActivationModule:
                 Tag for ``video_writer``.
             
             kwargs:
-                For a full list of additional arguments see :meth:``ActivationModule.show_function``.
+                For a full list of additional arguments see :meth:`ActivationModule.show_function`.
 
         Raises:
             TypeError:
