@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.utils.rational_json &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../activations.html">activations namespace</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">activations.utils.rational_json</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for activations.utils.rational_json</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Provides functions to store and load Rationals in json format.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+
+<div class="viewcode-block" id="JsonHandler"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler">[docs]</a><span class="k">class</span> <span class="nc">JsonHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manages read/write operations on a json file.</span>
+<span class="sd">    </span>
+<span class="sd">    Managed json files have the following format:</span>
+<span class="sd">    </span>
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        {&lt;version&gt;&lt;N&gt;/&lt;M&gt;</span>
+<span class="sd">            {&lt;func&gt;</span>
+<span class="sd">                {</span>
+<span class="sd">                    &quot;numerator&quot;: &lt;weights&gt;,</span>
+<span class="sd">                    &quot;denominator&quot;: &lt;weights&gt; </span>
+<span class="sd">                }</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_json_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">_known_rationals</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_read_data</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads a json file.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            path (str or pathlike):</span>
+<span class="sd">                Path of file.</span>
+<span class="sd">                </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                The key-value pairs read.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fin</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_write_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Writes to a json file.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict):</span>
+<span class="sd">                Data to write.</span>
+<span class="sd">            </span>
+<span class="sd">            path (str or pathlike):</span>
+<span class="sd">                Path of destination file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;wt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fout</span><span class="p">)</span>
+
+<div class="viewcode-block" id="JsonHandler.set_current"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler.set_current">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_current</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets a file to be used by future store/load operations.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            path (str or pathlike):</span>
+<span class="sd">                Destination file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> 
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_known_rationals</span> <span class="o">=</span> <span class="p">{</span><span class="n">version</span><span class="p">:</span> <span class="p">[</span><span class="n">func</span> <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="n">version</span><span class="p">]]</span> <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">data</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="JsonHandler.create"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a new json file.</span>
+<span class="sd">        </span>
+<span class="sd">        The file is used for future store/load operations.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            path (str or pathlike):</span>
+<span class="sd">                Path of new file.</span>
+<span class="sd">            copy (bool):</span>
+<span class="sd">                Copy data of old file to new file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str:</span>
+<span class="sd">                Absolute path of new file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_path</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">new_path</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">):</span> <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_write_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">set_current</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_path</span></div>
+
+<div class="viewcode-block" id="JsonHandler.is_stored"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler.is_stored">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">is_stored</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if rational is stored in json.&quot;&quot;&quot;</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">version</span><span class="si">}{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">version</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_known_rationals</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_known_rationals</span><span class="p">[</span><span class="n">version</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="JsonHandler.load"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler.load">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads weights of rational.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            version (str):</span>
+<span class="sd">                Version of :class:`~activations.torch.rationals.rationals.Rational`.</span>
+
+<span class="sd">            degrees (tuple(int, int)):</span>
+<span class="sd">                Degrees of numerator and denominator.</span>
+
+<span class="sd">            name (str):</span>
+<span class="sd">                Name of approximated function.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numerator (list(float)):</span>
+<span class="sd">                The weights for numerator.</span>
+
+<span class="sd">            denominator (list(float)):</span>
+<span class="sd">                The weights for denominator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span><span class="p">)</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">version</span><span class="si">}{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;numerator&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;denominator&quot;</span><span class="p">]</span></div>
+    
+<div class="viewcode-block" id="JsonHandler.store"><a class="viewcode-back" href="../../../activations.utils.html#activations.utils.rational_json.JsonHandler.store">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">store</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stores numerator/denominator weights.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            version (str):</span>
+<span class="sd">                The version of rational.</span>
+<span class="sd">                </span>
+<span class="sd">            degrees (str):</span>
+<span class="sd">                The degrees of the polynominals.</span>
+<span class="sd">                </span>
+<span class="sd">            name (str):</span>
+<span class="sd">                The name of the approximated function.</span>
+<span class="sd">                </span>
+<span class="sd">            numerator, denominator (list(float)):</span>
+<span class="sd">                The weights to store.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># numerator, denominator must be lists</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">version</span><span class="si">}{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">degrees</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_read_data</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_known_rationals</span><span class="p">[</span><span class="n">version</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">version</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;numerator&quot;</span><span class="p">:</span> <span class="n">numerator</span><span class="p">,</span> <span class="s2">&quot;denominator&quot;</span><span class="p">:</span> <span class="n">denominator</span><span class="p">}</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_write_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_json_file</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_known_rationals</span><span class="p">[</span><span class="n">version</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.torch.learnable_activations.rationals.rationals &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../activations.html">activations namespace</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">activations.torch.learnable_activations.rationals.rationals</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for activations.torch.learnable_activations.rationals.rationals</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Rational Activation Functions for Pytorch</span>
+<span class="sd">=========================================</span>
+
+<span class="sd">This module allows you to create Rational Neural Networks using Learnable</span>
+<span class="sd">Rational activation functions with Pytorch networks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span>
+
+<span class="kn">from</span> <span class="nn">activations.torch.activation_module</span> <span class="kn">import</span> <span class="n">ActivationModule</span>
+<span class="kn">from</span> <span class="nn">activations.utils.utils</span> <span class="kn">import</span> <span class="n">find_closest_equivalent</span>
+<span class="kn">from</span> <span class="nn">activations.utils.rational_json</span> <span class="kn">import</span> <span class="n">JsonHandler</span>
+<span class="kn">from</span> <span class="nn">activations.torch.learnable_activations.rationals.functions</span> <span class="kn">import</span> <span class="n">rational_A</span><span class="p">,</span> <span class="n">rational_B</span><span class="p">,</span> <span class="n">rational_C</span><span class="p">,</span> <span class="n">rational_D</span><span class="p">,</span> <span class="n">rational_nonsafe</span><span class="p">,</span> <span class="n">rational_spline</span>
+
+
+
+<span class="k">def</span> <span class="nf">_get_rational_fn</span><span class="p">(</span><span class="n">version</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_A</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;B&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_B</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_C</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_D</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_nonsafe</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rational_spline</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported version, got </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> expected one of [A, B, C, D, N, S]&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="find_weights"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.find_weights">[docs]</a><span class="k">def</span> <span class="nf">find_weights</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">version</span><span class="p">,</span> <span class="o">**</span><span class="n">scipyargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Approximates any function using a rational.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable):</span>
+<span class="sd">            The target function.</span>
+
+<span class="sd">        x (array_like):</span>
+<span class="sd">            Input data.</span>
+
+<span class="sd">        degrees (tuple(int, int)):</span>
+<span class="sd">            Number of weights for (numerator, denominator).</span>
+<span class="sd">        </span>
+<span class="sd">        scipyargs:</span>
+<span class="sd">            Additional arguments passed to :func:`scipy.optimize.cuve_fit` (parameter ``method`` is ``&#39;lm&#39;``).</span>
+<span class="sd">            Using any of ``f``, ``xdata``, ``ydata``, ``p0``, ``method``, ``full_output`` in ``scipyargs`` will raise</span>
+<span class="sd">            an Exception.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        w_numerator, w_denominator (list(float)):</span>
+<span class="sd">            Found weights for numerator/denominator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_num</span><span class="p">,</span> <span class="n">n_denom</span> <span class="o">=</span> <span class="n">degrees</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;RARE&quot;</span><span class="p">:</span>
+        <span class="n">n_num</span> <span class="o">-=</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span>
+        <span class="n">n_denom</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">n_total</span> <span class="o">=</span> <span class="n">n_num</span> <span class="o">+</span> <span class="n">n_denom</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">rat_fn</span> <span class="o">=</span> <span class="n">_get_rational_fn</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;RARE&quot;</span><span class="p">:</span>
+        <span class="n">k1</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">k2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">rational</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">rat_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">params</span><span class="p">[:</span><span class="n">n_num</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">n_num</span><span class="p">:]))</span>
+            <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">k1</span> <span class="o">*</span> <span class="n">k2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">rational</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">rat_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">params</span><span class="p">[:</span><span class="n">n_num</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">n_num</span><span class="p">:]))</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;RARE&quot;</span><span class="p">:</span>
+        <span class="n">w_init</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_total</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w_init</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_total</span><span class="p">)</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">curve_fit</span><span class="p">(</span>
+        <span class="n">f</span><span class="o">=</span><span class="n">rational</span><span class="p">,</span>
+        <span class="n">xdata</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+        <span class="n">ydata</span><span class="o">=</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">p0</span><span class="o">=</span><span class="n">w_init</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lm&quot;</span><span class="p">,</span>
+        <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">scipyargs</span>
+    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">w_numerator</span><span class="p">,</span> <span class="n">w_denominator</span> <span class="o">=</span> <span class="n">params</span><span class="p">[:</span><span class="n">n_num</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="n">n_num</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">w_numerator</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">w_denominator</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="RationalBase"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.RationalBase">[docs]</a><span class="k">class</span> <span class="nc">RationalBase</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="n">ActivationModule</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_fitted_function</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="RationalBase.fit"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.RationalBase.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the parameters a, b, c, and d to have the neurally equivalent </span>
+<span class="sd">        function of the provided one as close as possible to this rational</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            function (callable):</span>
+<span class="sd">                The function you want to fit to rational.</span>
+
+<span class="sd">            x (array):</span>
+<span class="sd">                The range on which the curves of the functions are fitted</span>
+<span class="sd">                together.</span>
+<span class="sd">                Defaults to ``np.arange(-3., 3., 0.1)``.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            ((a, b, c, d), dist):</span>
+<span class="sd">                The parameters to adjust the function</span>
+<span class="sd">                (vertical and horizontal scales and bias)</span>
+<span class="sd">                and the final distance between the rational function and the</span>
+<span class="sd">                fitted one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">find_closest_equivalent</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="n">distance</span></div>
+
+<div class="viewcode-block" id="RationalBase.best_fit"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.RationalBase.best_fit">[docs]</a>    <span class="k">def</span> <span class="nf">best_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functions</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the distance between the rational and other functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            functions (list(callable)):</span>
+<span class="sd">                The other functions.</span>
+<span class="sd">            x (array):</span>
+<span class="sd">                The range on which the distance is computed.</span>
+<span class="sd">                Defaults to ``np.arange(-3., 3., 0.1)``.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            best_func (callable):</span>
+<span class="sd">                The function with minimal distance to rational.</span>
+
+<span class="sd">            best_params (tuple): </span>
+<span class="sd">                The parameters to adjust the function</span>
+<span class="sd">                (vertical and horizontal scales and bias).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">best_params</span><span class="p">,</span> <span class="n">min_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">functions</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">best_func</span> <span class="o">=</span> <span class="n">functions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">functions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="n">distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">min_dist</span> <span class="o">&gt;</span> <span class="n">distance</span><span class="p">:</span>
+                <span class="n">min_dist</span> <span class="o">=</span> <span class="n">distance</span>
+                <span class="n">best_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+                <span class="n">best_func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">return</span> <span class="n">best_func</span><span class="p">,</span> <span class="n">best_params</span></div></div>
+
+
+<div class="viewcode-block" id="Rational"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.Rational">[docs]</a><span class="k">class</span> <span class="nc">Rational</span><span class="p">(</span><span class="n">RationalBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Rational activation function.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        init (str, callable or None):</span>
+<span class="sd">            Method of weight initiaization.</span>
+<span class="sd">            </span>
+<span class="sd">            * If of type ``str`` will attempt to load corresponding weights from json.</span>
+<span class="sd">            * If ``callable`` must have two arguments. The first is the number of weights to return</span>
+<span class="sd">              and the second is ``True`` for numerator and ``False`` for denominator. Should return</span>
+<span class="sd">              a ``torch.Tensor``.</span>
+<span class="sd">            * If ``None`` numerator and denominator will be initialized uniformly in `[0, 1]`.</span>
+<span class="sd">        </span>
+<span class="sd">        degrees (tuple(int, int)):</span>
+<span class="sd">            The degree of the polynominal for numerator (``degrees[0]``) and denominator (``degrees[1]``).</span>
+
+<span class="sd">        device (:class:`torch.device`):</span>
+<span class="sd">            The device the rational is moved to after initialization.</span>
+
+<span class="sd">        version (str):</span>
+<span class="sd">            The :obj:`version &lt;activations.torch.learnable_activations.rationals.functions&gt;` to use.</span>
+<span class="sd">            Can be any of ``&#39;A&#39;``, ``&#39;B&#39;``, ``&#39;C&#39;``, ``&#39;D&#39;``, ``&#39;N&#39;``, ``&#39;S&#39;``.</span>
+
+<span class="sd">        train_numerator, train_denominator (bool):</span>
+<span class="sd">            If ``True`` gradients for numerator/denominator will be computed.</span>
+
+<span class="sd">        name, group:</span>
+<span class="sd">            The parameters to identify rational. See parameters ``name``, ``group`` in :meth:`.ActivationModule.register`.</span>
+
+<span class="sd">        logger:</span>
+<span class="sd">            Logger used by rational.</span>
+
+<span class="sd">        kwargs:</span>
+<span class="sd">            Additional parameters specific to version. Allowed args are:</span>
+
+<span class="sd">            * ``k`` for version ``S``</span>
+<span class="sd">            * ``noise_deviation`` for version ``D``.</span>
+
+<span class="sd">    Variables:</span>
+<span class="sd">        numerator, denominator (:class:`torch.nn.Parameter`):</span>
+<span class="sd">            The parameters used in forward/backward pass.</span>
+
+<span class="sd">        degrees (tuple(int, int)):</span>
+<span class="sd">            The degrees of the two polynominals.</span>
+
+<span class="sd">        version (str):</span>
+<span class="sd">            The currently used version.</span>
+
+<span class="sd">        init_approximation (str):</span>
+<span class="sd">            The initialization used.</span>
+
+<span class="sd">        activation_function (callable):</span>
+<span class="sd">            The actual function which computes the rational.</span>
+
+<span class="sd">        version_kwargs (dict):</span>
+<span class="sd">            Any additional arguments that should be passed to actual function.</span>
+
+<span class="sd">        noise_deviation (float):</span>
+<span class="sd">            If version is ``D`` holds the :func:`deviation &lt;.rational_D&gt;` for the uniform distribution. Otherwise unassigned.</span>
+
+<span class="sd">        k (float):</span>
+<span class="sd">            If version is ``S`` holds the parameter :func:`k &lt;.rational_spline&gt;`. Otherwise attribute unassigned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+                 <span class="n">version</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">train_numerator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train_denominator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Rational&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+
+        <span class="n">n_num</span><span class="p">,</span> <span class="n">n_denom</span> <span class="o">=</span> <span class="n">degrees</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">w_numerator</span><span class="p">,</span> <span class="n">w_denominator</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span> <span class="k">for</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">JsonHandler</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">init</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w_numerator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_num</span><span class="p">)</span>
+            <span class="n">w_denominator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_denom</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w_numerator</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="n">n_num</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="n">w_denominator</span> <span class="o">=</span> <span class="n">init</span><span class="p">(</span><span class="n">n_denom</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">w_numerator</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="n">train_numerator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">w_denominator</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="n">train_denominator</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">degrees</span> <span class="o">=</span> <span class="n">degrees</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_approximation</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_function</span> <span class="o">=</span> <span class="n">_get_rational_fn</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;noise_deviation&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">noise_deviation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;noise_deviation&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">noise_deviation</span> <span class="o">=</span> <span class="mf">0.1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;noise_deviation&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">noise_deviation</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version_kwargs</span><span class="p">[</span><span class="s2">&quot;noise_deviation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_deviation</span>
+        <span class="k">elif</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;k&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="mf">2.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version_kwargs</span><span class="p">[</span><span class="s2">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">k</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Rational.forward"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.Rational.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">version_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Rational.change_version"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.Rational.change_version">[docs]</a>    <span class="k">def</span> <span class="nf">change_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Change the version of the rational.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            version (str):</span>
+<span class="sd">                The new version to change to. Versions ``S``, ```D`` can not be change from or to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">version</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rationals of version &#39;S&#39; or &#39;D&#39; can not be changed, got change from version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_function</span> <span class="o">=</span> <span class="n">_get_rational_fn</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span></div></div>
+
+
+<div class="viewcode-block" id="RARE"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.RARE">[docs]</a><span class="k">class</span> <span class="nc">RARE</span><span class="p">(</span><span class="n">Rational</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RARE as proposed by `Authors &lt;link&gt;`_.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        name, group:</span>
+<span class="sd">            The parameters to identify rational. See parameters ``name``, ``group`` in :meth:`.ActivationModule.register`.</span>
+
+<span class="sd">        init, degrees, device, train_numerator, train_denominator, logger:</span>
+<span class="sd">            See parameters in :class:`.Rational`.</span>
+
+<span class="sd">        k (float):</span>
+<span class="sd">            Offset added before ``ReLU``.</span>
+
+<span class="sd">        k_trainable (bool):</span>
+<span class="sd">            If ``True`` gradients for ``k`` are computed in backward pass.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RARE&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+                 <span class="n">train_numerator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train_denominator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mf">2.</span><span class="p">,</span> <span class="n">k_trainable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="n">degrees</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+                         <span class="n">version</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">train_numerator</span><span class="o">=</span><span class="n">train_numerator</span><span class="p">,</span> <span class="n">train_denominator</span><span class="o">=</span><span class="n">train_denominator</span><span class="p">,</span>
+                         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">FloatTensor</span><span class="p">([</span><span class="n">k</span><span class="p">]),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="n">k_trainable</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RARE.forward"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.RARE.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">))</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="EmbeddedRational"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.EmbeddedRational">[docs]</a><span class="k">class</span> <span class="nc">EmbeddedRational</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiple chained rationals.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\begin{aligned}</span>
+<span class="sd">            \\text{Let }f_0,...,f_n\\text{ be rationals, }X\\text{ be any input.} \\\\</span>
+<span class="sd">            y=f_0(f_1(...f_n(X)</span>
+<span class="sd">        \\end{aligned}</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        name (str):</span>
+<span class="sd">            The base name of each :class:`.Rational`. The **ith** rational will be registered under ``f&#39;{name}({i})&#39;``.</span>
+<span class="sd">            </span>
+<span class="sd">        group, init, degrees, device, version, train_numerator, train_denominator, logger:</span>
+<span class="sd">            Parameters passed to each :class:`.Rational`.</span>
+<span class="sd">        </span>
+<span class="sd">        num_rationals (int):</span>
+<span class="sd">            Number of rationals.</span>
+
+<span class="sd">        rat_kwargs:</span>
+<span class="sd">            Version specific arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EmbeddedRational&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">degrees</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">num_rationals</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                 <span class="n">train_numerator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train_denominator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">rat_kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_rationals</span> <span class="o">=</span> <span class="n">num_rationals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successive_rats</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Rational</span><span class="p">(</span>
+                <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="n">degrees</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+                <span class="n">train_numerator</span><span class="o">=</span><span class="n">train_numerator</span><span class="p">,</span> <span class="n">train_denominator</span><span class="o">=</span><span class="n">train_denominator</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">rat_kwargs</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_rationals</span><span class="p">)</span>
+        <span class="p">]</span>
+
+<div class="viewcode-block" id="EmbeddedRational.forward"><a class="viewcode-back" href="../../../../../activations.torch.learnable_activations.rationals.html#activations.torch.learnable_activations.rationals.rationals.EmbeddedRational.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">rat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">successive_rats</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">rat</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

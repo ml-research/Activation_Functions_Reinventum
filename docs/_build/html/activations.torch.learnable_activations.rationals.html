@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.torch.learnable_activations.rationals package &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="activations.torch.utils package" href="activations.torch.utils.html" />
+    <link rel="prev" title="activations.torch.learnable_activations package" href="activations.torch.learnable_activations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="activations.html">activations namespace</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="activations.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="activations.torch.html">activations.torch package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="activations.torch.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch.activation_module">activations.torch.activation_module module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch.classic_activations">activations.torch.classic_activations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.utils.html">activations.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="activations.html">activations namespace</a></li>
+          <li class="breadcrumb-item"><a href="activations.torch.html">activations.torch package</a></li>
+          <li class="breadcrumb-item"><a href="activations.torch.learnable_activations.html">activations.torch.learnable_activations package</a></li>
+      <li class="breadcrumb-item active">activations.torch.learnable_activations.rationals package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/activations.torch.learnable_activations.rationals.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="activations-torch-learnable-activations-rationals-package">
+<h1>activations.torch.learnable_activations.rationals package<a class="headerlink" href="#activations-torch-learnable-activations-rationals-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-activations.torch.learnable_activations.rationals.functions">
+<span id="activations-torch-learnable-activations-rationals-functions-module"></span><h2>activations.torch.learnable_activations.rationals.functions module<a class="headerlink" href="#module-activations.torch.learnable_activations.rationals.functions" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_A">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_A</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_A"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_A" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <span class="math notranslate nohighlight">\(f(x)=\frac{\sum_i^Na_ix^i}{1+\sum_i^M|b_ix^i|}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_B">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_B</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_B"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_B" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <span class="math notranslate nohighlight">\(f(x)=\frac{\sum_i^Na_ix^i}{1+|\sum_i^Mb_ix^i|}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_C">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_C</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_C"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_C" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <span class="math notranslate nohighlight">\(f(x)=\frac{\sum_i^Na_ix^i}{|\sum_i^Mb_ix^i|}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_D">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_deviation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_D" title="Permalink to this definition"></a></dt>
+<dd><p>Computes version <strong>B</strong> but with noise added to numerator.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{cases}
+    \text{let }c\text{be sampled from uniform distribution }\mathcal{U} \\
+    f(x)=\frac{\sum_i^Na_ix^ic_i}{1+|\sum_i^Mb_ix^i|}
+\end{cases}\end{split}\]</div>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+<dt>noise_deviation (float):</dt><dd><p>Specifies noise distribution <span class="math notranslate nohighlight">\(\mathcal{U}=\frac{1}{2\sigma}\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_nonsafe">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_nonsafe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_nonsafe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_nonsafe" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <span class="math notranslate nohighlight">\(f(x)=\frac{\sum_i^Na_ix^i}{1+\sum_i^Mb_ix^i}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Can result in division by zero.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.functions.rational_spline">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.functions.</span></span><span class="sig-name descname"><span class="pre">rational_spline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_numerator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_denominator</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/functions.html#rational_spline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.functions.rational_spline" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <span class="math notranslate nohighlight">\(f(x)=\frac{\sum_i^Na_ix^i\cdot\text{max}\{0, x_i+k\}\cdot\text{min}\{0, x_i-k\}}{1+|\sum_i^Mb_ix^i|}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs of any shape. Will be treated as 1D tensor.</p>
+</dd>
+<dt>weight_numerator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(N\)</span>.</p>
+</dd>
+<dt>weight_denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Tensor of shape <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+<dt>k (float):</dt><dd><p>Parameter <span class="math notranslate nohighlight">\(k\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>:</dt><dd><p>Tensor of same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-activations.torch.learnable_activations.rationals.rationals">
+<span id="activations-torch-learnable-activations-rationals-rationals-module"></span><h2>activations.torch.learnable_activations.rationals.rationals module<a class="headerlink" href="#module-activations.torch.learnable_activations.rationals.rationals" title="Permalink to this heading"></a></h2>
+<section id="rational-activation-functions-for-pytorch">
+<h3>Rational Activation Functions for Pytorch<a class="headerlink" href="#rational-activation-functions-for-pytorch" title="Permalink to this heading"></a></h3>
+<p>This module allows you to create Rational Neural Networks using Learnable
+Rational activation functions with Pytorch networks.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.EmbeddedRational">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.rationals.</span></span><span class="sig-name descname"><span class="pre">EmbeddedRational</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EmbeddedRational'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_rationals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_numerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_denominator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">rat_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#EmbeddedRational"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.EmbeddedRational" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Multiple chained rationals.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+    \text{Let }f_0,...,f_n\text{ be rationals, }X\text{ be any input.} \\
+    y=f_0(f_1(...f_n(X)
+\end{aligned}\end{split}\]</div>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>The base name of each <a class="reference internal" href="#activations.torch.learnable_activations.rationals.rationals.Rational" title="activations.torch.learnable_activations.rationals.rationals.Rational"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rational</span></code></a>. The <strong>ith</strong> rational will be registered under <code class="docutils literal notranslate"><span class="pre">f'{name}({i})'</span></code>.</p>
+</dd>
+<dt>group, init, degrees, device, version, train_numerator, train_denominator, logger:</dt><dd><p>Parameters passed to each <a class="reference internal" href="#activations.torch.learnable_activations.rationals.rationals.Rational" title="activations.torch.learnable_activations.rationals.rationals.Rational"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rational</span></code></a>.</p>
+</dd>
+<dt>num_rationals (int):</dt><dd><p>Number of rationals.</p>
+</dd>
+<dt>rat_kwargs:</dt><dd><p>Version specific arguments.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.EmbeddedRational.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#EmbeddedRational.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.EmbeddedRational.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.EmbeddedRational.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.EmbeddedRational.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RARE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.rationals.</span></span><span class="sig-name descname"><span class="pre">RARE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RARE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_numerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_denominator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#RARE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RARE" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#activations.torch.learnable_activations.rationals.rationals.Rational" title="activations.torch.learnable_activations.rationals.rationals.Rational"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rational</span></code></a></p>
+<p>RARE as proposed by <a class="reference external" href="link">Authors</a>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>The parameters to identify rational. See parameters <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">group</span></code> in <a class="reference internal" href="activations.torch.html#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.register()</span></code></a>.</p>
+</dd>
+<dt>init, degrees, device, train_numerator, train_denominator, logger:</dt><dd><p>See parameters in <a class="reference internal" href="#activations.torch.learnable_activations.rationals.rationals.Rational" title="activations.torch.learnable_activations.rationals.rationals.Rational"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rational</span></code></a>.</p>
+</dd>
+<dt>k (float):</dt><dd><p>Offset added before <code class="docutils literal notranslate"><span class="pre">ReLU</span></code>.</p>
+</dd>
+<dt>k_trainable (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> gradients for <code class="docutils literal notranslate"><span class="pre">k</span></code> are computed in backward pass.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RARE.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#RARE.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RARE.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RARE.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RARE.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.Rational">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.rationals.</span></span><span class="sig-name descname"><span class="pre">Rational</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_numerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_denominator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Rational'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#Rational"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.Rational" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#activations.torch.learnable_activations.rationals.rationals.RationalBase" title="activations.torch.learnable_activations.rationals.rationals.RationalBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">RationalBase</span></code></a></p>
+<p>A Rational activation function.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>init (str, callable or None):</dt><dd><p>Method of weight initiaization.</p>
+<ul class="simple">
+<li><p>If of type <code class="docutils literal notranslate"><span class="pre">str</span></code> will attempt to load corresponding weights from json.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">callable</span></code> must have two arguments. The first is the number of weights to return
+and the second is <code class="docutils literal notranslate"><span class="pre">True</span></code> for numerator and <code class="docutils literal notranslate"><span class="pre">False</span></code> for denominator. Should return
+a <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code> numerator and denominator will be initialized uniformly in <cite>[0, 1]</cite>.</p></li>
+</ul>
+</dd>
+<dt>degrees (tuple(int, int)):</dt><dd><p>The degree of the polynominal for numerator (<code class="docutils literal notranslate"><span class="pre">degrees[0]</span></code>) and denominator (<code class="docutils literal notranslate"><span class="pre">degrees[1]</span></code>).</p>
+</dd>
+<dt>device (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.device</span></code>):</dt><dd><p>The device the rational is moved to after initialization.</p>
+</dd>
+<dt>version (str):</dt><dd><p>The <a class="reference internal" href="#module-activations.torch.learnable_activations.rationals.functions" title="activations.torch.learnable_activations.rationals.functions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span></code></a> to use.
+Can be any of <code class="docutils literal notranslate"><span class="pre">'A'</span></code>, <code class="docutils literal notranslate"><span class="pre">'B'</span></code>, <code class="docutils literal notranslate"><span class="pre">'C'</span></code>, <code class="docutils literal notranslate"><span class="pre">'D'</span></code>, <code class="docutils literal notranslate"><span class="pre">'N'</span></code>, <code class="docutils literal notranslate"><span class="pre">'S'</span></code>.</p>
+</dd>
+<dt>train_numerator, train_denominator (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> gradients for numerator/denominator will be computed.</p>
+</dd>
+<dt>name, group:</dt><dd><p>The parameters to identify rational. See parameters <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">group</span></code> in <a class="reference internal" href="activations.torch.html#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by rational.</p>
+</dd>
+<dt>kwargs:</dt><dd><p>Additional parameters specific to version. Allowed args are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> for version <code class="docutils literal notranslate"><span class="pre">S</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">noise_deviation</span></code> for version <code class="docutils literal notranslate"><span class="pre">D</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Variables:</dt><dd><dl class="simple">
+<dt>numerator, denominator (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Parameter</span></code>):</dt><dd><p>The parameters used in forward/backward pass.</p>
+</dd>
+<dt>degrees (tuple(int, int)):</dt><dd><p>The degrees of the two polynominals.</p>
+</dd>
+<dt>version (str):</dt><dd><p>The currently used version.</p>
+</dd>
+<dt>init_approximation (str):</dt><dd><p>The initialization used.</p>
+</dd>
+<dt>activation_function (callable):</dt><dd><p>The actual function which computes the rational.</p>
+</dd>
+<dt>version_kwargs (dict):</dt><dd><p>Any additional arguments that should be passed to actual function.</p>
+</dd>
+<dt>noise_deviation (float):</dt><dd><p>If version is <code class="docutils literal notranslate"><span class="pre">D</span></code> holds the <a class="reference internal" href="#activations.torch.learnable_activations.rationals.functions.rational_D" title="activations.torch.learnable_activations.rationals.functions.rational_D"><code class="xref py py-func docutils literal notranslate"><span class="pre">deviation</span></code></a> for the uniform distribution. Otherwise unassigned.</p>
+</dd>
+<dt>k (float):</dt><dd><p>If version is <code class="docutils literal notranslate"><span class="pre">S</span></code> holds the parameter <a class="reference internal" href="#activations.torch.learnable_activations.rationals.functions.rational_spline" title="activations.torch.learnable_activations.rationals.functions.rational_spline"><code class="xref py py-func docutils literal notranslate"><span class="pre">k</span></code></a>. Otherwise attribute unassigned.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.Rational.change_version">
+<span class="sig-name descname"><span class="pre">change_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#Rational.change_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.Rational.change_version" title="Permalink to this definition"></a></dt>
+<dd><p>Change the version of the rational.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>version (str):</dt><dd><p>The new version to change to. Versions <code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">`D</span></code> can not be change from or to.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.Rational.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#Rational.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.Rational.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.Rational.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.Rational.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RationalBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.rationals.</span></span><span class="sig-name descname"><span class="pre">RationalBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#RationalBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RationalBase" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RationalBase.best_fit">
+<span class="sig-name descname"><span class="pre">best_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#RationalBase.best_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RationalBase.best_fit" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the distance between the rational and other functions.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>functions (list(callable)):</dt><dd><p>The other functions.</p>
+</dd>
+<dt>x (array):</dt><dd><p>The range on which the distance is computed.
+Defaults to <code class="docutils literal notranslate"><span class="pre">np.arange(-3.,</span> <span class="pre">3.,</span> <span class="pre">0.1)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>best_func (callable):</dt><dd><p>The function with minimal distance to rational.</p>
+</dd>
+<dt>best_params (tuple): </dt><dd><p>The parameters to adjust the function
+(vertical and horizontal scales and bias).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RationalBase.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#RationalBase.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RationalBase.fit" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the parameters a, b, c, and d to have the neurally equivalent 
+function of the provided one as close as possible to this rational
+function.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>function (callable):</dt><dd><p>The function you want to fit to rational.</p>
+</dd>
+<dt>x (array):</dt><dd><p>The range on which the curves of the functions are fitted
+together.
+Defaults to <code class="docutils literal notranslate"><span class="pre">np.arange(-3.,</span> <span class="pre">3.,</span> <span class="pre">0.1)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>((a, b, c, d), dist):</dt><dd><p>The parameters to adjust the function
+(vertical and horizontal scales and bias)
+and the final distance between the rational function and the
+fitted one.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.RationalBase.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.RationalBase.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.learnable_activations.rationals.rationals.find_weights">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.learnable_activations.rationals.rationals.</span></span><span class="sig-name descname"><span class="pre">find_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">degrees</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">scipyargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/learnable_activations/rationals/rationals.html#find_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.learnable_activations.rationals.rationals.find_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Approximates any function using a rational.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>func (callable):</dt><dd><p>The target function.</p>
+</dd>
+<dt>x (array_like):</dt><dd><p>Input data.</p>
+</dd>
+<dt>degrees (tuple(int, int)):</dt><dd><p>Number of weights for (numerator, denominator).</p>
+</dd>
+<dt>scipyargs:</dt><dd><p>Additional arguments passed to <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.cuve_fit()</span></code> (parameter <code class="docutils literal notranslate"><span class="pre">method</span></code> is <code class="docutils literal notranslate"><span class="pre">'lm'</span></code>).
+Using any of <code class="docutils literal notranslate"><span class="pre">f</span></code>, <code class="docutils literal notranslate"><span class="pre">xdata</span></code>, <code class="docutils literal notranslate"><span class="pre">ydata</span></code>, <code class="docutils literal notranslate"><span class="pre">p0</span></code>, <code class="docutils literal notranslate"><span class="pre">method</span></code>, <code class="docutils literal notranslate"><span class="pre">full_output</span></code> in <code class="docutils literal notranslate"><span class="pre">scipyargs</span></code> will raise
+an Exception.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>w_numerator, w_denominator (list(float)):</dt><dd><p>Found weights for numerator/denominator.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-activations.torch.learnable_activations.rationals">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-activations.torch.learnable_activations.rationals" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="activations.torch.learnable_activations.html" class="btn btn-neutral float-left" title="activations.torch.learnable_activations package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="activations.torch.utils.html" class="btn btn-neutral float-right" title="activations.torch.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

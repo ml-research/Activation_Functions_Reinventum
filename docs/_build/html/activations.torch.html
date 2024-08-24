@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.torch package &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="activations.torch.learnable_activations package" href="activations.torch.learnable_activations.html" />
+    <link rel="prev" title="activations namespace" href="activations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="activations.html">activations namespace</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="activations.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">activations.torch package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-activations.torch.activation_module">activations.torch.activation_module module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-activations.torch.classic_activations">activations.torch.classic_activations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-activations.torch">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.utils.html">activations.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="activations.html">activations namespace</a></li>
+      <li class="breadcrumb-item active">activations.torch package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/activations.torch.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="activations-torch-package">
+<h1>activations.torch package<a class="headerlink" href="#activations-torch-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="activations.torch.learnable_activations.html">activations.torch.learnable_activations package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.learnable_activations.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.learnable_activations.rationals.html">activations.torch.learnable_activations.rationals package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.rationals.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.rationals.html#module-activations.torch.learnable_activations.rationals.functions">activations.torch.learnable_activations.rationals.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.rationals.html#module-activations.torch.learnable_activations.rationals.rationals">activations.torch.learnable_activations.rationals.rationals module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.rationals.html#module-activations.torch.learnable_activations.rationals">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.learnable_activations.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.learnable_activations.html#module-activations.torch.learnable_activations.tent_activations">activations.torch.learnable_activations.tent_activations module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.BiTentActivation"><code class="docutils literal notranslate"><span class="pre">BiTentActivation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.BiTentActivation.forward"><code class="docutils literal notranslate"><span class="pre">BiTentActivation.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.BiTentActivation.training"><code class="docutils literal notranslate"><span class="pre">BiTentActivation.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.TentActivation"><code class="docutils literal notranslate"><span class="pre">TentActivation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.TentActivation.forward"><code class="docutils literal notranslate"><span class="pre">TentActivation.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.TentActivation.learnable"><code class="docutils literal notranslate"><span class="pre">TentActivation.learnable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.TentActivation.training"><code class="docutils literal notranslate"><span class="pre">TentActivation.training</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.bitent_activation"><code class="docutils literal notranslate"><span class="pre">bitent_activation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.learnable_activations.html#activations.torch.learnable_activations.tent_activations.tent_activation"><code class="docutils literal notranslate"><span class="pre">tent_activation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.learnable_activations.html#module-activations.torch.learnable_activations">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="activations.torch.utils.html">activations.torch.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.utils.html#module-activations.torch.utils.histogram">activations.torch.utils.histogram module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.Histogram"><code class="docutils literal notranslate"><span class="pre">Histogram</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.Histogram.fill_n"><code class="docutils literal notranslate"><span class="pre">Histogram.fill_n()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.Histogram.kde"><code class="docutils literal notranslate"><span class="pre">Histogram.kde()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.Histogram.weights"><code class="docutils literal notranslate"><span class="pre">Histogram.weights</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.fill_n"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram.fill_n()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.get_bin_edges"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram.get_bin_edges()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.is_empty"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram.is_empty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.kde"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram.kde()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.weights"><code class="docutils literal notranslate"><span class="pre">NeuronsHistogram.weights</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.filter_weights"><code class="docutils literal notranslate"><span class="pre">filter_weights()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.get_bin_edges"><code class="docutils literal notranslate"><span class="pre">get_bin_edges()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.get_bin_size"><code class="docutils literal notranslate"><span class="pre">get_bin_size()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="activations.torch.utils.html#module-activations.torch.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-activations.torch.activation_module">
+<span id="activations-torch-activation-module-module"></span><h2>activations.torch.activation_module module<a class="headerlink" href="#module-activations.torch.activation_module" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.activation_module.</span></span><span class="sig-name descname"><span class="pre">ActivationModule</span></span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Static class which provides functionality to capture/plot data of multiple <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.capture">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">capture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.capture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.capture" title="Permalink to this definition"></a></dt>
+<dd><p>Saves snapshot of registered modules</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>returns (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> snapshots are returned and not saved.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>For detailed information of parameters see <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a> should be used for creating snapshots. Otherwise existing snapshots may be overwritten.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.create_snapshot">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_saves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_grad_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_grad_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">irm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'layer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.create_snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="Permalink to this definition"></a></dt>
+<dd><p>Create snapshots for later plotting.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group (str or list(str)):</dt><dd><p>Mutually exclusive parameters to specify all registered modules for which a snapshot is created.</p>
+</dd>
+<dt>snap_name (str):</dt><dd><p>Name of new snapshot. If name is already existing an increasing integer will be suffixed.</p>
+</dd>
+<dt>other_func (dict(str, callable)):</dt><dd><p>Other functions to include in plots (the keys will be used as labels).</p>
+</dd>
+<dt>max_saves (int):</dt><dd><p>Maximum number of times inputs/gradients are saved. After the maximum is exceeded hooks will automatically remove themselfs.</p>
+</dd>
+<dt>bin_width (float):</dt><dd><p>Width of histogram bins.</p>
+</dd>
+<dt>label_in, label_grad_in, label_grad_out (str or dict(str, str)):</dt><dd><p>Labels for inputs/gradients. If given as dict should have a key matching each module name.</p>
+</dd>
+<dt>irm (str or int):</dt><dd><p>Input retrieval mode. See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.capture" title="activations.torch.activation_module.RegisteredModule.capture"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.capture()</span></code></a> for more information.</p>
+</dd>
+<dt>function, inputs, gradients (bool):</dt><dd><p>Data to be stored in snapshot.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.default_irm">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_irm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">irm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.default_irm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.default_irm" title="Permalink to this definition"></a></dt>
+<dd><p>Setter/Getter for the default input retrieval mode (<strong>irm</strong>).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>irm (str or int, optional):</dt><dd><p>See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.capture" title="activations.torch.activation_module.RegisteredModule.capture"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.capture()</span></code></a> for detailed information about <strong>irm</strong>. If omitted will return current <strong>irm</strong>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.export_evolution_graphs">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">export_evolution_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">video_writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.export_evolution_graphs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.export_evolution_graphs" title="Permalink to this definition"></a></dt>
+<dd><p>Creates animation over multiple snapshots.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>path (str or pathlike):</dt><dd><p>Path to save animation to.</p>
+</dd>
+<dt>snap_names (list(str) or list(dict(str, str))):</dt><dd><p>All snapshots to animate over.
+Each element should be accepted by <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.show_function" title="activations.torch.activation_module.ActivationModule.show_function"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.show_function()</span></code></a>.</p>
+</dd>
+<dt>video_writer (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.tensorboard.SummaryWriter</span></code>):</dt><dd><p>Writer to add animation. If writer does not support videos
+only a log message is produced.</p>
+</dd>
+<dt>tag (str):</dt><dd><p>Tag for <code class="docutils literal notranslate"><span class="pre">video_writer</span></code>.</p>
+</dd>
+<dt>kwargs:</dt><dd><p>For a full list of additional arguments see <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.show_function" title="activations.torch.activation_module.ActivationModule.show_function"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.show_function()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>TypeError:</dt><dd><p>If keyword argument <code class="docutils literal notranslate"><span class="pre">axes</span></code> is passed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.get_groups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.get_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.get_groups" title="Permalink to this definition"></a></dt>
+<dd><p>Get names of modules belonging to specific groups.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>group (str or list(str)):</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">str</span></code>: return all module names registered in this group.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">list(str)</span></code>: return all module names registered in at least one group.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>: return all registered modules.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>names (tuple):</dt><dd><p>All registered modules matching given group(s).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.get_plotting_style">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_plotting_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.get_plotting_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.get_plotting_style" title="Permalink to this definition"></a></dt>
+<dd><p>Get current <code class="docutils literal notranslate"><span class="pre">rc_params</span></code> modifications.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.get_snapshots">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_snapshots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.get_snapshots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.get_snapshots" title="Permalink to this definition"></a></dt>
+<dd><p>Return all shared snapshots in order.</p>
+<p>A snapshot is shared if all modules have a snapshot of equal name.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>snapshots (list(str)):</dt><dd><p>Snapshots that are common to all given modules.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.modules">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">modules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.modules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.modules" title="Permalink to this definition"></a></dt>
+<dd><p>Get list of names for registered modules.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.register">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.register" title="Permalink to this definition"></a></dt>
+<dd><p>Registers a <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>. Registered modules can be captured/plotted.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>module (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>):</dt><dd><p>The module to register.</p>
+</dd>
+<dt>name (str):</dt><dd><p>Name under which module will be registered. If name already exists an incrementing integer will be appended.</p>
+</dd>
+<dt>group (hashable or list of hashables, optional):</dt><dd><p>Group(s) to assign <code class="docutils literal notranslate"><span class="pre">module</span></code> to.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>Name under which module is registered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.save_gradients">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_saves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_grad_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_grad_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.save_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.save_gradients" title="Permalink to this definition"></a></dt>
+<dd><p>Saves gradients of registered modules.</p>
+<p>For detailed information see <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a> should be used for creating snapshots. Otherwise existing snapshots may be overwritten.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.save_inputs">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_saves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.save_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.save_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Saves inputs of registered modules.</p>
+<p>For detailed information see <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a> should be used for creating snapshots. Otherwise existing snapshots may be overwritten.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.set_global_color_cycle">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_global_color_cycle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colors</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.set_global_color_cycle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.set_global_color_cycle" title="Permalink to this definition"></a></dt>
+<dd><p>Set a cycle of colors used across axes.</p>
+<p>Each time smething is plotted the next color drawn. The cycle is not reset for each axis.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>colors (iterable):</dt><dd><p>Colors to endlessly cycle through. If <code class="docutils literal notranslate"><span class="pre">None</span></code> will remove current
+cycle and use <code class="docutils literal notranslate"><span class="pre">matplotlb.rc_params['prop_cycle']</span></code> for each axis.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.set_labels">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.set_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.set_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Sets x/y labels for plot axes.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x_label, y_label (str, optional):</dt><dd><p>Label for x/y-axis used in plots. If one is given (other is <code class="docutils literal notranslate"><span class="pre">None</span></code>) changes only the given label.
+If both are <code class="docutils literal notranslate"><span class="pre">None</span></code> removes current labels.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Labels are stored in snapshots therefore changes to labels are only taken into account
+by future calls to <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.create_snapshot" title="activations.torch.activation_module.ActivationModule.create_snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ActivationModule.create_snapshot()</span></code></a>. Changes to existing snapshot 
+labels must be done manually (see <code class="xref py py-attr docutils literal notranslate"><span class="pre">RegisteredModule.axis_labels</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.set_logger">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.set_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.set_logger" title="Permalink to this definition"></a></dt>
+<dd><p>Set default logger.</p>
+<p>Does not change assigned loggers for already registered modules.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.set_plotting_style">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_plotting_style</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rc_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.set_plotting_style"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.set_plotting_style" title="Permalink to this definition"></a></dt>
+<dd><p>Set the used <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> style.</p>
+<p>This method will only modify the <code class="docutils literal notranslate"><span class="pre">rc_params</span></code> in local scope.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>path (str or pathlike, optional):</dt><dd><p>Path to file containing <code class="docutils literal notranslate"><span class="pre">rcparam,</span> <span class="pre">value</span></code> pairs (seperated by colon) on each line.</p>
+</dd>
+<dt>rc_params (dict(str, str), optional):</dt><dd><p><code class="docutils literal notranslate"><span class="pre">rcparams</span></code> to use. If a param is used in <code class="docutils literal notranslate"><span class="pre">path</span></code> and <code class="docutils literal notranslate"><span class="pre">rc_params</span></code> will use value of <code class="docutils literal notranslate"><span class="pre">rc_params</span></code>.</p>
+</dd>
+<dt>update (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, only update existing <cite>rc_params</cite> instead of overwriting.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.show_function">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">show_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'expand'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_grad_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_grad_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">fig_kw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.show_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.show_function" title="Permalink to this definition"></a></dt>
+<dd><p>Create figure of multiple modules for single snapshot.</p>
+<p>Creates a figure with one axis for each module. Each module can only be plotted for a single snapshot,
+but snapshots do not have to be equal for all modules.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group (str or list(str)):</dt><dd><p>Mutually exclusive parameters specifying modules.</p>
+</dd>
+<dt>snap_name (str or dict(str, str)):</dt><dd><p>Snapshot to be used.</p>
+</dd>
+<dt>x (int or tuple(float, float, int) or array-like):</dt><dd><dl class="simple">
+<dt>The x-values to plot snapshot on. Defaults to <code class="docutils literal notranslate"><span class="pre">torch.linspace(-3.,</span> <span class="pre">3.,</span> <span class="pre">100)</span></code>.</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">int</span></code> number of points in interval [-3, 3].</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">tuple(float,</span> <span class="pre">float,</span> <span class="pre">int)</span></code> specifies min, max value and number of points.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">array-like</span></code> Concrete values to use.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>other_func (dict(str, callable)):</dt><dd><p>Other functions to use. Keys are used as plot labels.</p>
+</dd>
+<dt>display (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> shows plot using <code class="docutils literal notranslate"><span class="pre">plt.show</span></code> (blocking until figure is closed).</p>
+</dd>
+<dt>title (str):</dt><dd><p>Title of figure. Is also used as tag for SummaryWriter.</p>
+</dd>
+<dt>axes (<code class="docutils literal notranslate"><span class="pre">plt.Axes</span></code> or list(<code class="docutils literal notranslate"><span class="pre">plt.Axes</span></code>)):</dt><dd><dl class="simple">
+<dt>Axes to plot on.</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">plt.Axes</span></code> plot all snapshots on single axis.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">list(plt.Axes)</span></code>: plots each module on own axis.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>layout (“auto” or tuple(n_rows, n_cols)):</dt><dd><p>Determines the <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html">subplot layout</a>. If <code class="docutils literal notranslate"><span class="pre">layout==&quot;auto&quot;</span></code>
+the number of rows and columns is determined automatically. Otherwise <code class="docutils literal notranslate"><span class="pre">n_rows*n_cols</span></code>
+should be greater than number of modules to plot or equal to 1, in which case all modules
+will be plotted in single plot.</p>
+</dd>
+<dt>writer (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.tensorboard.SummaryWriter</span></code>):</dt><dd><p>Add figure on SummaryWriter. Will add before showing if <code class="docutils literal notranslate"><span class="pre">display==True</span></code>.</p>
+</dd>
+<dt>step (int):</dt><dd><p>Global step for <code class="docutils literal notranslate"><span class="pre">writer</span></code>.</p>
+</dd>
+<dt>x_label, y_label (str or dict(str, str)):</dt><dd><p>Label for x/y-axes.</p>
+</dd>
+<dt>ax_title (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> each axis uses the module name as title. Otherwise axis have no title.</p>
+</dd>
+<dt>x_mode (str):</dt><dd><dl class="simple">
+<dt>Determines how x axis limits are choosen between input histogram range and given parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">'expand'</span></code>.</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">'expand'</span></code> expand to greatest range.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">'clip'</span></code> clip to smallest range.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">'x'</span></code> use only parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>tol_in, tol_grad_in, tol_grad_out (float):</dt><dd><p>Tolerance values for input/gradient histograms (see <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.plot_histogram" title="activations.torch.activation_module.RegisteredModule.plot_histogram"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.plot_histogram()</span></code></a>)</p>
+</dd>
+<dt>save_to (str or pathlike):</dt><dd><p>Path to save figure to. File extension must be supported by matplotlib.</p>
+</dd>
+<dt>use_kde (bool):</dt><dd><p>Plot kde function instead of barplots for all histograms.</p>
+</dd>
+<dt>legend (bool):</dt><dd><p>Create legend for plot.</p>
+</dd>
+<dt>fig_kw:</dt><dd><p>Keyword arguments passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.pyplot.plt.subplots()</span></code>. Ignored if <code class="docutils literal notranslate"><span class="pre">axes</span></code> is given.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If a parameter is allowed to be passed as <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> it can be specified per module by using module names as keys.
+In this case the <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code> must have a key matching each module name.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.ActivationModule.stop_saving">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stop_saving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#ActivationModule.stop_saving"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.ActivationModule.stop_saving" title="Permalink to this definition"></a></dt>
+<dd><p>Stop retrieving inputs/gradients.</p>
+<p>Removes all attached forward/backward hooks.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group (str or list(str)):</dt><dd><p>Mutually exclusive parameters for specifying modules.</p>
+</dd>
+<dt>inputs (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> stop retrieving inputs.</p>
+</dd>
+<dt>gradients (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> stop retrieving gradients.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.activation_module.</span></span><span class="sig-name descname"><span class="pre">RegisteredModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Wrapper for <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code> which handles captureing/plotting of data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>Unique ID. Is used for registration in <code class="xref py py-class docutils literal notranslate"><span class="pre">AcivationModule</span></code> and as label.</p>
+</dd>
+<dt>module (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>):</dt><dd><p>Wrapped module.</p>
+</dd>
+<dt>groups (list(hashable)):</dt><dd><p>All groups module belongs to.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used.</p>
+</dd>
+</dl>
+</dd>
+<dt>Variables:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>Name under which module is registered.</p>
+</dd>
+<dt>module (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.Module</span></code> ):</dt><dd><p>Wrapped module.</p>
+</dd>
+<dt>logger:</dt><dd><p>Used logger.</p>
+</dd>
+<dt>axis_labels (<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedDict</span></code> (str, tuple(str, str))):</dt><dd><p>Mapping of snapshot name to (x-axis label, y-axis label).</p>
+</dd>
+<dt>snapshots (<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedDict</span></code> (str, tuple)):</dt><dd><p>Stores snapshots created by <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.capture" title="activations.torch.activation_module.RegisteredModule.capture"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.capture()</span></code></a> . Mapping of
+snapshot name to (<code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">dict</span></code>, <code class="docutils literal notranslate"><span class="pre">other_func</span></code>, <code class="docutils literal notranslate"><span class="pre">label</span></code>) where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span> <span class="pre">dict</span></code> is the current state of wrapped module (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.nn.Module.state_dict()</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">other_func</span></code>, <code class="docutils literal notranslate"><span class="pre">label</span></code> are the corresponding parameters in <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.capture" title="activations.torch.activation_module.RegisteredModule.capture"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.capture()</span></code></a></p></li>
+</ul>
+</dd>
+<dt>input_distributions (<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedDict</span></code> (str, <a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram" title="activations.torch.utils.histogram.NeuronsHistogram"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeuronsHistogram</span></code></a> )):</dt><dd><p>Captured distributions of inputs. Mapping of snapshot name to distribution.</p>
+</dd>
+<dt>input_gradient_distributions, output_gradient_distributions (<code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedDict</span></code> (str, <a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.Histogram" title="activations.torch.utils.histogram.Histogram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Histogram</span></code></a> )):</dt><dd><p>Captured distributions of gradients wrt input/output. Mapping of snapshot name to distribution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.capture">
+<span class="sig-name descname"><span class="pre">capture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.capture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.capture" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a snapshot of current function.</p>
+<p>The snapshot is stored via modules <code class="docutils literal notranslate"><span class="pre">state_dict</span></code>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>Snapshot name.</p>
+</dd>
+<dt>other_func (dict(str, callable), optional):</dt><dd><p>Other functions to include in this snapshot. Keys of <code class="docutils literal notranslate"><span class="pre">dict</span></code> will be used as labels.</p>
+</dd>
+<dt>label (str, optional):</dt><dd><p>Plot label used. Defaults to <code class="docutils literal notranslate"><span class="pre">'&lt;name&gt;'</span></code></p>
+</dd>
+<dt>returns (bool):</dt><dd><p>If True only return snapshot. In this case snapshot can not be plotted via <a class="reference internal" href="#activations.torch.activation_module.ActivationModule" title="activations.torch.activation_module.ActivationModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivationModule</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.groups">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">groups</span></span><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.groups" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.input_range">
+<span class="sig-name descname"><span class="pre">input_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.input_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.input_range" title="Permalink to this definition"></a></dt>
+<dd><p>Return x-axis range for snapshot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.plot_histogram">
+<span class="sig-name descname"><span class="pre">plot_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.plot_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.plot_histogram" title="Permalink to this definition"></a></dt>
+<dd><p>Plots data from histogram.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>hist (<a class="reference internal" href="activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram" title="activations.torch.utils.histogram.NeuronsHistogram"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeuronsHistogram</span></code></a>):</dt><dd><p>Data to plot.</p>
+</dd>
+<dt>label (str):</dt><dd><p>Plot label.</p>
+</dd>
+<dt>axis (<code class="docutils literal notranslate"><span class="pre">plt.Axes</span></code>):</dt><dd><p>Axis to plot on.</p>
+</dd>
+<dt>tolerance (float):</dt><dd><p>All bars with a relative fraction less than <code class="docutils literal notranslate"><span class="pre">tolerance</span></code> will be removed before plotting.</p>
+</dd>
+<dt>use_kde (bool):</dt><dd><p>If True plot kde function of histogram.</p>
+</dd>
+<dt>color (<a class="reference external" href="https://matplotlib.org/stable/users/explain/colors/colors.html">color</a>):</dt><dd><p>Color used for plotting.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.save_gradients">
+<span class="sig-name descname"><span class="pre">save_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_saves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.save_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.save_gradients" title="Permalink to this definition"></a></dt>
+<dd><p>Saves gradients as histogram.</p>
+<p>Saves gradients of output wrt. input aswell as upstream gradients in seperate histograms.
+All data is stored by attaching hooks that will be called when tensors <code class="docutils literal notranslate"><span class="pre">backward</span></code> is called.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name (str):</dt><dd><p>Snapshot name.</p>
+</dd>
+<dt>saving (bool):</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> start saving inputs.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">False</span></code> stop saving inputs.</p></li>
+</ul>
+</dd>
+<dt>max_saves (int):</dt><dd><p>After equal number of calls to <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.module.forward()</span></code> stop saving inputs.</p>
+</dd>
+<dt>bin_width (float):</dt><dd><p>Width of bins.</p>
+</dd>
+<dt>label_in, label_out (str, optional):</dt><dd><p>Label for plot legend to use. Defaults to <code class="docutils literal notranslate"><span class="pre">'&lt;name&gt;_in_grad'</span></code>/<code class="docutils literal notranslate"><span class="pre">'&lt;name&gt;_out_grad'</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.save_inputs">
+<span class="sig-name descname"><span class="pre">save_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saving</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_saves</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.save_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.save_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Save input data as histogram.</p>
+<p>All data is stored by attaching hooks that will be called when module is called.</p>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>name (str):</dt><dd><p>Snapshot name.</p>
+</dd>
+<dt>saving (bool):</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> start saving inputs.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">False</span></code> stop saving inputs.</p></li>
+</ul>
+</dd>
+<dt>max_saves (int):</dt><dd><p>After equal number of calls to <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.module.forward()</span></code> stop saving inputs.</p>
+</dd>
+<dt>bin_width (float):</dt><dd><p>Width of bins.</p>
+</dd>
+<dt>mode (str or int, optional):</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">'layer'</span></code>: store all input values in single histogram.</p></li>
+<li><p>otherwise should be the index of axis in input tensor
+that represents number of neurons in layer.</p></li>
+</ul>
+<p>Defaults to <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.default_irm" title="activations.torch.activation_module.ActivationModule.default_irm"><code class="xref py py-func docutils literal notranslate"><span class="pre">ActivationModule.default_irm()</span></code></a>.</p>
+</dd>
+<dt>label (str, optional):</dt><dd><p>Label for plot legend to use. Defaults to <code class="docutils literal notranslate"><span class="pre">'&lt;name&gt;_inputs'</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.set_input_category">
+<span class="sig-name descname"><span class="pre">set_input_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.set_input_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.set_input_category" title="Permalink to this definition"></a></dt>
+<dd><p>Sets x-label for all future snapshots.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.set_output_category">
+<span class="sig-name descname"><span class="pre">set_output_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.set_output_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.set_output_category" title="Permalink to this definition"></a></dt>
+<dd><p>Sets y-label for all future snapshots.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.show_function">
+<span class="sig-name descname"><span class="pre">show_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.show_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.show_function" title="Permalink to this definition"></a></dt>
+<dd><p>Plots snapshot of function.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x (any):</dt><dd><p>X-Axis values to plot on. Must be accepted by <code class="docutils literal notranslate"><span class="pre">forward</span></code> pass of module and <code class="docutils literal notranslate"><span class="pre">other_func</span></code> (see <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.capture" title="activations.torch.activation_module.RegisteredModule.capture"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.capture()</span></code></a>)</p>
+</dd>
+<dt>axis (<code class="xref py py-class docutils literal notranslate"><span class="pre">plt.Axes</span></code>):</dt><dd><p>Axis to plot on.</p>
+</dd>
+<dt>next_color (callable, optional):</dt><dd><p>A function with no arguments which returns a color on call. First for each <code class="docutils literal notranslate"><span class="pre">other_func</span></code> a color is used and then for the module.</p>
+</dd>
+<dt>name (str):</dt><dd><p>Name of snapshot to plot.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.show_input_gradients">
+<span class="sig-name descname"><span class="pre">show_input_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.show_input_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.show_input_gradients" title="Permalink to this definition"></a></dt>
+<dd><p>Plots captured gradients of output wrt. input.</p>
+<p>See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.show_inputs" title="activations.torch.activation_module.RegisteredModule.show_inputs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.show_inputs()</span></code></a> for more info.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.show_inputs">
+<span class="sig-name descname"><span class="pre">show_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.show_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.show_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Plots captured input data.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>axis (<code class="docutils literal notranslate"><span class="pre">plt.Axes</span></code>):</dt><dd><p>Axis to plot on.</p>
+</dd>
+<dt>color (<a class="reference external" href="https://matplotlib.org/stable/users/explain/colors/colors.html">color</a>):</dt><dd><p>Color used for Histogram data.</p>
+</dd>
+<dt>name (str):</dt><dd><p>Name of snapshot.</p>
+</dd>
+<dt>tolerance (float):</dt><dd><p>See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.plot_histogram" title="activations.torch.activation_module.RegisteredModule.plot_histogram"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.plot_histogram()</span></code></a>.</p>
+</dd>
+<dt>use_kde (bool):</dt><dd><p>See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.plot_histogram" title="activations.torch.activation_module.RegisteredModule.plot_histogram"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.plot_histogram()</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.activation_module.RegisteredModule.show_output_gradients">
+<span class="sig-name descname"><span class="pre">show_output_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'snapshot_0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_kde</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/activation_module.html#RegisteredModule.show_output_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.activation_module.RegisteredModule.show_output_gradients" title="Permalink to this definition"></a></dt>
+<dd><p>Plots captured upstream gradients.</p>
+<p>See <a class="reference internal" href="#activations.torch.activation_module.RegisteredModule.show_inputs" title="activations.torch.activation_module.RegisteredModule.show_inputs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RegisteredModule.show_inputs()</span></code></a> for more info.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-activations.torch.classic_activations">
+<span id="activations-torch-classic-activations-module"></span><h2>activations.torch.classic_activations module<a class="headerlink" href="#module-activations.torch.classic_activations" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.GLU">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">GLU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#GLU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.GLU" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered <code class="xref py py-func docutils literal notranslate"><span class="pre">F.glu()</span></code> activation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.GLU.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.GLU.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.LReLU">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">LReLU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#LReLU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.LReLU" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered <code class="xref py py-func docutils literal notranslate"><span class="pre">F.leaky_relu()</span></code> activation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.LReLU.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.LReLU.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.OneSin">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">OneSin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#OneSin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.OneSin" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered activation which implements function <span class="math notranslate nohighlight">\(f(x)=\begin{cases}\text{sin}(x\cdot\pi),&amp;x\in(-1,1)\\0,&amp;\text{otherwise}\end{cases}\)</span>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.OneSin.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.OneSin.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.ReLU">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">ReLU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#ReLU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.ReLU" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered <code class="xref py py-func docutils literal notranslate"><span class="pre">F.relu()</span></code> activation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.ReLU.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.ReLU.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.Sigmoid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">Sigmoid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#Sigmoid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.Sigmoid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered <code class="xref py py-func docutils literal notranslate"><span class="pre">F.sigmoid()</span></code> activation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.Sigmoid.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.Sigmoid.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.Tanh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.classic_activations.</span></span><span class="sig-name descname"><span class="pre">Tanh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/classic_activations.html#Tanh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.classic_activations.Tanh" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_Base</span></code></p>
+<p>Registered <code class="xref py py-func docutils literal notranslate"><span class="pre">F.tanh()</span></code> activation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>name, group:</dt><dd><p>Parameters used for referencing this module. See <a class="reference internal" href="#activations.torch.activation_module.ActivationModule.register" title="activations.torch.activation_module.ActivationModule.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>.</p>
+</dd>
+<dt>logger:</dt><dd><p>Logger used by this module.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="activations.torch.classic_activations.Tanh.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#activations.torch.classic_activations.Tanh.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-activations.torch">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-activations.torch" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="activations.html" class="btn btn-neutral float-left" title="activations namespace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="activations.torch.learnable_activations.html" class="btn btn-neutral float-right" title="activations.torch.learnable_activations package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

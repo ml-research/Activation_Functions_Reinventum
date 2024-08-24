@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.torch.utils.histogram &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../activations.html">activations namespace</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">activations.torch.utils.histogram</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for activations.torch.utils.histogram</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">sts</span>
+
+
+
+<div class="viewcode-block" id="get_bin_size"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.get_bin_size">[docs]</a><span class="k">def</span> <span class="nf">get_bin_size</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes ``x`` such that ``x`` fits ``100`` times into ``max - min``.&quot;&quot;&quot;</span>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">bin_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bin_size</span></div>
+
+
+<div class="viewcode-block" id="get_bin_edges"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.get_bin_edges">[docs]</a><span class="k">def</span> <span class="nf">get_bin_edges</span><span class="p">(</span><span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">bin_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes new bin edges with fixed bin size.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        left_edge, right_edge (float):</span>
+<span class="sd">            The edges of current bins.</span>
+
+<span class="sd">        min, max (float):</span>
+<span class="sd">            Minimum/maximum values which should be included in bins.</span>
+
+<span class="sd">        bin_size (float):</span>
+<span class="sd">            Desired size of each bin.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        left_edge, right_edge (float):</span>
+<span class="sd">            Closest edges such that ``min``, `max`` are included.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">min</span> <span class="o">&lt;</span> <span class="n">left_edge</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">left_edge</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="n">bin_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">left_edge</span> <span class="o">=</span> <span class="n">left_edge</span> <span class="o">-</span> <span class="n">n</span><span class="o">*</span><span class="n">bin_size</span>
+        <span class="k">if</span> <span class="n">left_edge</span> <span class="o">+</span> <span class="n">bin_size</span> <span class="o">&lt;=</span> <span class="nb">min</span><span class="p">:</span>
+            <span class="n">left_edge</span> <span class="o">+=</span> <span class="n">bin_size</span>
+
+    <span class="k">if</span> <span class="nb">max</span> <span class="o">&gt;</span> <span class="n">right_edge</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">max</span> <span class="o">-</span> <span class="n">right_edge</span><span class="p">)</span> <span class="o">/</span> <span class="n">bin_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">right_edge</span> <span class="o">=</span> <span class="n">right_edge</span> <span class="o">+</span> <span class="n">n</span><span class="o">*</span><span class="n">bin_size</span>
+        <span class="k">if</span> <span class="n">right_edge</span> <span class="o">-</span> <span class="n">bin_size</span> <span class="o">&gt;=</span> <span class="nb">max</span><span class="p">:</span>
+            <span class="n">right_edge</span> <span class="o">-=</span> <span class="n">bin_size</span>
+
+    <span class="k">return</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span></div>
+
+
+<div class="viewcode-block" id="filter_weights"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.filter_weights">[docs]</a><span class="k">def</span> <span class="nf">filter_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all values smaller than ``tolerance``.&quot;&quot;&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">weights</span> <span class="o">&gt;</span> <span class="n">tolerance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="NeuronsHistogram"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram">[docs]</a><span class="k">class</span> <span class="nc">NeuronsHistogram</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A collection of multiple Hisograms that can be fed iteratively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bin_size (float, optional):</span>
+<span class="sd">            Desired size of bins. If omitted will be computed on first batch.</span>
+<span class="sd">            </span>
+<span class="sd">        device (:class:`torch.device` or int):</span>
+<span class="sd">            Device to use. Bin widths and bin counts are stored on device and computations are performed on device.</span>
+<span class="sd">            </span>
+<span class="sd">    Variables:</span>
+<span class="sd">        auto_bin_size (bool):</span>
+<span class="sd">            If ``True`` bin width is computed when :meth:`NeuronsHistogram.fill_n` is called.</span>
+
+<span class="sd">        bin_size (float):</span>
+<span class="sd">            Width of bins.</span>
+
+<span class="sd">        bins (list(:class:`torch.Tensor`)):</span>
+<span class="sd">            Left edges of bins. Element at index :math:`i` belongs to **ith** histogram.</span>
+
+<span class="sd">        counts (list(:class:`torch.Tensor`)):</span>
+<span class="sd">            Height of bins. Element at index :math:`i` belongs to **ith** histogram.</span>
+
+<span class="sd">        n_neurons (int):</span>
+<span class="sd">            Number of hisograms.</span>
+
+<span class="sd">        weights (list(:class:`torch.Tensor`)):</span>
+<span class="sd">            :attr:`~NeuronsHistogram.counts` normalized to :math:`[0, 1]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bin_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_bin_size</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_bin_size</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span> <span class="o">=</span> <span class="n">bin_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">_fill_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds input to one histogram.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n (int):</span>
+<span class="sd">                Index of histogram to add input to.</span>
+<span class="sd">                </span>
+<span class="sd">            input (:class:`torch.Tensor`):</span>
+<span class="sd">                Tensor to add. Must be 1D.        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">left_edge</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span>
+            <span class="n">right_edge</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span> <span class="o">=</span> <span class="n">get_bin_edges</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="nb">input</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                <span class="nb">input</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">n_bins</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">right_edge</span> <span class="o">-</span> <span class="n">left_edge</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>  <span class="c1"># round for numerical stability</span>
+        <span class="n">new_bins</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">,</span> <span class="n">n_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">new_counts</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">histc</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">left_edge</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="nb">max</span><span class="o">=</span><span class="n">right_edge</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_counts</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_counts</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]):</span>  <span class="c1"># no new bins added</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+=</span> <span class="n">new_counts</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># find indices to insert `self.counts`</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">new_bins</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">new_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_counts</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_bins</span>
+
+<div class="viewcode-block" id="NeuronsHistogram.fill_n"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.fill_n">[docs]</a>    <span class="k">def</span> <span class="nf">fill_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">ax_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds batch of inputs to histograms.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            input (:class:`torch.Tensor`):</span>
+<span class="sd">                Inputs to add. If of shape :math:`(A, N, B, C, ...),\,\\text{where }N\\text{represents number of histograms}` will be reshaped to :math:`(N, A*B*C*...)`.</span>
+<span class="sd">                </span>
+<span class="sd">            ax_idx (int):</span>
+<span class="sd">                Index of dimension in ``input`` that matches number of histograms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax_idx</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># move neuron axis to first</span>
+            <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax_idx</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># hist is uninitialized</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_bin_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bin_size</span> <span class="o">=</span> <span class="n">get_bin_size</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="nb">input</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auto_bin_size</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># move to correct device/dtype</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fill_n</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">input</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="NeuronsHistogram.kde"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.kde">[docs]</a>    <span class="k">def</span> <span class="nf">kde</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="mf">0.13797296614612148</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return kde function of one histogram.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            n (int):</span>
+<span class="sd">                Index of histogram.</span>
+
+<span class="sd">            bw_method (float):</span>
+<span class="sd">                See parameter `bw_method` in :class:`scipy.stats.gaussian_kde`</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            kde (:meth:`scipy.stats.gaussian_kde.pdf`):</span>
+<span class="sd">                Probability density function of :class:`scipy.stats.gaussian_kde`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sts</span><span class="o">.</span><span class="n">gaussian_kde</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">bw_method</span><span class="o">=</span><span class="n">bw_method</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">n</span><span class="p">])</span><span class="o">.</span><span class="n">pdf</span></div>
+    
+<div class="viewcode-block" id="NeuronsHistogram.get_bin_edges"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.get_bin_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_bin_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            left_edge, right_edge (float):</span>
+<span class="sd">                Smallest and greatets edge over all histograms.</span>
+<span class="sd">        </span>
+<span class="sd">        .. note::</span>
+<span class="sd">            ``right_edge`` is the left edge of the rightmost bin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">left_edge</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">)])</span>
+        <span class="n">right_edge</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span></div>
+    
+<div class="viewcode-block" id="NeuronsHistogram.is_empty"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.NeuronsHistogram.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div></div>
+
+    
+<div class="viewcode-block" id="Histogram"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.Histogram">[docs]</a><span class="k">class</span> <span class="nc">Histogram</span><span class="p">(</span><span class="n">NeuronsHistogram</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Histogram that can be fed iteratively.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bin_size (float, optional):</span>
+<span class="sd">            Desired size of bins. If omitted will be computed on first batch.</span>
+<span class="sd">            </span>
+<span class="sd">        device (:class:`torch.device` or int):</span>
+<span class="sd">            Device to use. Bin widths and bin counts are stored on device and computations are performed on device.</span>
+<span class="sd">            </span>
+<span class="sd">    Variables:</span>
+<span class="sd">        auto_bin_size (bool):</span>
+<span class="sd">            If ``True`` bin width is computed when :meth:`NeuronsHistogram.fill_n` is called.</span>
+
+<span class="sd">        bin_size (float):</span>
+<span class="sd">            Width of bins.</span>
+
+<span class="sd">        bins (list(:class:`torch.Tensor`)):</span>
+<span class="sd">            Left edges of bins. Element at index :math:`i` belongs to **ith** histogram.</span>
+
+<span class="sd">        counts (list(:class:`torch.Tensor`)):</span>
+<span class="sd">            Height of bins.</span>
+
+<span class="sd">        weights (:class:`torch.Tensor`):</span>
+<span class="sd">            :attr:`~NeuronsHistogram.counts` normalized to :math:`[0, 1]`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">bin_size</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_neurons</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="Histogram.fill_n"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.Histogram.fill_n">[docs]</a>    <span class="k">def</span> <span class="nf">fill_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">ax_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds flattened input to histogram.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fill_n</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax_idx</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+<div class="viewcode-block" id="Histogram.kde"><a class="viewcode-back" href="../../../../activations.torch.utils.html#activations.torch.utils.histogram.Histogram.kde">[docs]</a>    <span class="k">def</span> <span class="nf">kde</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="mf">0.13797296614612148</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sts</span><span class="o">.</span><span class="n">gaussian_kde</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">bw_method</span><span class="o">=</span><span class="n">bw_method</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">pdf</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

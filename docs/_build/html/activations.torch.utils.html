@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>activations.torch.utils package &mdash; activations  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="activations.utils package" href="activations.utils.html" />
+    <link rel="prev" title="activations.torch.learnable_activations.rationals package" href="activations.torch.learnable_activations.rationals.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            activations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="activations.html">activations namespace</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="activations.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="activations.torch.html">activations.torch package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="activations.torch.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch.activation_module">activations.torch.activation_module module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch.classic_activations">activations.torch.classic_activations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="activations.torch.html#module-activations.torch">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="activations.utils.html">activations.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">activations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="activations.html">activations namespace</a></li>
+          <li class="breadcrumb-item"><a href="activations.torch.html">activations.torch package</a></li>
+      <li class="breadcrumb-item active">activations.torch.utils package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/activations.torch.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="activations-torch-utils-package">
+<h1>activations.torch.utils package<a class="headerlink" href="#activations-torch-utils-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-activations.torch.utils.histogram">
+<span id="activations-torch-utils-histogram-module"></span><h2>activations.torch.utils.histogram module<a class="headerlink" href="#module-activations.torch.utils.histogram" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.Histogram">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.utils.histogram.</span></span><span class="sig-name descname"><span class="pre">Histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#Histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.Histogram" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#activations.torch.utils.histogram.NeuronsHistogram" title="activations.torch.utils.histogram.NeuronsHistogram"><code class="xref py py-class docutils literal notranslate"><span class="pre">NeuronsHistogram</span></code></a></p>
+<p>A Histogram that can be fed iteratively.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>bin_size (float, optional):</dt><dd><p>Desired size of bins. If omitted will be computed on first batch.</p>
+</dd>
+<dt>device (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.device</span></code> or int):</dt><dd><p>Device to use. Bin widths and bin counts are stored on device and computations are performed on device.</p>
+</dd>
+</dl>
+</dd>
+<dt>Variables:</dt><dd><dl class="simple">
+<dt>auto_bin_size (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> bin width is computed when <a class="reference internal" href="#activations.torch.utils.histogram.NeuronsHistogram.fill_n" title="activations.torch.utils.histogram.NeuronsHistogram.fill_n"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NeuronsHistogram.fill_n()</span></code></a> is called.</p>
+</dd>
+<dt>bin_size (float):</dt><dd><p>Width of bins.</p>
+</dd>
+<dt>bins (list(<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)):</dt><dd><p>Left edges of bins. Element at index <span class="math notranslate nohighlight">\(i\)</span> belongs to <strong>ith</strong> histogram.</p>
+</dd>
+<dt>counts (list(<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)):</dt><dd><p>Height of bins.</p>
+</dd>
+<dt>weights (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">counts</span></code> normalized to <span class="math notranslate nohighlight">\([0, 1]\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.Histogram.fill_n">
+<span class="sig-name descname"><span class="pre">fill_n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#Histogram.fill_n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.Histogram.fill_n" title="Permalink to this definition"></a></dt>
+<dd><p>Adds flattened input to histogram.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.Histogram.kde">
+<span class="sig-name descname"><span class="pre">kde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bw_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.13797296614612148</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#Histogram.kde"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.Histogram.kde" title="Permalink to this definition"></a></dt>
+<dd><p>Return kde function of one histogram.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>n (int):</dt><dd><p>Index of histogram.</p>
+</dd>
+<dt>bw_method (float):</dt><dd><p>See parameter <cite>bw_method</cite> in <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>kde (<code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde.pdf()</span></code>):</dt><dd><p>Probability density function of <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.Histogram.weights">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#activations.torch.utils.histogram.Histogram.weights" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">activations.torch.utils.histogram.</span></span><span class="sig-name descname"><span class="pre">NeuronsHistogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#NeuronsHistogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A collection of multiple Hisograms that can be fed iteratively.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>bin_size (float, optional):</dt><dd><p>Desired size of bins. If omitted will be computed on first batch.</p>
+</dd>
+<dt>device (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.device</span></code> or int):</dt><dd><p>Device to use. Bin widths and bin counts are stored on device and computations are performed on device.</p>
+</dd>
+</dl>
+</dd>
+<dt>Variables:</dt><dd><dl class="simple">
+<dt>auto_bin_size (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> bin width is computed when <a class="reference internal" href="#activations.torch.utils.histogram.NeuronsHistogram.fill_n" title="activations.torch.utils.histogram.NeuronsHistogram.fill_n"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NeuronsHistogram.fill_n()</span></code></a> is called.</p>
+</dd>
+<dt>bin_size (float):</dt><dd><p>Width of bins.</p>
+</dd>
+<dt>bins (list(<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)):</dt><dd><p>Left edges of bins. Element at index <span class="math notranslate nohighlight">\(i\)</span> belongs to <strong>ith</strong> histogram.</p>
+</dd>
+<dt>counts (list(<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)):</dt><dd><p>Height of bins. Element at index <span class="math notranslate nohighlight">\(i\)</span> belongs to <strong>ith</strong> histogram.</p>
+</dd>
+<dt>n_neurons (int):</dt><dd><p>Number of hisograms.</p>
+</dd>
+<dt>weights (list(<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>)):</dt><dd><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">counts</span></code> normalized to <span class="math notranslate nohighlight">\([0, 1]\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram.fill_n">
+<span class="sig-name descname"><span class="pre">fill_n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#NeuronsHistogram.fill_n"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram.fill_n" title="Permalink to this definition"></a></dt>
+<dd><p>Adds batch of inputs to histograms.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>input (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>):</dt><dd><p>Inputs to add. If of shape <span class="math notranslate nohighlight">\((A, N, B, C, ...),\,\text{where }N\text{represents number of histograms}\)</span> will be reshaped to <span class="math notranslate nohighlight">\((N, A*B*C*...)\)</span>.</p>
+</dd>
+<dt>ax_idx (int):</dt><dd><p>Index of dimension in <code class="docutils literal notranslate"><span class="pre">input</span></code> that matches number of histograms.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram.get_bin_edges">
+<span class="sig-name descname"><span class="pre">get_bin_edges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#NeuronsHistogram.get_bin_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram.get_bin_edges" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>left_edge, right_edge (float):</dt><dd><p>Smallest and greatets edge over all histograms.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">right_edge</span></code> is the left edge of the rightmost bin.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#NeuronsHistogram.is_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram.is_empty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram.kde">
+<span class="sig-name descname"><span class="pre">kde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.13797296614612148</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#NeuronsHistogram.kde"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram.kde" title="Permalink to this definition"></a></dt>
+<dd><p>Return kde function of one histogram.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>n (int):</dt><dd><p>Index of histogram.</p>
+</dd>
+<dt>bw_method (float):</dt><dd><p>See parameter <cite>bw_method</cite> in <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code></p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>kde (<code class="xref py py-meth docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde.pdf()</span></code>):</dt><dd><p>Probability density function of <code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.stats.gaussian_kde</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.NeuronsHistogram.weights">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#activations.torch.utils.histogram.NeuronsHistogram.weights" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.filter_weights">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.utils.histogram.</span></span><span class="sig-name descname"><span class="pre">filter_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#filter_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.filter_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all values smaller than <code class="docutils literal notranslate"><span class="pre">tolerance</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.get_bin_edges">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.utils.histogram.</span></span><span class="sig-name descname"><span class="pre">get_bin_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#get_bin_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.get_bin_edges" title="Permalink to this definition"></a></dt>
+<dd><p>Computes new bin edges with fixed bin size.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>left_edge, right_edge (float):</dt><dd><p>The edges of current bins.</p>
+</dd>
+<dt>min, max (float):</dt><dd><p>Minimum/maximum values which should be included in bins.</p>
+</dd>
+<dt>bin_size (float):</dt><dd><p>Desired size of each bin.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>left_edge, right_edge (float):</dt><dd><p>Closest edges such that <code class="docutils literal notranslate"><span class="pre">min</span></code>, <cite>max`</cite> are included.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="activations.torch.utils.histogram.get_bin_size">
+<span class="sig-prename descclassname"><span class="pre">activations.torch.utils.histogram.</span></span><span class="sig-name descname"><span class="pre">get_bin_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/activations/torch/utils/histogram.html#get_bin_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#activations.torch.utils.histogram.get_bin_size" title="Permalink to this definition"></a></dt>
+<dd><p>Computes <code class="docutils literal notranslate"><span class="pre">x</span></code> such that <code class="docutils literal notranslate"><span class="pre">x</span></code> fits <code class="docutils literal notranslate"><span class="pre">100</span></code> times into <code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">-</span> <span class="pre">min</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="module-activations.torch.utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-activations.torch.utils" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="activations.torch.learnable_activations.rationals.html" class="btn btn-neutral float-left" title="activations.torch.learnable_activations.rationals package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="activations.utils.html" class="btn btn-neutral float-right" title="activations.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Author.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
