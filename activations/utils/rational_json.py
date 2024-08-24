@@ -8,6 +8,9 @@ class JsonHandler:
     """Manages read/write operations on a json file.
     
     Managed json files have the following format:
+    
+    .. code-block::
+
         {<version><N>/<M>
             {<func>
                 {
