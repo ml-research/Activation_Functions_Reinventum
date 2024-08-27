@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 
-
 def tent_activation(x, delta):
     """Functional implementation of TentActivation."""
     return torch.clamp(delta - torch.abs(x), min=0)
@@ -27,8 +26,10 @@ class TentActivation(nn.Module):
 
 def bitent_activation(x, delta, epsilon):
     """Functional implementation of BiTentActivation."""
-    hdt = delta/2
-    return tent_activation(x+hdt+epsilon, hdt) + tent_activation(x-hdt-epsilon, hdt)
+    hdt = delta / 2
+    return tent_activation(x + hdt + epsilon, hdt) + tent_activation(
+        x - hdt - epsilon, hdt
+    )
 
 
 class BiTentActivation(TentActivation):

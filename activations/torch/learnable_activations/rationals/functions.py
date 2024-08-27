@@ -1,10 +1,9 @@
 import torch
 
 
-
 def rational_A(x, weight_numerator, weight_denominator):
     """Computes :math:`f(x)=\\frac{\\sum_i^Na_ix^i}{1+\\sum_i^M|b_ix^i|}`.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -20,15 +19,19 @@ def rational_A(x, weight_numerator, weight_denominator):
             Tensor of same shape as ``x``.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device)
+    )
     numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1)
-    denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).abs().sum(1)
+    denominator = (
+        torch.mul(x_powers[:, 1 : len_deno + 1], weight_denominator).abs().sum(1)
+    )
     return torch.div(numerator, denominator + 1.0).view(x.shape)
 
 
 def rational_B(x, weight_numerator, weight_denominator):
     """Computes :math:`f(x)=\\frac{\\sum_i^Na_ix^i}{1+|\\sum_i^Mb_ix^i|}`.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -44,15 +47,19 @@ def rational_B(x, weight_numerator, weight_denominator):
             Tensor of same shape as ``x``.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device)
+    )
     numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1)
-    denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).sum(1).abs()
+    denominator = (
+        torch.mul(x_powers[:, 1 : len_deno + 1], weight_denominator).sum(1).abs()
+    )
     return torch.div(numerator, denominator + 1.0).view(x.shape)
 
 
 def rational_C(x, weight_numerator, weight_denominator):
     """Computes :math:`f(x)=\\frac{\\sum_i^Na_ix^i}{|\\sum_i^Mb_ix^i|}`.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -68,7 +75,9 @@ def rational_C(x, weight_numerator, weight_denominator):
             Tensor of same shape as ``x``.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno), device=x.device)
+    )
     numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1)
     denominator = torch.mul(x_powers[:, :len_deno], weight_denominator).sum(1).abs()
     return torch.div(numerator, denominator).view(x.shape)
@@ -101,19 +110,25 @@ def rational_D(x, weight_numerator, weight_denominator, *, noise_deviation=0.2):
             Tensor of same shape as ``x``.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno), device=x.device)
+    )
 
-    noise = torch.FloatTensor(len_num).uniform_(1.0-noise_deviation, 1.0+noise_deviation)
+    noise = torch.FloatTensor(len_num).uniform_(
+        1.0 - noise_deviation, 1.0 + noise_deviation
+    )
     noised_numerator = torch.mul(weight_numerator, noise)
 
     numerator = torch.mul(x_powers[:, :len_num], noised_numerator).sum(1)
-    denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).sum(1).abs()
+    denominator = (
+        torch.mul(x_powers[:, 1 : len_deno + 1], weight_denominator).sum(1).abs()
+    )
     return torch.div(numerator, denominator + 1.0).view(x.shape)
 
 
 def rational_nonsafe(x, weight_numerator, weight_denominator):
     """Computes :math:`f(x)=\\frac{\\sum_i^Na_ix^i}{1+\\sum_i^Mb_ix^i}`.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -132,15 +147,17 @@ def rational_nonsafe(x, weight_numerator, weight_denominator):
         Can result in division by zero.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device)
+    )
     numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1)
-    denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).sum(1)
+    denominator = torch.mul(x_powers[:, 1 : len_deno + 1], weight_denominator).sum(1)
     return torch.div(numerator, denominator + 1.0).view(x.shape)
 
 
 def rational_spline(x, weight_numerator, weight_denominator, *, k=2.0):
     """Computes :math:`f(x)=\\frac{\\sum_i^Na_ix^i\\cdot\\text{max}\\{0, x_i+k\\}\\cdot\\text{min}\\{0, x_i-k\\}}{1+|\\sum_i^Mb_ix^i|}`.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -159,16 +176,25 @@ def rational_spline(x, weight_numerator, weight_denominator, *, k=2.0):
             Tensor of same shape as ``x``.
     """
     len_num, len_deno = len(weight_numerator), len(weight_denominator)
-    x_powers = torch.pow(x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device))
+    x_powers = torch.pow(
+        x.view(-1, 1), torch.arange(max(len_num, len_deno + 1), device=x.device)
+    )
     z = x.view(-1)
-    numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1).mul(torch.relu(z+k)).mul(-torch.relu(-z+k))
-    denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).sum(1).abs()
+    numerator = (
+        torch.mul(x_powers[:, :len_num], weight_numerator)
+        .sum(1)
+        .mul(torch.relu(z + k))
+        .mul(-torch.relu(-z + k))
+    )
+    denominator = (
+        torch.mul(x_powers[:, 1 : len_deno + 1], weight_denominator).sum(1).abs()
+    )
     return torch.div(numerator, denominator + 1.0).view(x.shape)
 
 
 def era(x, weight_numerator, weight_denominator):
     """Computes `ERA <https://www.ecva.net/papers/eccv_2022/papers_ECCV/papers/136800705.pdf>`_.
-    
+
     Args:
         x (:class:`torch.Tensor`):
             Inputs of any shape. Will be treated as 1D tensor.
@@ -189,7 +215,11 @@ def era(x, weight_numerator, weight_denominator):
     weight_denominator = weight_denominator.view(-1, 1)
 
     numerator = weight_numerator[2::2] * x
-    denominator = (x - weight_denominator[::2])**2 + weight_denominator[1::2]**2
-    output = torch.sum(numerator / denominator, 0) + weight_numerator[0]*x + weight_numerator[1]
+    denominator = (x - weight_denominator[::2]) ** 2 + weight_denominator[1::2] ** 2
+    output = (
+        torch.sum(numerator / denominator, 0)
+        + weight_numerator[0] * x
+        + weight_numerator[1]
+    )
 
     return output.view(x_shape)

@@ -2,11 +2,10 @@ import torch
 import scipy.stats as sts
 
 
-
 def get_bin_size(min, max):
     """Computes ``x`` such that ``x`` fits ``100`` times into ``max - min``."""
-    bin_size = int(torch.log10(1./(max - min))) + 2
-    bin_size = 1./(10**bin_size)
+    bin_size = int(torch.log10(1.0 / (max - min))) + 2
+    bin_size = 1.0 / (10**bin_size)
 
     return bin_size
 
@@ -30,13 +29,13 @@ def get_bin_edges(left_edge, right_edge, min, max, bin_size):
     """
     if min < left_edge:
         n = int((left_edge - min) / bin_size) + 1
-        left_edge = left_edge - n*bin_size
+        left_edge = left_edge - n * bin_size
         if left_edge + bin_size <= min:
             left_edge += bin_size
 
     if max > right_edge:
         n = int((max - right_edge) / bin_size) + 1
-        right_edge = right_edge + n*bin_size
+        right_edge = right_edge + n * bin_size
         if right_edge - bin_size >= max:
             right_edge -= bin_size
 
@@ -44,9 +43,9 @@ def get_bin_edges(left_edge, right_edge, min, max, bin_size):
 
 
 def filter_weights(weights, tolerance):
-        """Remove all values smaller than ``tolerance``."""
-        mask = (weights > tolerance)
-        return mask.nonzero(as_tuple=True)[0]
+    """Remove all values smaller than ``tolerance``."""
+    mask = weights > tolerance
+    return mask.nonzero(as_tuple=True)[0]
 
 
 class NeuronsHistogram:
@@ -55,10 +54,10 @@ class NeuronsHistogram:
     Args:
         bin_size (float, optional):
             Desired size of bins. If omitted will be computed on first batch.
-            
+
         device (:class:`torch.device` or int):
             Device to use. Bin widths and bin counts are stored on device and computations are performed on device.
-            
+
     Variables:
         auto_bin_size (bool):
             If ``True`` bin width is computed when :meth:`NeuronsHistogram.fill_n` is called.
@@ -94,7 +93,9 @@ class NeuronsHistogram:
 
     def _initialize(self):
         self.bins = [torch.empty(0, device=self.device) for _ in range(self.n_neurons)]
-        self.counts = [torch.empty(0, device=self.device) for _ in range(self.n_neurons)]
+        self.counts = [
+            torch.empty(0, device=self.device) for _ in range(self.n_neurons)
+        ]
 
     @property
     def weights(self):
@@ -102,13 +103,13 @@ class NeuronsHistogram:
 
     def _fill_n(self, n, input):
         """Adds input to one histogram.
-        
+
         Args:
             n (int):
                 Index of histogram to add input to.
-                
+
             input (:class:`torch.Tensor`):
-                Tensor to add. Must be 1D.        
+                Tensor to add. Must be 1D.
         """
         if len(self.bins[n]) == 0:
             left_edge = torch.floor(input.min() / self.bin_size) * self.bin_size
@@ -122,28 +123,36 @@ class NeuronsHistogram:
                 self.bin_size,
             )
 
-        n_bins = int(torch.round((right_edge - left_edge) / self.bin_size).item())  # round for numerical stability
+        n_bins = int(
+            torch.round((right_edge - left_edge) / self.bin_size).item()
+        )  # round for numerical stability
         new_bins = torch.linspace(left_edge, right_edge, n_bins + 1, device=self.device)
-        new_counts = torch.histc(input, n_bins, min=left_edge.item(), max=right_edge.item())
+        new_counts = torch.histc(
+            input, n_bins, min=left_edge.item(), max=right_edge.item()
+        )
 
         if len(self.counts[n]) == 0:
             self.counts[n] = new_counts
         elif len(new_counts) == len(self.counts[n]):  # no new bins added
             self.counts[n] += new_counts
         else:  # find indices to insert `self.counts`
-            idx = torch.isclose(self.bins[n][0], new_bins, atol=self.bin_size/10).nonzero()[0].item()
-            new_counts[idx:idx + len(self.bins[n]) - 1] += self.counts[n]
+            idx = (
+                torch.isclose(self.bins[n][0], new_bins, atol=self.bin_size / 10)
+                .nonzero()[0]
+                .item()
+            )
+            new_counts[idx : idx + len(self.bins[n]) - 1] += self.counts[n]
             self.counts[n] = new_counts
 
         self.bins[n] = new_bins
 
     def fill_n(self, input, ax_idx=0):
         """Adds batch of inputs to histograms.
-        
+
         Args:
             input (:class:`torch.Tensor`):
                 Inputs to add. If of shape :math:`(A, N, B, C, ...),\,\\text{where }N\\text{represents number of histograms}` will be reshaped to :math:`(N, A*B*C*...)`.
-                
+
             ax_idx (int):
                 Index of dimension in ``input`` that matches number of histograms.
         """
@@ -161,10 +170,10 @@ class NeuronsHistogram:
         input = input.to(self.bins[0])  # move to correct device/dtype
         for n in range(self.n_neurons):
             self._fill_n(n, input[n].view(-1))
-    
+
     def kde(self, n, bw_method=0.13797296614612148):
         """Return kde function of one histogram.
-        
+
         Args:
             n (int):
                 Index of histogram.
@@ -177,14 +186,16 @@ class NeuronsHistogram:
                 Probability density function of :class:`scipy.stats.gaussian_kde`.
 
         """
-        return sts.gaussian_kde(self.bins[n][:-1], bw_method=bw_method, weights=self.weights[n]).pdf
-    
+        return sts.gaussian_kde(
+            self.bins[n][:-1], bw_method=bw_method, weights=self.weights[n]
+        ).pdf
+
     def get_bin_edges(self):
         """
         Returns:
             left_edge, right_edge (float):
                 Smallest and greatets edge over all histograms.
-        
+
         .. note::
             ``right_edge`` is the left edge of the rightmost bin.
         """
@@ -194,21 +205,21 @@ class NeuronsHistogram:
         left_edge = min([self.bins[n][0] for n in range(self.n_neurons)])
         right_edge = max([self.bins[n][-1] for n in range(self.n_neurons)])
         return left_edge, right_edge
-    
+
     def is_empty(self):
         return (self.bins is None) or (sum(map(len, self.bins)) == 0)
 
-    
+
 class Histogram(NeuronsHistogram):
     """A Histogram that can be fed iteratively.
 
     Args:
         bin_size (float, optional):
             Desired size of bins. If omitted will be computed on first batch.
-            
+
         device (:class:`torch.device` or int):
             Device to use. Bin widths and bin counts are stored on device and computations are performed on device.
-            
+
     Variables:
         auto_bin_size (bool):
             If ``True`` bin width is computed when :meth:`NeuronsHistogram.fill_n` is called.
@@ -233,10 +244,12 @@ class Histogram(NeuronsHistogram):
     def fill_n(self, input, ax_idx=None):
         """Adds flattened input to histogram."""
         super().fill_n(input.view(1, -1), ax_idx=0)
-    
+
     @property
     def weights(self):
         return super().weights[0]
-    
+
     def kde(self, bw_method=0.13797296614612148):
-        return sts.gaussian_kde(self.bins[0][:-1], bw_method=bw_method, weights=self.weights).pdf
+        return sts.gaussian_kde(
+            self.bins[0][:-1], bw_method=bw_method, weights=self.weights
+        ).pdf

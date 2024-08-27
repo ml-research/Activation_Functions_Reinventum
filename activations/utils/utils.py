@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def find_closest_equivalent(rational_func, new_func, x):
     """
     Compute the parameters a, b, c, and d that minimizes distance between the
@@ -23,17 +22,17 @@ def find_closest_equivalent(rational_func, new_func, x):
         dist: The final distance between the rational function and the \
         fitted one
     """
-    initials = np.array([1., 0., 1., 0.]) # a, b, c, d
+    initials = np.array([1.0, 0.0, 1.0, 0.0])  # a, b, c, d
     y = rational_func(x)
     from scipy.optimize import curve_fit
-    import torch
 
     def equivalent_func(x_array, a, b, c, d):
         return a * new_func(c * x_array + d) + b
+
     params = curve_fit(equivalent_func, x, y, initials)
     a, b, c, d = params[0]
     final_func_output = np.array(equivalent_func(x, a, b, c, d))
-    final_distance = np.sqrt(((y - final_func_output)**2).sum())
+    final_distance = np.sqrt(((y - final_func_output) ** 2).sum())
     return (a, b, c, d), final_distance
 
 
