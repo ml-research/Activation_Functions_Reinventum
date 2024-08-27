@@ -200,7 +200,7 @@ class Rational(RationalBase):
 
         version (str):
             The :obj:`version <activations.torch.learnable_activations.rationals.functions>` to use.
-            Can be any of ``'A'``, ``'B'``, ``'C'``, ``'D'``, ``'N'``, ``'S'``.
+            Can be any of ``'A'``, ``'B'``, ``'C'``, ``'D'``, ``'N'``, ``'S'``, ``'ERA'``.
 
         train_numerator, train_denominator (bool):
             If ``True`` gradients for numerator/denominator will be computed.
@@ -265,6 +265,11 @@ class Rational(RationalBase):
         n_num, n_denom = degrees
         if version == "C":
             n_denom += 1
+        elif version == "ERA":
+            assert (
+            n_num == n_denom + 1
+        ), f"Denominator must have polynominal of one degree smaller than numerator for version 'ERA', got {degrees}"
+            n_num = n_denom + 2
 
         if isinstance(init, str):
             w_numerator, w_denominator = [

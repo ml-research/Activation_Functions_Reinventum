@@ -203,7 +203,7 @@ def era(x, weight_numerator, weight_denominator):
             Tensor of shape :math:`N`.
 
         weight_denominator (:class:`torch.Tensor`):
-            Tensor of shape :math:`N-1`.
+            Tensor of shape :math:`N-2`.
 
     Returns:
         :class:`torch.Tensor`:
@@ -214,8 +214,12 @@ def era(x, weight_numerator, weight_denominator):
     weight_numerator = weight_numerator.view(-1, 1)
     weight_denominator = weight_denominator.view(-1, 1)
 
-    numerator = weight_numerator[2::2] * x
-    denominator = (x - weight_denominator[::2]) ** 2 + weight_denominator[1::2] ** 2
+    N = len(weight_numerator)
+    if N % 2 == 1:
+        N -= 1
+
+    numerator = weight_numerator[2:N:2] * x + weight_numerator[3:N:2]
+    denominator = (x - weight_denominator[:N-2:2]) ** 2 + weight_denominator[1:N-2:2] ** 2
     output = (
         torch.sum(numerator / denominator, 0)
         + weight_numerator[0] * x
