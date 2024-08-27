@@ -13,14 +13,20 @@ import scipy.optimize
 from activations.torch.activation_module import ActivationModule
 from activations.utils.utils import find_closest_equivalent
 from activations.utils.rational_json import JsonHandler
-from activations.torch.learnable_activations.rationals.functions import rational_A, rational_B, rational_C, rational_D, rational_nonsafe, rational_spline
+from activations.torch.learnable_activations.rationals.functions import rational_A, rational_B, rational_C, rational_D, rational_nonsafe, rational_spline, era
 
+
+
+_all_versions = ["A", "B", "C", "D", "N", "S", "RARE", "ERA"]
 
 
 def _get_rational_fn(version):
+    if version not in _all_versions:
+        raise ValueError(f"Unsupported version, got {version} expected one of {_all_versions}")
+
     if version == "A":
         return rational_A
-    elif version == "B":
+    elif version in ["B", "RARE"]:
         return rational_B
     elif version == "C":
         return rational_C
@@ -30,8 +36,8 @@ def _get_rational_fn(version):
         return rational_nonsafe
     elif version == "S":
         return rational_spline
-    else:
-        raise ValueError(f"Unsupported version, got {version} expected one of [A, B, C, D, N, S]")
+    elif version == "ERA":
+        return era
 
 
 def find_weights(func, x, degrees, version, **scipyargs):
@@ -45,7 +51,7 @@ def find_weights(func, x, degrees, version, **scipyargs):
             Input data.
 
         degrees (tuple(int, int)):
-            Number of weights for (numerator, denominator).
+            Degrees of polynominals.
         
         scipyargs:
             Additional arguments passed to :func:`scipy.optimize.cuve_fit` (parameter ``method`` is ``'lm'``).
@@ -61,7 +67,9 @@ def find_weights(func, x, degrees, version, **scipyargs):
         n_num -= 2
     elif version == "C":
         n_denom += 1
-    n_total = n_num + n_denom + 1
+    elif version == "ERA":
+        assert n_num == n_denom + 1, f"Denominator must have polynominal of one degree smaller than numerator for version 'ERA', got {degrees}"
+    n_total = n_num + n_denom
 
     rat_fn = _get_rational_fn(version)
     if version == "RARE":
@@ -224,9 +232,16 @@ class Rational(RationalBase):
     def __init__(self, init=None, degrees=(5, 4), device="cpu",
                  version="A", train_numerator=True, train_denominator=True,
                  name="Rational", group=None, logger=None, **kwargs):
-        super().__init__(name=name, group=group, logger=logger)
+        super().__init__(
+            name=name,
+            group=group,
+            logger=logger,
+        )
 
         n_num, n_denom = degrees
+        if version == "C":
+                n_denom += 1
+
         if isinstance(init, str):
             w_numerator, w_denominator = [torch.tensor(weight) for weight in JsonHandler.load(version, degrees, init)]
         elif init is None:
@@ -238,7 +253,7 @@ class Rational(RationalBase):
 
         self.numerator = nn.Parameter(w_numerator, requires_grad=train_numerator)
         self.denominator = nn.Parameter(w_denominator, requires_grad=train_denominator)
-        
+
         self.degrees = degrees
         self.version = version
         self.init_approximation = f"{init}"
@@ -281,6 +296,44 @@ class Rational(RationalBase):
         self.activation_function = _get_rational_fn(version)
         self.version = version
 
+    def store(self, name=None):
+        """Stores weights in current json file.
+        
+        Args:
+            name (str):
+                Name under which rational should be stored. If ``None`` initialization will be taken.
+        """
+        if name is None:
+            name = self.init_approximation
+
+        JsonHandler.store(
+            version=self.version,
+            degrees=self.degrees,
+            name=name,
+            numerator=self.numerator.detach().cpu().tolist(),
+            denominator=self.denominator.detach().cpu().tolist(),
+        )
+
+    def load(self, name=None):
+        """Loads weights from current json file.
+        
+        Args:
+            name (str):
+                Name under which rational is stored. If ``None`` initialization will be taken.
+        """
+        if name is None:
+            name = self.init_approximation
+
+        w_numerator, w_denominator = JsonHandler.load(
+            version=self.version,
+            degrees=self.degrees,
+            name=name,
+        )
+
+        device = self.numerator.device
+        self.numerator = torch.nn.Parameter(torch.tensor(w_numerator, device=device))
+        self.denominator = torch.nn.Parameter(torch.tensor(w_denominator, device=device))
+
 
 class RARE(Rational):
     """RARE as proposed by `Authors <link>`_.
@@ -300,9 +353,11 @@ class RARE(Rational):
     """
     def __init__(self, name="RARE", group=None, init=None, degrees=(6, 4), device="cpu",
                  train_numerator=True, train_denominator=True, k=2., k_trainable=False, logger=None):
-        super().__init__(self, init=init, degrees=degrees, device=device,
+        n_num, n_denom = degrees
+        super().__init__(self, init=init, degrees=(n_num - 2, n_denom), device=device,
                          version="B", train_numerator=train_numerator, train_denominator=train_denominator,
                          name=name, group=group, logger=logger)
+        self.degrees = degrees
 
         self.k = nn.Parameter(torch.FloatTensor([k]), requires_grad=k_trainable)
 

@@ -164,3 +164,32 @@ def rational_spline(x, weight_numerator, weight_denominator, *, k=2.0):
     numerator = torch.mul(x_powers[:, :len_num], weight_numerator).sum(1).mul(torch.relu(z+k)).mul(-torch.relu(-z+k))
     denominator = torch.mul(x_powers[:, 1:len_deno+1], weight_denominator).sum(1).abs()
     return torch.div(numerator, denominator + 1.0).view(x.shape)
+
+
+def era(x, weight_numerator, weight_denominator):
+    """Computes `ERA <https://www.ecva.net/papers/eccv_2022/papers_ECCV/papers/136800705.pdf>`_.
+    
+    Args:
+        x (:class:`torch.Tensor`):
+            Inputs of any shape. Will be treated as 1D tensor.
+
+        weight_numerator (:class:`torch.Tensor`):
+            Tensor of shape :math:`N`.
+
+        weight_denominator (:class:`torch.Tensor`):
+            Tensor of shape :math:`N-1`.
+
+    Returns:
+        :class:`torch.Tensor`:
+            Tensor of same shape as ``x``.
+    """
+    x_shape = x.shape
+    x = x.view(1, -1)
+    weight_numerator = weight_numerator.view(-1, 1)
+    weight_denominator = weight_denominator.view(-1, 1)
+
+    numerator = weight_numerator[2::2] * x
+    denominator = (x - weight_denominator[::2])**2 + weight_denominator[1::2]**2
+    output = torch.sum(numerator / denominator, 0) + weight_numerator[0]*x + weight_numerator[1]
+
+    return output.view(x_shape)
