@@ -1,15 +1,7 @@
-import torch
-import os
-from torch.utils.cpp_extension import load_inline
-from torch.autograd import Function
-import torch.nn as nn
+#include <torch/types.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
 
-# Set the custom directory for PyTorch extensions so its importable and not saved in root depending on server 
-# unnecessary on dgx* TU-Darmstadt
-os.environ['TORCH_EXTENSIONS_DIR'] = './torch_extensions'
-
-# CUDA Kernel code
-cuda_code = r'''
 #include <torch/extension.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -340,72 +332,3 @@ void rationals_cuda_inline_backward(
             num_elements);
     }));
 }
-'''
-
-cpp_code = r'''
-#include <torch/extension.h>
-
-// Declarations of CUDA functions
-void rationals_cuda_inline_forward(
-    at::Tensor x,
-    at::Tensor coeff_numerator,
-    at::Tensor coeff_denominator,
-    at::Tensor output);
-
-void rationals_cuda_inline_backward(
-    at::Tensor grad_output,
-    at::Tensor x,
-    at::Tensor coeff_numerator,
-    at::Tensor coeff_denominator,
-    at::Tensor grad_x,
-    at::Tensor grad_coeff_numerator,
-    at::Tensor grad_coeff_denominator);
-
-// C++ interface (forward and backward functions)
-at::Tensor rationals_cuda_forward(
-    at::Tensor x,
-    at::Tensor coeff_numerator,
-    at::Tensor coeff_denominator) {
-
-    auto output = at::zeros_like(x);
-    rationals_cuda_inline_forward(x, coeff_numerator, coeff_denominator, output);
-    return output;
-}
-
-std::vector<at::Tensor> rationals_cuda_backward(
-    at::Tensor grad_output,
-    at::Tensor x,
-    at::Tensor coeff_numerator,
-    at::Tensor coeff_denominator) {
-
-    auto grad_x = at::zeros_like(x);
-    auto grad_coeff_numerator = at::zeros_like(coeff_numerator, coeff_numerator.options().dtype(at::kFloat));
-    auto grad_coeff_denominator = at::zeros_like(coeff_denominator, coeff_denominator.options().dtype(at::kFloat));
-
-    rationals_cuda_inline_backward(
-        grad_output,
-        x,
-        coeff_numerator,
-        coeff_denominator,
-        grad_x,
-        grad_coeff_numerator,
-        grad_coeff_denominator);
-
-    return {grad_x, grad_coeff_numerator, grad_coeff_denominator};
-}
-'''
-
-# Module compilation inline with proper error handling
-try:
-    rationals_cuda_inline = load_inline(
-        name='rationals_cuda_inline',
-        cpp_sources=cpp_code,
-        cuda_sources=cuda_code,
-        functions=['rationals_cuda_forward', 'rationals_cuda_backward'],
-        verbose=True,
-        extra_cuda_cflags=['-O2', '--use_fast_math']
-    )
-except Exception as e:
-    print(f"Failed to compile CUDA extension: {str(e)}")
-    raise
-

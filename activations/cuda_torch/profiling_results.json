@@ -1,0 +1,34 @@
+[
+    {
+        "Optimizer Setup": "Separate Optimizers",
+        "Precision": "32-bit",
+        "Validation Loss": 1.385989785194397,
+        "Validation Accuracy": 0.44437503814697266,
+        "Training Time (s)": 84.86265420913696,
+        "Average Inference Time (ms)": 3.9794564247131348
+    },
+    {
+        "Optimizer Setup": "Separate Optimizers",
+        "Precision": "16-mixed-bit",
+        "Validation Loss": 1.6982351541519165,
+        "Validation Accuracy": 0.3873343765735626,
+        "Training Time (s)": 129.18921399116516,
+        "Average Inference Time (ms)": 3.8715744018554688
+    },
+    {
+        "Optimizer Setup": "Single Optimizer",
+        "Precision": "32-bit",
+        "Validation Loss": 1.3297947645187378,
+        "Validation Accuracy": 0.45207783579826355,
+        "Training Time (s)": 99.51386737823486,
+        "Average Inference Time (ms)": 3.8579893112182617
+    },
+    {
+        "Optimizer Setup": "Single Optimizer",
+        "Precision": "16-mixed-bit",
+        "Validation Loss": 1.3136242628097534,
+        "Validation Accuracy": 0.4553247392177582,
+        "Training Time (s)": 121.18258666992188,
+        "Average Inference Time (ms)": 4.058902263641357
+    }
+]

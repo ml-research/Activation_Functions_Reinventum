@@ -1,0 +1,17 @@
+Simple Action,Source File,Mean Duration (s),Total Time (s),Num Calls,Percentage (%)
+Backward Pass,fit-Separate_Optimizers_16-mixed_20241205-144238_profiler_logs.txt.txt,2.886033333333333e-06,0.058493500000000004,20268,0.007547249999999999
+Backward Pass,fit-Separate_Optimizers_32_20241205-144111_profiler_logs.txt.txt,2.5122166666666666e-06,0.0509179,20268,0.0100019
+Backward Pass,fit-Single_Optimizer_16-mixed_20241205-144629_profiler_logs.txt.txt,0.0019785723142857143,46.7860685,23646,5.515803
+Backward Pass,fit-Single_Optimizer_32_20241205-144448_profiler_logs.txt.txt,0.0015362681142857145,36.3262544,23646,5.215929942857143
+Optimizer Step,fit-Separate_Optimizers_16-mixed_20241205-144238_profiler_logs.txt.txt,0.0004812942,13.00689,27024,2.5171799249999998
+Optimizer Step,fit-Separate_Optimizers_32_20241205-144111_profiler_logs.txt.txt,0.00026251157500000003,7.094302000000001,27024,2.09033025
+Optimizer Step,fit-Single_Optimizer_16-mixed_20241205-144629_profiler_logs.txt.txt,0.0072584696,98.0776134,13512,20.234990625000002
+Optimizer Step,fit-Single_Optimizer_32_20241205-144448_profiler_logs.txt.txt,0.00568208515,76.7784184,13512,19.29213185
+Training Step,fit-Separate_Optimizers_16-mixed_20241205-144238_profiler_logs.txt.txt,0.032697,110.45,3378,85.505
+Training Step,fit-Separate_Optimizers_32_20241205-144111_profiler_logs.txt.txt,0.019889,67.185,3378,79.183
+Training Step,fit-Single_Optimizer_16-mixed_20241205-144629_profiler_logs.txt.txt,0.011167,37.721,3378,31.13
+Training Step,fit-Single_Optimizer_32_20241205-144448_profiler_logs.txt.txt,0.0087038,29.402,3378,29.551
+Validation Step,fit-Separate_Optimizers_16-mixed_20241205-144238_profiler_logs.txt.txt,0.0077982,1.4193,182,1.0987
+Validation Step,fit-Separate_Optimizers_32_20241205-144111_profiler_logs.txt.txt,0.0062911,1.145,182,1.3495
+Validation Step,fit-Single_Optimizer_16-mixed_20241205-144629_profiler_logs.txt.txt,0.0073693,1.3412,182,1.1068
+Validation Step,fit-Single_Optimizer_32_20241205-144448_profiler_logs.txt.txt,0.0058924,1.0724,182,1.0779

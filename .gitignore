@@ -138,3 +138,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+activations/cuda_torch/datasets/
+activations/cuda_torch/tb_logs/

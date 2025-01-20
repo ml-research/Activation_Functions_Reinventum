@@ -1,0 +1,19 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+    "name": "Python 3",
+    "image": "pytorch/pytorch:2.2.0-cuda12.1-cudnn8-runtime",
+    "features": {
+        "ghcr.io/devcontainers/features/nvidia-cuda:1": {},
+        "ghcr.io/devcontainers-contrib/features/pipenv:2": {},
+        "ghcr.io/akhildevelops/devcontainer-features/pip:0": {}
+    },
+    "mounts": [
+        "source=/home/benchmarkbob/Documents/datasets/imagenette2-160,target=/workspaces/Act_Func_Reinventum/activations/cuda_torch/datasets/imagenette-160,type=bind"
+    ],
+    "runArgs": [
+        "--shm-size=64g",
+        "--gpus=all"
+    ],
+    "postCreateCommand": "pip3 install lightning tensorboard einops linformer scipy matplotlib && apt-get update && apt-get install ninja-build && apt-get install -y cuda-toolkit-12-4"
+}
