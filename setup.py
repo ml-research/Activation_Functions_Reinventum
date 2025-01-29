@@ -5,7 +5,7 @@ from distutils.command.clean import clean
 
 
 degrees = [(5, 4), (7, 6)]
-name='activation-functions'
+name='activations'
 
 long_description = ""
 
@@ -26,7 +26,7 @@ class clean_all(clean):
 
 setup(
     name=name,
-    version=1,
+    version="1.0.0",
     author="Quentin Delfosse, Patrick Schramowski",
     author_email="quentin.delfosse@cs.tu-darmstadt.de",
     description="Activations functions",
@@ -38,9 +38,6 @@ setup(
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: Apache Software License"
     ],
     install_requires=requirements,

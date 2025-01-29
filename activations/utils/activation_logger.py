@@ -11,9 +11,9 @@ class ColoredFormatter(logging.Formatter):
     bold_red = "\x1b[31;1m"
     white = "\x1b[38;5;231m"
 
-    def __init__(self, format):
-        logging.Formatter.__init__(self, format)
-        self.fmt = format
+    def __init__(self, fmt):
+        logging.Formatter.__init__(self, fmt)
+        self.fmt = fmt
 
         self.FORMATS = {
             logging.DEBUG: self.blue + self.fmt + self.reset,
@@ -46,7 +46,7 @@ class ActivationLogger(object):
         formatter = logging.Formatter(message_format)
 
         if os.name != "nt":
-            console.setFormatter(ColoredFormatter(formatter))
+            console.setFormatter(ColoredFormatter(message_format))
         if os.name == "nt":
             console.setFormatter(formatter)
 

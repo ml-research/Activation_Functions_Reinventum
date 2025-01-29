@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 
-from activations.torch import ActivationModule, ReLU, Rational
-
+from activations.torch import ActivationModule, ReLU, Rational, RARE
 
 
 class Model(nn.Module):
@@ -10,12 +9,12 @@ class Model(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.act1 = ReLU("relu_1")
+        self.act1 = RARE()
         self.act2 = Rational(
             init=None,
             degrees=(5, 4),
             device="cpu",
-            version="A",
+            version="RARE",
             name="rational_1"
         )
 
@@ -24,6 +23,7 @@ class Model(nn.Module):
 
     def forward(self, x):
         x = self.layer1(x)
+        print(x)
         x = self.act1(x)
         x = self.layer2(x)
         x = self.act2(x)
@@ -58,7 +58,7 @@ def main(device, num_epochs, batch_size):
     model = Model()
     model = model.to(device)
 
-    data = torch.rand(1000, 12)
+    data = (torch.rand(1000, 12) - 0.5)*7
     labels = torch.rand(1000, 6) * 10
 
     criterion = nn.MSELoss()
