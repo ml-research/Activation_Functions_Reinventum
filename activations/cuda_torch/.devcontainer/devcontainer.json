@@ -9,7 +9,7 @@
         "ghcr.io/akhildevelops/devcontainer-features/pip:0": {}
     },
     "mounts": [
-        "source=/home/benchmarkbob/Documents/datasets/imagenette2-160,target=/workspaces/Act_Func_Reinventum/activations/cuda_torch/datasets/imagenette-160,type=bind"
+        "type=bind,source=/storage-01/datasets,target=/workspaces/Act_Func_Reinventum/activations/cuda_torch/datasets"
     ],
     "runArgs": [
         "--shm-size=64g",

@@ -142,3 +142,4 @@ dmypy.json
 
 activations/cuda_torch/datasets/
 activations/cuda_torch/tb_logs/
+activations/cuda_torch/visualizations/

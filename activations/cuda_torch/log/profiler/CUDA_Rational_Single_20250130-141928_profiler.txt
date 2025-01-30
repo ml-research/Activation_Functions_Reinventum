@@ -1,19 +1,19 @@
-Configuration: Separate Optimizers with Precision 16-mixed-bit
+Activation: CUDA_Rational, Optimizer=Single
 Profiler Key Averages:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      33.000us       100.00%      33.000us      33.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      43.000us       100.00%      43.000us      43.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 33.000us
+Self CPU time total: 43.000us
 
 
-Detailed Profiler Information:
+Detailed Info:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      33.000us       100.00%      33.000us      33.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      43.000us       100.00%      43.000us      43.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 33.000us
+Self CPU time total: 43.000us
 
 

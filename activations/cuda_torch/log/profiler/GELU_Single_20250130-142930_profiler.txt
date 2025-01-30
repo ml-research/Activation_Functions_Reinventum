@@ -1,19 +1,19 @@
-Configuration: Separate Optimizers with Precision 32-bit
+Activation: GELU, Optimizer=Single
 Profiler Key Averages:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      29.000us       100.00%      29.000us      29.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      20.000us       100.00%      20.000us      20.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 29.000us
+Self CPU time total: 20.000us
 
 
-Detailed Profiler Information:
+Detailed Info:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      29.000us       100.00%      29.000us      29.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      20.000us       100.00%      20.000us      20.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 29.000us
+Self CPU time total: 20.000us
 
 

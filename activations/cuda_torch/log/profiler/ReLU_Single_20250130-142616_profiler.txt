@@ -1,19 +1,19 @@
-Configuration: Single Optimizer with Precision 16-mixed-bit
+Activation: ReLU, Optimizer=Single
 Profiler Key Averages:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      30.000us       100.00%      30.000us      30.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      41.000us       100.00%      41.000us      41.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 30.000us
+Self CPU time total: 41.000us
 
 
-Detailed Profiler Information:
+Detailed Info:
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
                      Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg       CPU Mem  Self CPU Mem    # of Calls  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-    cudaDeviceSynchronize       100.00%      30.000us       100.00%      30.000us      30.000us           0 b           0 b             1  
+    cudaDeviceSynchronize       100.00%      41.000us       100.00%      41.000us      41.000us           0 b           0 b             1  
 -------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 30.000us
+Self CPU time total: 41.000us
 
 
