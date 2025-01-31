@@ -13,7 +13,9 @@ import pytorch_lightning as pl
 from pytorch_lightning.profilers import SimpleProfiler
 from torch.profiler import profile, ProfilerActivity, schedule
 
+os.environ['CUDA_VISIBLE_DEVICES']='6,7'
 
+torch.set_float32_matmul_precision('medium')
 
 #####################################################################
 # TO DO: import the activation modules from this repo instead of nn for comparsion 
@@ -30,8 +32,12 @@ from model_loader import create_simple_vit
 # 3) CUDA-based rational activation init (if used)
 from rationals_cuda_inline import init_rationals_cuda_activation
 
-# 4) Other possible activations
+# 4) PyTorch-based rational activation
+from rationals_new import RationalsModel  # Ensure correct import
+
+# 5) Other possible activations
 import torch.nn as nn
+
 
 ###############################################################################
 #                          Configuration Section
@@ -44,9 +50,9 @@ COMPARE_ACTIVATIONS = True  # If False, only a single CUDA Rational run.
 # If True, we define a list of activations to compare.
 
 # Base training hyperparams
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 IMG_SIZE = 160
-MAX_EPOCHS = 6
+MAX_EPOCHS = 3
 
 ###############################################################################
 #                    Utility Functions (Profiler & Logging)
@@ -138,12 +144,14 @@ def run_profiling_comprehensive(dataset_path: str, batch_size: int, img_size: in
         # 2) Torch-based rational
         # 2) Plain ReLU (no trainable params)
         rational_cuda = init_rationals_cuda_activation(numerator_size=5, denominator_size=4, init="normal", init_std=0.1)
+        rational_pytorch = RationalsModel(n=5, m=4, function="gauss")
         relu = nn.ReLU()
         gelu = nn.GELU()
         
         # Build a list of (name, module)
         all_activations = [
             ("CUDA_Rational", rational_cuda),
+            ("PyTorch_Rational", rational_pytorch),
             ("ReLU", relu),
             ("GELU", gelu),
         ]
@@ -219,12 +227,12 @@ def run_profiling_comprehensive(dataset_path: str, batch_size: int, img_size: in
             # Setup profiler
             simple_profiler = SimpleProfiler(dirpath=profiler_log_dir, filename=f"{unique_name}_profiler_logs.txt")
 
-            # Setup Trainer (32-bit only, no "16-mixed")
+            # Setup Trainer
             trainer = pl.Trainer(
                 max_epochs=max_epochs,
                 accelerator="gpu" if torch.cuda.is_available() else "cpu",
                 devices=1,
-                precision=32,  # Force 32-bit
+                precision="16-mixed",
                 log_every_n_steps=1,
                 logger=logger,
                 enable_progress_bar=False,
@@ -303,10 +311,13 @@ def run_profiling_comprehensive(dataset_path: str, batch_size: int, img_size: in
         v_acc = r["Val Acc"]
         t_time = r["Train Time (s)"]
         i_time = r.get("Inference (ms/batch)", 0.0)
-        print(f"Activation={act}, Optim={opt}, "
-              f"ValLoss={v_loss:.4f if v_loss else 'N/A'}, "
-              f"ValAcc={v_acc:.4f if v_acc else 'N/A'}, "
-              f"TrainTime={t_time:.2f}s, InfTime={i_time:.2f}ms")
+        print("Activation={}, Optim={}, ValLoss={}, ValAcc={}, TrainTime={}s, InfTime={}ms".format(
+            act, opt,
+            f"{v_loss:.4f}" if v_loss is not None else "N/A",
+            f"{v_acc:.4f}" if v_acc is not None else "N/A",
+            f"{t_time:.2f}" if t_time is not None else "N/A",
+            f"{i_time:.2f}" if i_time is not None else "N/A"
+        ))
 
     # Optionally save to JSON
     out_file = "combined_profiling_results.json"

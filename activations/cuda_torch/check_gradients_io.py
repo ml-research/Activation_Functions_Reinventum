@@ -27,7 +27,7 @@ def compare_gradients_io(device='cuda'):
     output_pytorch = activation_pytorch(x)
     
     # Check if outputs match within tolerance
-    if torch.allclose(output_cuda, output_pytorch, atol=1e-4):
+    if torch.allclose(output_cuda, output_pytorch, atol=1e-6):
         print("[✓] Outputs match.")
     else:
         print("[✗] Outputs do NOT match!")
@@ -41,7 +41,7 @@ def compare_gradients_io(device='cuda'):
     loss_pytorch.backward()
     
     # Compare input gradients
-    if torch.allclose(x.grad, x.grad, atol=1e-4):
+    if torch.allclose(x.grad, x.grad, atol=1e-6):
         print("[✓] Input gradients match.")
     else:
         print("[✗] Input gradients do NOT match!")
@@ -52,7 +52,7 @@ def compare_gradients_io(device='cuda'):
     if hasattr(activation_cuda, 'coeff_numerator') and hasattr(activation_pytorch, 'coeff_numerator'):
         grad_num_cuda = activation_cuda.coeff_numerator.grad
         grad_num_pytorch = activation_pytorch.coeff_numerator.grad
-        if torch.allclose(grad_num_cuda, grad_num_pytorch, atol=1e-4):
+        if torch.allclose(grad_num_cuda, grad_num_pytorch, atol=1e-6):
             print("[✓] Numerator coefficient gradients match.")
         else:
             print("[✗] Numerator coefficient gradients do NOT match!")

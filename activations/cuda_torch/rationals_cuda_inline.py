@@ -640,17 +640,17 @@ class RationalsCUDAActivation(nn.Module):
         # Initialize coefficients
         if self.init == "normal":
             self.coeff_numerator = nn.Parameter(
-                torch.randn((numerator_size,), dtype=torch.float32) * init_std
+                torch.randn((numerator_size,), dtype=torch.float32)
             )
             self.coeff_denominator = nn.Parameter(
-                torch.randn((denominator_size,), dtype=torch.float32) * init_std
+                torch.randn((denominator_size,), dtype=torch.float32)
             )
         elif self.init == "uniform":
             self.coeff_numerator = nn.Parameter(
-                torch.rand((numerator_size,), dtype=torch.float32) - 0.5  # center around 0
+                torch.normal(mean=0.0, std=1.0, size=(numerator_size,), dtype=torch.float32)
             )
             self.coeff_denominator = nn.Parameter(
-                torch.rand((denominator_size,), dtype=torch.float32) - 0.5
+                torch.normal(mean=0.0, std=1.0, size=(denominator_size,), dtype=torch.float32)
             )
         else:
             raise ValueError(f"Unknown init type: {self.init}")
