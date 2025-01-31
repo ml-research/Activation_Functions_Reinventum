@@ -34,11 +34,11 @@ A **custom CUDA-accelerated** activation function for PyTorch, implemented as a 
 
 This project provides a **CUDA kernel** implementation of a **rational activation** function for use in PyTorch neural networks. The activation function is generally defined as:
 
-\[
+$$
 f(x) = \frac{\sum_{i=0}^{M-1} a_i\, x^i}{ 1 + \left|\sum_{j=1}^{N-1} b_j\, x^j\right| }
-\]
+$$
 
-where \(a_i\) and \(b_j\) are learnable coefficients, and \(M\) and \(N\) are the degrees of the numerator and denominator polynomials, respectively. The code uses **Horner's method** for efficient polynomial evaluation and **atomic operations** in the backward pass for safe gradient accumulation across threads.
+where $a_i$ and $b_j$ are learnable coefficients, and $M$ and $N$ are the degrees of the numerator and denominator polynomials, respectively. The code uses **Horner's method** for efficient polynomial evaluation and **atomic operations** in the backward pass for safe gradient accumulation across threads.
 
 ---
 
@@ -58,7 +58,7 @@ where \(a_i\) and \(b_j\) are learnable coefficients, and \(M\) and \(N\) are th
 
 ├── requirements.txt # Python dependencies 
 
-├── README.md # (This file) 
+├── README.md
 
 
 
@@ -68,7 +68,7 @@ where \(a_i\) and \(b_j\) are learnable coefficients, and \(M\) and \(N\) are th
 ## Features
 
 - **CUDA Acceleration**: Leverages GPU parallelism for efficient forward/backward passes.  
-- **Customizable**: Easily change numerator or denominator degrees (\(M, N\)) and initialization.  
+- **Customizable**: Easily change numerator or denominator degrees ($M, N$) and initialization.  
 - **PyTorch Integration**: Can be used as a drop-in `nn.Module` activation (like ReLU, etc.).  
 - **Optimized Computation**: Horner's method, fused multiply-add, atomicAdd wrappers for half, float, and double.
 
