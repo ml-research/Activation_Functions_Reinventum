@@ -104,7 +104,7 @@ def benchmark_inference(model, dataloader, device, num_batches=100):
 
 
 ###############################################################################
-#                      Combined Profiling Logic
+#                      Profiling Logic
 ###############################################################################
 def run_profiling_comprehensive(dataset_path: str, batch_size: int, img_size: int, max_epochs: int):
     """
@@ -135,9 +135,8 @@ def run_profiling_comprehensive(dataset_path: str, batch_size: int, img_size: in
     else:
         # Compare multiple activations. For example:
         # 1) CUDA-based rational
+        # 2) Torch-based rational
         # 2) Plain ReLU (no trainable params)
-        # 3) Possibly a built-in GELU or something else
-        # You can add as many as you want, e.g. a CPU-based rational or custom.
         rational_cuda = init_rationals_cuda_activation(numerator_size=5, denominator_size=4, init="normal", init_std=0.1)
         relu = nn.ReLU()
         gelu = nn.GELU()
