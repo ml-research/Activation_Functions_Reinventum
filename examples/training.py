@@ -14,7 +14,7 @@ class Model(nn.Module):
             init=None,
             degrees=(5, 4),
             device="cpu",
-            version="RARE",
+            version="A",
             name="rational_1"
         )
 
