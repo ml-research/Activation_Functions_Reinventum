@@ -405,7 +405,6 @@ class RARE(Rational):
     ):
         n_num, n_denom = degrees
         super().__init__(
-            self,
             init=init,
             degrees=(n_num - 2, n_denom),
             device=device,
