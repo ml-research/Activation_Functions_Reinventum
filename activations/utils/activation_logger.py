@@ -1,5 +1,6 @@
 import logging
 import os
+import copy
 
 
 # https://alexandra-zaharia.github.io/posts/make-your-own-custom-color-formatter-with-python-logging/
@@ -11,22 +12,21 @@ class ColoredFormatter(logging.Formatter):
     bold_red = "\x1b[31;1m"
     white = "\x1b[38;5;231m"
 
-    def __init__(self, fmt):
-        logging.Formatter.__init__(self, fmt)
-        self.fmt = fmt
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        self.FORMATS = {
-            logging.DEBUG: self.blue + self.fmt + self.reset,
-            logging.INFO: self.white + self.fmt + self.reset,
-            logging.CRITICAL: self.bold_red + self.fmt + self.reset,
-            logging.ERROR: self.red + self.fmt + self.reset,
-            logging.WARNING: self.yellow + self.fmt + self.reset,
+        self.colors = {
+            logging.DEBUG: self.blue,
+            logging.INFO: self.white,
+            logging.CRITICAL: self.bold_red,
+            logging.ERROR: self.red,
+            logging.WARNING: self.yellow,
         }
 
     def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
+        record = copy.copy(record)
+        record.msg = self.colors[record.levelno] + record.msg + self.reset
+        return super().format(record)
 
 
 class ActivationLogger(object):
