@@ -15,7 +15,7 @@ __pycache__/
 *.pyc
 
 # C extensions
-*.so
+#*.so
 
 # Distribution / packaging
 .Python
@@ -139,7 +139,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
-activations/cuda_torch/datasets/
-activations/cuda_torch/tb_logs/
-activations/cuda_torch/visualizations/
+data
