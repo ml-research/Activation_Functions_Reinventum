@@ -14,7 +14,7 @@ __pycache__/
 *$py.class
 *.pyc
 
-# C extensions
+# C extensions - .so needs to be included for compiled cuda version
 #*.so
 
 # Distribution / packaging

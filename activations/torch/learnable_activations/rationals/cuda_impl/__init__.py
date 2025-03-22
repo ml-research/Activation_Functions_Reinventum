@@ -9,6 +9,8 @@ try:
 except ImportError:
     CUDA_AVAILABLE = False
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class RationalsCUDAFunction(Function):
     @staticmethod
     def forward(ctx, x, coeff_numerator, coeff_denominator):

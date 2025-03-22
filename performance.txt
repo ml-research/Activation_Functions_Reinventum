@@ -1,0 +1,10 @@
+Activation	Train Accuracy (%)	Test Accuracy (%)	Duration (s)
+ReLU	71.70	67.99	13.68
+GLU	57.59	54.22	13.26
+OneSin	38.19	36.89	13.52
+Sigmoid	50.69	50.15	13.37
+Tanh	74.35	67.11	13.29
+LReLU	72.53	68.73	13.44
+Rational	68.95	63.31	21.79
+RARE	10.00	10.00	22.39
+RationalCUDA	64.82	60.59	13.57
