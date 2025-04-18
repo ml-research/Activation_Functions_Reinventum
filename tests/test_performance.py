@@ -2,6 +2,8 @@ import pytest
 import sys
 import os
 import csv
+import torch
+import random
 
 # Add project root to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -31,6 +33,11 @@ if not os.path.exists(LOG_FILE):
     (RationalCUDA, "RationalCUDA"),
 ])
 def test_activation_performance(activation_class, name):
+    torch.manual_seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
+        
     activation = activation_class() if name == "RationalCUDA" else activation_class(name=name)
     duration, train_acc, test_acc = train_and_evaluate_perf(activation, name, num_epochs=3)
     

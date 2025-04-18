@@ -77,6 +77,6 @@ pytest -v tests/
 ---
 
 ## 📜 License
-
+MIT License
 
 ---

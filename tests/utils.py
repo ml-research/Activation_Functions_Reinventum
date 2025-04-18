@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import time
+import random
 import torchvision
 import torchvision.transforms as transforms
 from activations.torch.classic_activations import GLU
@@ -64,6 +65,11 @@ class TestModel(nn.Module):
 
 
 def train_and_evaluate(activation_fn, activation_name, num_epochs=1):
+    torch.manual_seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
+
     model = TestModel(activation_fn).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -94,6 +100,11 @@ def train_and_evaluate(activation_fn, activation_name, num_epochs=1):
 
 
 def train_and_evaluate_perf(activation_fn, activation_name, num_epochs=5):
+    torch.manual_seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
+
     model = TestModel(activation_fn).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -137,26 +148,4 @@ def train_and_evaluate_perf(activation_fn, activation_name, num_epochs=5):
 
     return train_duration, train_acc, test_acc
 
-def compare_gradients(act_a, act_b, input_tensor, target_tensor):
-    input_tensor = input_tensor.clone().detach().requires_grad_(True)
-    target_tensor = target_tensor.clone().detach()
-
-    # Clone inputs for both activations
-    input_a = input_tensor.clone().detach().requires_grad_(True)
-    input_b = input_tensor.clone().detach().requires_grad_(True)
-
-    # Forward
-    output_a = act_a(input_a)
-    output_b = act_b(input_b)
-
-    # Same loss
-    loss_fn = nn.MSELoss()
-    loss_a = loss_fn(output_a, target_tensor)
-    loss_b = loss_fn(output_b, target_tensor)
-
-    # Backward
-    grad_input_a = torch.autograd.grad(loss_a, input_a, retain_graph=True)[0]
-    grad_input_b = torch.autograd.grad(loss_b, input_b, retain_graph=True)[0]
-
-    return torch.allclose(grad_input_a, grad_input_b, atol=1e-5, rtol=1e-4)
 

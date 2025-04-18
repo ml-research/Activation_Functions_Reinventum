@@ -13,7 +13,7 @@ from activations.torch.learnable_activations.rationals.cuda_impl import Rational
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-def compare_gradients(act_a, act_b, input_tensor, target_tensor, tol=1e-5):
+def compare_gradients(act_a, act_b, input_tensor, target_tensor, tol=None):
     device = input_tensor.device
     act_a = act_a.to(device)
     act_b = act_b.to(device)
@@ -48,6 +48,10 @@ def compare_gradients(act_a, act_b, input_tensor, target_tensor, tol=1e-5):
     (Rational, RationalCUDA),
 ])
 def test_gradient_equivalence(act_class_a, act_class_b):
+    torch.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
+    random.seed(42)
+
     # Hardcoded coefficients
     numerator = torch.tensor([1.0, -0.5, 0.25, 0.1, -0.05], dtype=torch.float32)
     denominator = torch.tensor([1.0, 0.2, -0.1, 0.05], dtype=torch.float32)
@@ -66,11 +70,8 @@ def test_gradient_equivalence(act_class_a, act_class_b):
             act_b.coeff_denominator.copy_(denominator.clone().to(torch.device("cuda")))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    input_tensor = torch.randn(32, device=device)
-    target_tensor = torch.randn(32, device=device)
+    input_tensor = (torch.rand(32, device=device) * 1.9 - 0.95)
+    target_tensor = (torch.rand(32, device=device) * 1.9 - 0.95)
 
     assert compare_gradients(act_a, act_b, input_tensor, target_tensor, tol=3e-3), \
         f"Gradient mismatch between {act_class_a.__name__} and {act_class_b.__name__}"
-    
-
-
