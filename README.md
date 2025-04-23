@@ -14,6 +14,11 @@ Each activation can be dropped into PyTorch models and evaluated across various 
 
 Model: Simple ConvNet with 2 Conv layers + 2 FC layers. All models were trained for **3 epochs**.
 
+> **⚠️ Note**  
+> The Rational-family activations (`Rational`, `RARE`, `RationalCUDA`) use randomly initialized parameters,  
+> so their exact accuracies will vary between runs. These numbers are meant to be illustrative, not definitive.
+
+
 | Activation    | Train Accuracy (%) | Test Accuracy (%) | Duration (s) |
 |---------------|--------------------|--------------------|--------------|
 | ReLU          | 71.70              | 67.99              | 13.68        |
@@ -54,16 +59,44 @@ This test ensures that `RationalCUDA`, our custom CUDA-accelerated implementatio
 
 ---
 
-## 🧪 How to Run the Tests
+## 🛠️ Installation
 
-Install dependencies (PyTorch + pytest):
+### Devcontainer (CUDA-enabled)
+
+If you need the CUDA‐accelerated `RationalCUDA`, start the VS Code devcontainer and install inside it:
+
 ```bash
-pip install -r requirements.txt
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash
 ```
 
-Then run:
+Install requirements and the module inside the container
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+ELSE: Local Virtual Environment (CPU or pre-configured CUDA)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate    # on Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+```
+---
+
+## 🔍 Running Tests
+
+Run the full suite:
+
 ```bash
 pytest -v tests/
+```
+
+```bash
+pytest tests/test_performance.py
+pytest tests/test_gradients_rationals.py::test_gradient_equivalence
 ```
 
 ---
