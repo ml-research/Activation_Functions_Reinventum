@@ -1,3 +1,29 @@
+# 🛠️ Installation
+
+### Devcontainer (CUDA-enabled)
+
+If you need the CUDA‐accelerated `RationalCUDA`, start the VS Code devcontainer and install inside it:
+
+```bash
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash
+```
+
+Install requirements and the module inside the container
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+ELSE: Local Virtual Environment (CPU or pre-configured CUDA)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate    # on Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .
+```
+
 # 🧠 Activation Functions Benchmark
 
 This repository provides a collection of classical and learnable activation functions implemented in PyTorch, including:
@@ -57,33 +83,6 @@ This test ensures that `RationalCUDA`, our custom CUDA-accelerated implementatio
 - `tests/`: Contains automated unit tests (training accuracy, performance, gradient tests)
 - `utils/`: Shared model definitions and training helpers
 
----
-
-## 🛠️ Installation
-
-### Devcontainer (CUDA-enabled)
-
-If you need the CUDA‐accelerated `RationalCUDA`, start the VS Code devcontainer and install inside it:
-
-```bash
-devcontainer up --workspace-folder .
-devcontainer exec --workspace-folder . bash
-```
-
-Install requirements and the module inside the container
-```bash
-pip install -r requirements.txt
-pip install -e .
-```
-
-ELSE: Local Virtual Environment (CPU or pre-configured CUDA)
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate    # on Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-pip install -e .
-```
 ---
 
 ## 🔍 Running Tests
