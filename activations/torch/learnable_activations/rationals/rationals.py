@@ -25,7 +25,7 @@ from activations.torch.learnable_activations.rationals.functions import (
 )
 
 
-_all_versions = ["A", "B", "C", "D", "N", "S", "RARE", "ERA"]
+_all_versions = ["A", "B", "C", "D", "N", "S", "ERA"]
 
 
 def _get_rational_fn(version):
@@ -36,7 +36,7 @@ def _get_rational_fn(version):
 
     if version == "A":
         return rational_A
-    elif version in ["B", "RARE"]:
+    elif version == "B":
         return rational_B
     elif version == "C":
         return rational_C

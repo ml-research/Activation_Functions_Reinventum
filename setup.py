@@ -10,7 +10,6 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CUDA_HOME
 
 degrees = [(5, 4), (7, 6)]
 name = 'activations'
-
 long_description = ""
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
@@ -78,7 +77,7 @@ class clean_all(clean):
 setup(
     name=name,
     version="1.0.0",
-    author="Quentin Delfosse, Patrick Schramowski & Matthias Tichy",
+    author="Quentin Delfosse, Patrick Schramowski, & Matthias Tichy",
     author_email="quentin.delfosse@cs.tu-darmstadt.de",
     description="Activations functions",
     long_description=long_description,
