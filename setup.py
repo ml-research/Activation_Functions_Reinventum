@@ -77,7 +77,7 @@ class clean_all(clean):
 setup(
     name=name,
     version="1.0.0",
-    author="Quentin Delfosse, Patrick Schramowski, & Matthias Tichy",
+    author="Quentin Delfosse, Patrick Schramowski, Matthias Tichy, and contributors",
     author_email="quentin.delfosse@cs.tu-darmstadt.de",
     description="Activations functions",
     long_description=long_description,
@@ -90,7 +90,6 @@ setup(
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License"
     ],
     install_requires=requirements,
     ext_modules=ext_modules,

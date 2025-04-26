@@ -108,6 +108,5 @@ pytest tests/test_gradients_rationals.py::test_gradient_equivalence
 ---
 
 ## 📜 License
-MIT License
 
----
+MIT License
