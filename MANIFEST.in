@@ -1,0 +1,3 @@
+include activations/torch/learnable_activations/rationals/cuda_impl/*.so
+include activations/torch/learnable_activations/rationals/cuda_impl/*.pyd
+include requirements.txt

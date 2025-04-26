@@ -14,8 +14,8 @@ __pycache__/
 *$py.class
 *.pyc
 
-# C extensions
-*.so
+# C extensions - .so needs to be included for compiled cuda version
+#*.so
 
 # Distribution / packaging
 .Python
@@ -138,3 +138,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+data
+performance.txt

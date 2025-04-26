@@ -6,5 +6,6 @@ tqdm
 termcolor
 torchvision
 setuptools>=49.4.0
+pytest
 # tensorflow>=2.0.0
 # mxnet-cu102==1.7.0
