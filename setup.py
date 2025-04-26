@@ -98,5 +98,5 @@ setup(
         'clean': clean_all,
         'build_ext': BuildExtension
     },
-    python_requires='>=3.5.0',
+    python_requires='>=3.9',
 )

@@ -63,14 +63,12 @@ Model: Simple ConvNet with 2 Conv layers + 2 FC layers. All models were trained 
 
 This test ensures that `RationalCUDA`, our custom CUDA-accelerated implementation, produces gradients similar to the CPU-based `Rational` function.
 
-```markdown
 | Metric             | Value          |
 |--------------------|----------------|
 | **MSE**            | `0.00030033`   |
 | **Max Abs Diff**   | `0.0413`       |
 | **Mean Abs Diff**  | `0.0106`       |
 | **Test Result**    | ✅ **Passed** (tolerance = `3e-3`) |
-```
 
 > Minor numerical differences are expected due to floating-point precision but remain within acceptable tolerances.
 
@@ -94,6 +92,7 @@ pytest -v tests/
 ```
 
 ```bash
+pip install pytest
 pytest tests/test_performance.py
 pytest tests/test_gradients_rationals.py::test_gradient_equivalence
 ```
